@@ -1,0 +1,48 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: penderie_db
+    environment:
+      POSTGRES_DB: penderie_db
+      POSTGRES_USER: penderie_user
+      POSTGRES_PASSWORD: penderie_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - db_data:/var/lib/postgresql/data
+
+  backend:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    container_name: penderie_backend
+    volumes:
+      - ./backend:/var/www/backend
+    depends_on:
+      - db
+
+  web:
+    image: nginx:alpine
+    container_name: penderie_web
+    ports:
+      - "8000:80"
+    volumes:
+      - ./backend:/var/www/backend
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - backend
+
+  frontend:
+    image: node:20-alpine
+    container_name: penderie_frontend
+    working_dir: /app
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "5173:5173"
+    command: sh -c "npm install && npm run dev -- --host"
+
+volumes:
+  db_data:
