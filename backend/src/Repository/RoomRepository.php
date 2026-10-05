@@ -2,17 +2,17 @@
 
 namespace App\Repository;
 
-use App\Entity\Tenue;
+use App\Entity\Room;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Tenue>
+ * @extends ServiceEntityRepository<Room>
  */
-class TenueRepository extends ServiceEntityRepository
+class RoomRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Tenue::class);
+        parent::__construct($registry, Room::class);
     }
 }

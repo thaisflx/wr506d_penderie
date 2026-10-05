@@ -2,17 +2,17 @@
 
 namespace App\Repository;
 
-use App\Entity\Rangement;
+use App\Entity\Look;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Rangement>
+ * @extends ServiceEntityRepository<Look>
  */
-class RangementRepository extends ServiceEntityRepository
+class LookRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Rangement::class);
+        parent::__construct($registry, Look::class);
     }
 }

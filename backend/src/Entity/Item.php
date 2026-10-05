@@ -2,8 +2,8 @@
 
 namespace App\Entity;
 
-use App\Enum\StatutObjet;
-use App\Enum\VisibiliteObjet;
+use App\Enum\ItemStatus;
+use App\Enum\Visibility;
 use App\Repository\ItemRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -21,58 +21,58 @@ class Item
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
-    private ?string $nom = null;
+    private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $photo = null;
 
     #[ORM\Column(length: 255, nullable: true)]
-    private ?string $codeBarres = null;
+    private ?string $barcode = null;
 
     #[ORM\Column(type: Types::JSON, nullable: true)]
-    private ?array $attributs = null;
+    private ?array $attributes = null;
 
-    #[ORM\Column(length: 50, enumType: StatutObjet::class)]
-    private StatutObjet $statut;
+    #[ORM\Column(length: 50, enumType: ItemStatus::class)]
+    private ItemStatus $status;
 
-    #[ORM\Column(length: 50, enumType: VisibiliteObjet::class)]
-    private VisibiliteObjet $visibilite;
-
-    #[ORM\ManyToOne(inversedBy: 'items')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Categorie $categorie = null;
+    #[ORM\Column(length: 50, enumType: Visibility::class)]
+    private Visibility $visibility;
 
     #[ORM\ManyToOne(inversedBy: 'items')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Rangement $rangement = null;
+    private ?Category $category = null;
 
-    #[ORM\ManyToOne(inversedBy: 'objets')]
+    #[ORM\ManyToOne(inversedBy: 'items')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Membre $proprietaireMembre = null;
+    private ?Storage $storage = null;
+
+    #[ORM\ManyToOne(inversedBy: 'items')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Member $ownerMember = null;
 
     /**
-     * @var Collection<int, ReservationPret>
+     * @var Collection<int, Reservation>
      */
-    #[ORM\OneToMany(mappedBy: 'item', targetEntity: ReservationPret::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'item', targetEntity: Reservation::class, orphanRemoval: true)]
     private Collection $reservations;
 
     /**
-     * @var Collection<int, ItemPartage>
+     * @var Collection<int, ItemShare>
      */
-    #[ORM\OneToMany(mappedBy: 'item', targetEntity: ItemPartage::class, orphanRemoval: true)]
-    private Collection $partages;
+    #[ORM\OneToMany(mappedBy: 'item', targetEntity: ItemShare::class, orphanRemoval: true)]
+    private Collection $shares;
 
     /**
-     * @var Collection<int, TenueObjet>
+     * @var Collection<int, LookItem>
      */
-    #[ORM\OneToMany(mappedBy: 'item', targetEntity: TenueObjet::class, orphanRemoval: true)]
-    private Collection $tenueObjets;
+    #[ORM\OneToMany(mappedBy: 'item', targetEntity: LookItem::class, orphanRemoval: true)]
+    private Collection $lookItems;
 
     public function __construct()
     {
         $this->reservations = new ArrayCollection();
-        $this->partages = new ArrayCollection();
-        $this->tenueObjets = new ArrayCollection();
+        $this->shares = new ArrayCollection();
+        $this->lookItems = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -80,14 +80,14 @@ class Item
         return $this->id;
     }
 
-    public function getNom(): ?string
+    public function getName(): ?string
     {
-        return $this->nom;
+        return $this->name;
     }
 
-    public function setNom(string $nom): static
+    public function setName(string $name): static
     {
-        $this->nom = $nom;
+        $this->name = $name;
 
         return $this;
     }
@@ -104,14 +104,14 @@ class Item
         return $this;
     }
 
-    public function getCodeBarres(): ?string
+    public function getBarcode(): ?string
     {
-        return $this->codeBarres;
+        return $this->barcode;
     }
 
-    public function setCodeBarres(?string $codeBarres): static
+    public function setBarcode(?string $barcode): static
     {
-        $this->codeBarres = $codeBarres;
+        $this->barcode = $barcode;
 
         return $this;
     }
@@ -119,104 +119,104 @@ class Item
     /**
      * @return array<string, mixed>|null
      */
-    public function getAttributs(): ?array
+    public function getAttributes(): ?array
     {
-        return $this->attributs;
+        return $this->attributes;
     }
 
     /**
-     * @param array<string, mixed>|null $attributs
+     * @param array<string, mixed>|null $attributes
      */
-    public function setAttributs(?array $attributs): static
+    public function setAttributes(?array $attributes): static
     {
-        $this->attributs = $attributs;
+        $this->attributes = $attributes;
 
         return $this;
     }
 
-    public function getStatut(): StatutObjet
+    public function getStatus(): ItemStatus
     {
-        return $this->statut;
+        return $this->status;
     }
 
-    public function setStatut(StatutObjet $statut): static
+    public function setStatus(ItemStatus $status): static
     {
-        $this->statut = $statut;
+        $this->status = $status;
 
         return $this;
     }
 
-    public function getVisibilite(): VisibiliteObjet
+    public function getVisibility(): Visibility
     {
-        return $this->visibilite;
+        return $this->visibility;
     }
 
-    public function setVisibilite(VisibiliteObjet $visibilite): static
+    public function setVisibility(Visibility $visibility): static
     {
-        $this->visibilite = $visibilite;
+        $this->visibility = $visibility;
 
         return $this;
     }
 
-    public function getCategorie(): ?Categorie
+    public function getCategory(): ?Category
     {
-        return $this->categorie;
+        return $this->category;
     }
 
-    public function setCategorie(?Categorie $categorie): static
+    public function setCategory(?Category $category): static
     {
-        $this->categorie = $categorie;
+        $this->category = $category;
 
         return $this;
     }
 
-    public function getRangement(): ?Rangement
+    public function getStorage(): ?Storage
     {
-        return $this->rangement;
+        return $this->storage;
     }
 
-    public function setRangement(?Rangement $rangement): static
+    public function setStorage(?Storage $storage): static
     {
-        $this->rangement = $rangement;
+        $this->storage = $storage;
 
         return $this;
     }
 
-    public function getProprietaireMembre(): ?Membre
+    public function getOwnerMember(): ?Member
     {
-        return $this->proprietaireMembre;
+        return $this->ownerMember;
     }
 
-    public function setProprietaireMembre(?Membre $proprietaireMembre): static
+    public function setOwnerMember(?Member $ownerMember): static
     {
-        $this->proprietaireMembre = $proprietaireMembre;
+        $this->ownerMember = $ownerMember;
 
         return $this;
     }
 
     /**
-     * @return Collection<int, ReservationPret>
+     * @return Collection<int, Reservation>
      */
     public function getReservations(): Collection
     {
         return $this->reservations;
     }
 
-    public function addReservation(ReservationPret $reservationPret): static
+    public function addReservation(Reservation $reservation): static
     {
-        if (!$this->reservations->contains($reservationPret)) {
-            $this->reservations->add($reservationPret);
-            $reservationPret->setItem($this);
+        if (!$this->reservations->contains($reservation)) {
+            $this->reservations->add($reservation);
+            $reservation->setItem($this);
         }
 
         return $this;
     }
 
-    public function removeReservation(ReservationPret $reservationPret): static
+    public function removeReservation(Reservation $reservation): static
     {
-        if ($this->reservations->removeElement($reservationPret)) {
-            if ($reservationPret->getItem() === $this) {
-                $reservationPret->setItem(null);
+        if ($this->reservations->removeElement($reservation)) {
+            if ($reservation->getItem() === $this) {
+                $reservation->setItem(null);
             }
         }
 
@@ -224,28 +224,28 @@ class Item
     }
 
     /**
-     * @return Collection<int, ItemPartage>
+     * @return Collection<int, ItemShare>
      */
-    public function getPartages(): Collection
+    public function getShares(): Collection
     {
-        return $this->partages;
+        return $this->shares;
     }
 
-    public function addPartage(ItemPartage $itemPartage): static
+    public function addShare(ItemShare $itemShare): static
     {
-        if (!$this->partages->contains($itemPartage)) {
-            $this->partages->add($itemPartage);
-            $itemPartage->setItem($this);
+        if (!$this->shares->contains($itemShare)) {
+            $this->shares->add($itemShare);
+            $itemShare->setItem($this);
         }
 
         return $this;
     }
 
-    public function removePartage(ItemPartage $itemPartage): static
+    public function removeShare(ItemShare $itemShare): static
     {
-        if ($this->partages->removeElement($itemPartage)) {
-            if ($itemPartage->getItem() === $this) {
-                $itemPartage->setItem(null);
+        if ($this->shares->removeElement($itemShare)) {
+            if ($itemShare->getItem() === $this) {
+                $itemShare->setItem(null);
             }
         }
 
@@ -253,28 +253,28 @@ class Item
     }
 
     /**
-     * @return Collection<int, TenueObjet>
+     * @return Collection<int, LookItem>
      */
-    public function getTenueObjets(): Collection
+    public function getLookItems(): Collection
     {
-        return $this->tenueObjets;
+        return $this->lookItems;
     }
 
-    public function addTenueObjet(TenueObjet $tenueObjet): static
+    public function addLookItem(LookItem $lookItem): static
     {
-        if (!$this->tenueObjets->contains($tenueObjet)) {
-            $this->tenueObjets->add($tenueObjet);
-            $tenueObjet->setItem($this);
+        if (!$this->lookItems->contains($lookItem)) {
+            $this->lookItems->add($lookItem);
+            $lookItem->setItem($this);
         }
 
         return $this;
     }
 
-    public function removeTenueObjet(TenueObjet $tenueObjet): static
+    public function removeLookItem(LookItem $lookItem): static
     {
-        if ($this->tenueObjets->removeElement($tenueObjet)) {
-            if ($tenueObjet->getItem() === $this) {
-                $tenueObjet->setItem(null);
+        if ($this->lookItems->removeElement($lookItem)) {
+            if ($lookItem->getItem() === $this) {
+                $lookItem->setItem(null);
             }
         }
 

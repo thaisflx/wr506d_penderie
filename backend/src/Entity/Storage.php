@@ -2,13 +2,13 @@
 
 namespace App\Entity;
 
-use App\Repository\RangementRepository;
+use App\Repository\StorageRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: RangementRepository::class)]
-class Rangement
+#[ORM\Entity(repositoryClass: StorageRepository::class)]
+class Storage
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -16,16 +16,16 @@ class Rangement
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $nom = null;
+    private ?string $name = null;
 
-    #[ORM\ManyToOne(inversedBy: 'rangements')]
+    #[ORM\ManyToOne(inversedBy: 'storages')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Piece $piece = null;
+    private ?Room $room = null;
 
     /**
      * @var Collection<int, Item>
      */
-    #[ORM\OneToMany(mappedBy: 'rangement', targetEntity: Item::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'storage', targetEntity: Item::class, orphanRemoval: true)]
     private Collection $items;
 
     public function __construct()
@@ -38,26 +38,26 @@ class Rangement
         return $this->id;
     }
 
-    public function getNom(): ?string
+    public function getName(): ?string
     {
-        return $this->nom;
+        return $this->name;
     }
 
-    public function setNom(string $nom): static
+    public function setName(string $name): static
     {
-        $this->nom = $nom;
+        $this->name = $name;
 
         return $this;
     }
 
-    public function getPiece(): ?Piece
+    public function getRoom(): ?Room
     {
-        return $this->piece;
+        return $this->room;
     }
 
-    public function setPiece(?Piece $piece): static
+    public function setRoom(?Room $room): static
     {
-        $this->piece = $piece;
+        $this->room = $room;
 
         return $this;
     }
@@ -74,7 +74,7 @@ class Rangement
     {
         if (!$this->items->contains($item)) {
             $this->items->add($item);
-            $item->setRangement($this);
+            $item->setStorage($this);
         }
 
         return $this;
@@ -83,8 +83,8 @@ class Rangement
     public function removeItem(Item $item): static
     {
         if ($this->items->removeElement($item)) {
-            if ($item->getRangement() === $this) {
-                $item->setRangement(null);
+            if ($item->getStorage() === $this) {
+                $item->setStorage(null);
             }
         }
 

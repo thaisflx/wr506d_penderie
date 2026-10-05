@@ -2,14 +2,14 @@
 
 namespace App\Entity;
 
-use App\Enum\TypeCategorie;
-use App\Repository\CategorieRepository;
+use App\Enum\CategoryType;
+use App\Repository\CategoryRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: CategorieRepository::class)]
-class Categorie
+#[ORM\Entity(repositoryClass: CategoryRepository::class)]
+class Category
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -17,15 +17,15 @@ class Categorie
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
-    private ?string $nom = null;
+    private ?string $name = null;
 
-    #[ORM\Column(length: 50, enumType: TypeCategorie::class)]
-    private TypeCategorie $type;
+    #[ORM\Column(length: 50, enumType: CategoryType::class)]
+    private CategoryType $type;
 
     /**
      * @var Collection<int, Item>
      */
-    #[ORM\OneToMany(mappedBy: 'categorie', targetEntity: Item::class, orphanRemoval: true)]
+    #[ORM\OneToMany(mappedBy: 'category', targetEntity: Item::class, orphanRemoval: true)]
     private Collection $items;
 
     public function __construct()
@@ -38,24 +38,24 @@ class Categorie
         return $this->id;
     }
 
-    public function getNom(): ?string
+    public function getName(): ?string
     {
-        return $this->nom;
+        return $this->name;
     }
 
-    public function setNom(string $nom): static
+    public function setName(string $name): static
     {
-        $this->nom = $nom;
+        $this->name = $name;
 
         return $this;
     }
 
-    public function getType(): TypeCategorie
+    public function getType(): CategoryType
     {
         return $this->type;
     }
 
-    public function setType(TypeCategorie $type): static
+    public function setType(CategoryType $type): static
     {
         $this->type = $type;
 
@@ -74,7 +74,7 @@ class Categorie
     {
         if (!$this->items->contains($item)) {
             $this->items->add($item);
-            $item->setCategorie($this);
+            $item->setCategory($this);
         }
 
         return $this;
@@ -83,8 +83,8 @@ class Categorie
     public function removeItem(Item $item): static
     {
         if ($this->items->removeElement($item)) {
-            if ($item->getCategorie() === $this) {
-                $item->setCategorie(null);
+            if ($item->getCategory() === $this) {
+                $item->setCategory(null);
             }
         }
 

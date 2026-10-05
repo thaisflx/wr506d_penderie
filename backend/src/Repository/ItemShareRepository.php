@@ -2,17 +2,17 @@
 
 namespace App\Repository;
 
-use App\Entity\ReservationPret;
+use App\Entity\ItemShare;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<ReservationPret>
+ * @extends ServiceEntityRepository<ItemShare>
  */
-class ReservationPretRepository extends ServiceEntityRepository
+class ItemShareRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, ReservationPret::class);
+        parent::__construct($registry, ItemShare::class);
     }
 }
