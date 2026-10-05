@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\Visibility;
 use App\Repository\StorageRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -17,6 +18,14 @@ class Storage
 
     #[ORM\Column(length: 255)]
     private ?string $name = null;
+
+    // Privé par défaut : c'est le propriétaire qui ouvre
+    #[ORM\Column(length: 50, enumType: Visibility::class, options: ['default' => 'private'])]
+    private Visibility $visibility = Visibility::Private;
+
+    // Perso : visible uniquement par le propriétaire, prioritaire sur la visibilité
+    #[ORM\Column(options: ['default' => false])]
+    private bool $isPersonal = false;
 
     #[ORM\ManyToOne(inversedBy: 'storages')]
     #[ORM\JoinColumn(nullable: false)]
@@ -36,6 +45,30 @@ class Storage
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getVisibility(): Visibility
+    {
+        return $this->visibility;
+    }
+
+    public function setVisibility(Visibility $visibility): static
+    {
+        $this->visibility = $visibility;
+
+        return $this;
+    }
+
+    public function isPersonal(): bool
+    {
+        return $this->isPersonal;
+    }
+
+    public function setIsPersonal(bool $isPersonal): static
+    {
+        $this->isPersonal = $isPersonal;
+
+        return $this;
     }
 
     public function getName(): ?string

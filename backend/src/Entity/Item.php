@@ -3,7 +3,6 @@
 namespace App\Entity;
 
 use App\Enum\ItemStatus;
-use App\Enum\Visibility;
 use App\Repository\ItemRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -35,8 +34,10 @@ class Item
     #[ORM\Column(length: 50, enumType: ItemStatus::class)]
     private ItemStatus $status;
 
-    #[ORM\Column(length: 50, enumType: Visibility::class)]
-    private Visibility $visibility;
+    // Perso : visible uniquement par le propriétaire, même dans un lien ou un look.
+    // Sinon la visibilité vient du storage, de la pièce et du logement (le plus fermé l'emporte).
+    #[ORM\Column(options: ['default' => false])]
+    private bool $isPersonal = false;
 
     #[ORM\ManyToOne(inversedBy: 'items')]
     #[ORM\JoinColumn(nullable: false)]
@@ -48,7 +49,7 @@ class Item
 
     #[ORM\ManyToOne(inversedBy: 'items')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Member $ownerMember = null;
+    private ?User $owner = null;
 
     /**
      * @var Collection<int, Reservation>
@@ -68,11 +69,25 @@ class Item
     #[ORM\OneToMany(mappedBy: 'item', targetEntity: LookItem::class, orphanRemoval: true)]
     private Collection $lookItems;
 
+    /**
+     * @var Collection<int, Comment>
+     */
+    #[ORM\OneToMany(mappedBy: 'item', targetEntity: Comment::class, orphanRemoval: true)]
+    private Collection $comments;
+
+    /**
+     * @var Collection<int, Sale>
+     */
+    #[ORM\OneToMany(mappedBy: 'item', targetEntity: Sale::class, orphanRemoval: true)]
+    private Collection $sales;
+
     public function __construct()
     {
         $this->reservations = new ArrayCollection();
         $this->shares = new ArrayCollection();
         $this->lookItems = new ArrayCollection();
+        $this->comments = new ArrayCollection();
+        $this->sales = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -146,14 +161,14 @@ class Item
         return $this;
     }
 
-    public function getVisibility(): Visibility
+    public function isPersonal(): bool
     {
-        return $this->visibility;
+        return $this->isPersonal;
     }
 
-    public function setVisibility(Visibility $visibility): static
+    public function setIsPersonal(bool $isPersonal): static
     {
-        $this->visibility = $visibility;
+        $this->isPersonal = $isPersonal;
 
         return $this;
     }
@@ -182,14 +197,14 @@ class Item
         return $this;
     }
 
-    public function getOwnerMember(): ?Member
+    public function getOwner(): ?User
     {
-        return $this->ownerMember;
+        return $this->owner;
     }
 
-    public function setOwnerMember(?Member $ownerMember): static
+    public function setOwner(?User $owner): static
     {
-        $this->ownerMember = $ownerMember;
+        $this->owner = $owner;
 
         return $this;
     }
@@ -275,6 +290,64 @@ class Item
         if ($this->lookItems->removeElement($lookItem)) {
             if ($lookItem->getItem() === $this) {
                 $lookItem->setItem(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Comment>
+     */
+    public function getComments(): Collection
+    {
+        return $this->comments;
+    }
+
+    public function addComment(Comment $comment): static
+    {
+        if (!$this->comments->contains($comment)) {
+            $this->comments->add($comment);
+            $comment->setItem($this);
+        }
+
+        return $this;
+    }
+
+    public function removeComment(Comment $comment): static
+    {
+        if ($this->comments->removeElement($comment)) {
+            if ($comment->getItem() === $this) {
+                $comment->setItem(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Sale>
+     */
+    public function getSales(): Collection
+    {
+        return $this->sales;
+    }
+
+    public function addSale(Sale $sale): static
+    {
+        if (!$this->sales->contains($sale)) {
+            $this->sales->add($sale);
+            $sale->setItem($this);
+        }
+
+        return $this;
+    }
+
+    public function removeSale(Sale $sale): static
+    {
+        if ($this->sales->removeElement($sale)) {
+            if ($sale->getItem() === $this) {
+                $sale->setItem(null);
             }
         }
 

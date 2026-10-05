@@ -3,11 +3,11 @@
 namespace App\Entity;
 
 use App\Enum\ReservationStatus;
-use App\Enum\ReservationType;
 use App\Repository\ReservationRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 
+// Prêt d'un objet (uniquement aux amis proches et aux comptes enfants)
 #[ORM\Entity(repositoryClass: ReservationRepository::class)]
 class Reservation
 {
@@ -15,9 +15,6 @@ class Reservation
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
-
-    #[ORM\Column(length: 50, enumType: ReservationType::class)]
-    private ReservationType $type;
 
     #[ORM\Column(type: Types::DATETIME_MUTABLE)]
     private \DateTimeInterface $startDate;
@@ -42,18 +39,6 @@ class Reservation
     public function getId(): ?int
     {
         return $this->id;
-    }
-
-    public function getType(): ReservationType
-    {
-        return $this->type;
-    }
-
-    public function setType(ReservationType $type): static
-    {
-        $this->type = $type;
-
-        return $this;
     }
 
     public function getStartDate(): ?\DateTimeInterface

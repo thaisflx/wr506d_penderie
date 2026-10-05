@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\Visibility;
 use App\Repository\HomeRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -17,6 +18,14 @@ class Home
 
     #[ORM\Column(length: 255)]
     private ?string $name = null;
+
+    // Privé par défaut : c'est le propriétaire qui ouvre
+    #[ORM\Column(length: 50, enumType: Visibility::class, options: ['default' => 'private'])]
+    private Visibility $visibility = Visibility::Private;
+
+    #[ORM\ManyToOne(inversedBy: 'homes')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?User $owner = null;
 
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $address = null;
@@ -38,6 +47,30 @@ class Home
     public function getId(): ?int
     {
         return $this->id;
+    }
+
+    public function getVisibility(): Visibility
+    {
+        return $this->visibility;
+    }
+
+    public function setVisibility(Visibility $visibility): static
+    {
+        $this->visibility = $visibility;
+
+        return $this;
+    }
+
+    public function getOwner(): ?User
+    {
+        return $this->owner;
+    }
+
+    public function setOwner(?User $owner): static
+    {
+        $this->owner = $owner;
+
+        return $this;
     }
 
     public function getName(): ?string
