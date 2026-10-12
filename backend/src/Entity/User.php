@@ -7,10 +7,12 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
+use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'app_user')]
-class User
+class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
@@ -63,10 +65,10 @@ class User
     private Collection $children;
 
     /**
-     * @var Collection<int, Home>
+     * @var Collection<int, Place>
      */
-    #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Home::class, orphanRemoval: true)]
-    private Collection $homes;
+    #[ORM\OneToMany(mappedBy: 'owner', targetEntity: Place::class, orphanRemoval: true)]
+    private Collection $places;
 
     /**
      * @var Collection<int, Item>
@@ -132,7 +134,7 @@ class User
     {
         $this->createdAt = new \DateTimeImmutable();
         $this->children = new ArrayCollection();
-        $this->homes = new ArrayCollection();
+        $this->places = new ArrayCollection();
         $this->items = new ArrayCollection();
         $this->looks = new ArrayCollection();
         $this->comments = new ArrayCollection();
@@ -159,6 +161,17 @@ class User
         $this->email = $email;
 
         return $this;
+    }
+
+    // Identifiant de connexion : l'email (un compte enfant sans email ne se connecte pas)
+    public function getUserIdentifier(): string
+    {
+        return (string) $this->email;
+    }
+
+    // Exigée par UserInterface (dépréciée depuis Symfony 7.3) : aucune donnée sensible à effacer
+    public function eraseCredentials(): void
+    {
     }
 
     public function getPassword(): ?string
@@ -311,28 +324,28 @@ class User
     }
 
     /**
-     * @return Collection<int, Home>
+     * @return Collection<int, Place>
      */
-    public function getHomes(): Collection
+    public function getPlaces(): Collection
     {
-        return $this->homes;
+        return $this->places;
     }
 
-    public function addHome(Home $home): static
+    public function addPlace(Place $place): static
     {
-        if (!$this->homes->contains($home)) {
-            $this->homes->add($home);
-            $home->setOwner($this);
+        if (!$this->places->contains($place)) {
+            $this->places->add($place);
+            $place->setOwner($this);
         }
 
         return $this;
     }
 
-    public function removeHome(Home $home): static
+    public function removePlace(Place $place): static
     {
-        if ($this->homes->removeElement($home)) {
-            if ($home->getOwner() === $this) {
-                $home->setOwner(null);
+        if ($this->places->removeElement($place)) {
+            if ($place->getOwner() === $this) {
+                $place->setOwner(null);
             }
         }
 

@@ -2,51 +2,87 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Link;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\Enum\ItemStatus;
 use App\Repository\ItemRepository;
+use App\State\OwnerProcessor;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 
+// Objet rangé dans une catégorie : place > room > storage > category > item
 #[ORM\Entity(repositoryClass: ItemRepository::class)]
+#[ApiResource(
+    operations: [
+        new Get(),
+        new Patch(securityPostDenormalize: 'object.getCategory()?.getStorage()?.getRoom()?.getPlace()?.getOwner() == user'),
+        new Delete(),
+        new Post(
+            securityPostDenormalize: 'object.getCategory()?.getStorage()?.getRoom()?.getPlace()?.getOwner() == user',
+            processor: OwnerProcessor::class,
+        ),
+    ],
+    normalizationContext: ['groups' => ['item:read']],
+    denormalizationContext: ['groups' => ['item:write']],
+)]
+#[ApiResource(
+    uriTemplate: '/categories/{categoryId}/items',
+    operations: [new GetCollection()],
+    uriVariables: ['categoryId' => new Link(toProperty: 'category', fromClass: Category::class)],
+    normalizationContext: ['groups' => ['item:read']],
+)]
 class Item
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['item:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
+    #[Groups(['item:read', 'item:write'])]
     private ?string $name = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['item:read', 'item:write'])]
     private ?string $photo = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['item:read', 'item:write'])]
     private ?string $barcode = null;
 
     #[ORM\Column(type: Types::JSON, nullable: true)]
+    #[Groups(['item:read', 'item:write'])]
     private ?array $attributes = null;
 
     #[ORM\Column(length: 50, enumType: ItemStatus::class)]
-    private ItemStatus $status;
+    #[Groups(['item:read', 'item:write'])]
+    private ItemStatus $status = ItemStatus::Available;
 
     // Perso : visible uniquement par le propriétaire, même dans un lien ou un look.
     // Sinon la visibilité vient du storage, de la pièce et du logement (le plus fermé l'emporte).
     #[ORM\Column(options: ['default' => false])]
+    #[Groups(['item:read', 'item:write'])]
     private bool $isPersonal = false;
 
+    // La catégorie donne aussi le storage, la pièce et le logement de l'objet
     #[ORM\ManyToOne(inversedBy: 'items')]
     #[ORM\JoinColumn(nullable: false)]
+    #[Assert\NotNull]
+    #[Groups(['item:read', 'item:write'])]
     private ?Category $category = null;
 
-    #[ORM\ManyToOne(inversedBy: 'items')]
-    #[ORM\JoinColumn(nullable: false)]
-    private ?Storage $storage = null;
-
+    // Renseigné automatiquement avec l'utilisateur connecté à la création
     #[ORM\ManyToOne(inversedBy: 'items')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $owner = null;
@@ -161,6 +197,12 @@ class Item
         return $this;
     }
 
+    // Accesseur lu par le serializer pour exposer le champ "isPersonal"
+    public function getIsPersonal(): bool
+    {
+        return $this->isPersonal;
+    }
+
     public function isPersonal(): bool
     {
         return $this->isPersonal;
@@ -185,16 +227,10 @@ class Item
         return $this;
     }
 
+    // Storage déduit de la catégorie
     public function getStorage(): ?Storage
     {
-        return $this->storage;
-    }
-
-    public function setStorage(?Storage $storage): static
-    {
-        $this->storage = $storage;
-
-        return $this;
+        return $this->category?->getStorage();
     }
 
     public function getOwner(): ?User
