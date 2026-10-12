@@ -2,23 +2,23 @@
 
 namespace App\Entity;
 
-use App\Repository\TenueObjetRepository;
+use App\Repository\LookItemRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: TenueObjetRepository::class)]
-#[ORM\UniqueConstraint(name: 'uniq_tenue_objet_tenue_item', fields: ['tenue', 'item'])]
-class TenueObjet
+#[ORM\Entity(repositoryClass: LookItemRepository::class)]
+#[ORM\UniqueConstraint(name: 'uniq_look_item_look_item', fields: ['look', 'item'])]
+class LookItem
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'tenueObjets')]
+    #[ORM\ManyToOne(inversedBy: 'lookItems')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Tenue $tenue = null;
+    private ?Look $look = null;
 
-    #[ORM\ManyToOne(inversedBy: 'tenueObjets')]
+    #[ORM\ManyToOne(inversedBy: 'lookItems')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Item $item = null;
 
@@ -27,14 +27,14 @@ class TenueObjet
         return $this->id;
     }
 
-    public function getTenue(): ?Tenue
+    public function getLook(): ?Look
     {
-        return $this->tenue;
+        return $this->look;
     }
 
-    public function setTenue(?Tenue $tenue): static
+    public function setLook(?Look $look): static
     {
-        $this->tenue = $tenue;
+        $this->look = $look;
 
         return $this;
     }

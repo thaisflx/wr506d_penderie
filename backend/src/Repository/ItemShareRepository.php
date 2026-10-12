@@ -2,17 +2,17 @@
 
 namespace App\Repository;
 
-use App\Entity\Piece;
+use App\Entity\ItemShare;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Piece>
+ * @extends ServiceEntityRepository<ItemShare>
  */
-class PieceRepository extends ServiceEntityRepository
+class ItemShareRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Piece::class);
+        parent::__construct($registry, ItemShare::class);
     }
 }

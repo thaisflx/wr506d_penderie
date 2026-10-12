@@ -2,25 +2,25 @@
 
 namespace App\Entity;
 
-use App\Repository\ItemPartageRepository;
+use App\Repository\ItemShareRepository;
 use Doctrine\ORM\Mapping as ORM;
 
-#[ORM\Entity(repositoryClass: ItemPartageRepository::class)]
-#[ORM\UniqueConstraint(name: 'uniq_item_partage_item_user', fields: ['item', 'user'])]
-class ItemPartage
+#[ORM\Entity(repositoryClass: ItemShareRepository::class)]
+#[ORM\UniqueConstraint(name: 'uniq_item_share_item_user', fields: ['item', 'user'])]
+class ItemShare
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\ManyToOne(inversedBy: 'partages')]
+    #[ORM\ManyToOne(inversedBy: 'shares')]
     #[ORM\JoinColumn(nullable: false)]
     private ?Item $item = null;
 
-    #[ORM\ManyToOne(inversedBy: 'objetsPartages')]
+    #[ORM\ManyToOne(inversedBy: 'sharedItems')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Utilisateur $user = null;
+    private ?User $user = null;
 
     public function getId(): ?int
     {
@@ -39,12 +39,12 @@ class ItemPartage
         return $this;
     }
 
-    public function getUser(): ?Utilisateur
+    public function getUser(): ?User
     {
         return $this->user;
     }
 
-    public function setUser(?Utilisateur $user): static
+    public function setUser(?User $user): static
     {
         $this->user = $user;
 
