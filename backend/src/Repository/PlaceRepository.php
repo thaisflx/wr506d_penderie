@@ -2,22 +2,22 @@
 
 namespace App\Repository;
 
-use App\Entity\Home;
+use App\Entity\Place;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
 
 /**
- * @extends ServiceEntityRepository<Home>
+ * @extends ServiceEntityRepository<Place>
  */
-class HomeRepository extends ServiceEntityRepository
+class PlaceRepository extends ServiceEntityRepository
 {
     public function __construct(ManagerRegistry $registry)
     {
-        parent::__construct($registry, Home::class);
+        parent::__construct($registry, Place::class);
     }
 
 //    /**
-//     * @return Home[] Returns an array of Home objects
+//     * @return Place[] Returns an array of Place objects
 //     */
 //    public function findByExampleField($value): array
 //    {
@@ -31,7 +31,7 @@ class HomeRepository extends ServiceEntityRepository
 //        ;
 //    }
 
-//    public function findOneBySomeField($value): ?Home
+//    public function findOneBySomeField($value): ?Place
 //    {
 //        return $this->createQueryBuilder('l')
 //            ->andWhere('l.exampleField = :val')

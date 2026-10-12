@@ -1,5 +1,19 @@
+import { createPinia } from 'pinia'
 import { createApp } from 'vue'
-import './style.css'
+import { setUnauthorizedHandler } from './api/client'
 import App from './App.vue'
+import router from './router'
+import { useAuthStore } from './stores/auth'
+import './style.css'
 
-createApp(App).mount('#app')
+const app = createApp(App)
+app.use(createPinia())
+app.use(router)
+
+// Jeton expiré ou invalide : retour à la connexion
+setUnauthorizedHandler(() => {
+  useAuthStore().logout()
+  router.push({ name: 'login', query: { redirect: router.currentRoute.value.fullPath } })
+})
+
+app.mount('#app')

@@ -2,34 +2,66 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Link;
+use ApiPlatform\Metadata\Patch;
+use ApiPlatform\Metadata\Post;
 use App\Enum\Visibility;
 use App\Repository\RoomRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 
 #[ORM\Entity(repositoryClass: RoomRepository::class)]
+#[ApiResource(
+    operations: [
+        new Get(),
+        new Patch(securityPostDenormalize: 'object.getPlace()?.getOwner() == user'),
+        new Delete(),
+        new Post(securityPostDenormalize: 'object.getPlace()?.getOwner() == user'),
+    ],
+    normalizationContext: ['groups' => ['room:read']],
+    denormalizationContext: ['groups' => ['room:write']],
+)]
+#[ApiResource(
+    uriTemplate: '/places/{placeId}/rooms',
+    operations: [new GetCollection()],
+    uriVariables: ['placeId' => new Link(toProperty: 'place', fromClass: Place::class)],
+    normalizationContext: ['groups' => ['room:read']],
+)]
 class Room
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['room:read'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
+    #[Assert\NotBlank]
+    #[Groups(['room:read', 'room:write'])]
     private ?string $name = null;
 
     // Privé par défaut : c'est le propriétaire qui ouvre
     #[ORM\Column(length: 50, enumType: Visibility::class, options: ['default' => 'private'])]
+    #[Groups(['room:read', 'room:write'])]
     private Visibility $visibility = Visibility::Private;
 
     // Perso : visible uniquement par le propriétaire, prioritaire sur la visibilité
     #[ORM\Column(options: ['default' => false])]
+    #[Groups(['room:read', 'room:write'])]
     private bool $isPersonal = false;
 
     #[ORM\ManyToOne(inversedBy: 'rooms')]
     #[ORM\JoinColumn(nullable: false)]
-    private ?Home $home = null;
+    #[Assert\NotNull]
+    #[Groups(['room:read', 'room:write'])]
+    private ?Place $place = null;
 
     /**
      * @var Collection<int, Storage>
@@ -59,6 +91,12 @@ class Room
         return $this;
     }
 
+    // Accesseur lu par le serializer pour exposer le champ "isPersonal"
+    public function getIsPersonal(): bool
+    {
+        return $this->isPersonal;
+    }
+
     public function isPersonal(): bool
     {
         return $this->isPersonal;
@@ -83,16 +121,22 @@ class Room
         return $this;
     }
 
-    public function getHome(): ?Home
+    public function getPlace(): ?Place
     {
-        return $this->home;
+        return $this->place;
     }
 
-    public function setHome(?Home $home): static
+    public function setPlace(?Place $place): static
     {
-        $this->home = $home;
+        $this->place = $place;
 
         return $this;
+    }
+
+    #[Groups(['room:read'])]
+    public function getStorageCount(): int
+    {
+        return $this->storages->count();
     }
 
     /**

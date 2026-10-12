@@ -4,7 +4,7 @@ namespace App\DataFixtures;
 
 use App\Entity\Category;
 use App\Entity\Comment;
-use App\Entity\Home;
+use App\Entity\Place;
 use App\Entity\Item;
 use App\Entity\Look;
 use App\Entity\LookItem;
@@ -23,6 +23,7 @@ use App\Enum\ReservationStatus;
 use App\Enum\Visibility;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Persistence\ObjectManager;
+use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
 /**
  * Jeu de test couvrant le tableau des droits.
@@ -30,6 +31,10 @@ use Doctrine\Persistence\ObjectManager;
  */
 class AppFixtures extends Fixture
 {
+    public function __construct(private readonly UserPasswordHasherInterface $passwordHasher)
+    {
+    }
+
     public function load(ObjectManager $manager): void
     {
         // --- Comptes ---
@@ -62,22 +67,15 @@ class AppFixtures extends Fixture
         $this->createRelationship($manager, $eve, $alice, RelationshipType::Follower, RelationshipStatus::Blocked);
         $this->createRelationship($manager, $alice, $bob, RelationshipType::CloseFriend, RelationshipStatus::Accepted);
 
-        // --- Catégories ---
-        $top = $this->createCategory($manager, 'T-shirts', CategoryType::Top);
-        $bottom = $this->createCategory($manager, 'Pantalons', CategoryType::Bottom);
-        $shoes = $this->createCategory($manager, 'Baskets', CategoryType::Shoes);
-        $vinyl = $this->createCategory($manager, 'Vinyles', CategoryType::Media);
-        $tools = $this->createCategory($manager, 'Outils', CategoryType::Other);
-
         // --- Logement, pièces et storages d'alice ---
-        $flat = (new Home())->setName('Appartement Lyon')->setCity('Lyon')->setVisibility(Visibility::Followers);
-        $alice->addHome($flat);
-        $manager->persist($flat);
+        $place = (new Place())->setName('Appartement Lyon')->setCity('Lyon')->setVisibility(Visibility::Followers);
+        $alice->addPlace($place);
+        $manager->persist($place);
 
-        $bedroom = $this->createRoom($manager, $flat, 'Chambre', Visibility::Followers);
-        $living = $this->createRoom($manager, $flat, 'Salon', Visibility::Followers);
-        $bathroom = $this->createRoom($manager, $flat, 'Salle de bain', Visibility::Private, true);
-        $cellar = $this->createRoom($manager, $flat, 'Cave', Visibility::CloseFriends);
+        $bedroom = $this->createRoom($manager, $place, 'Chambre', Visibility::Followers);
+        $living = $this->createRoom($manager, $place, 'Salon', Visibility::Followers);
+        $bathroom = $this->createRoom($manager, $place, 'Salle de bain', Visibility::Private, true);
+        $cellar = $this->createRoom($manager, $place, 'Cave', Visibility::CloseFriends);
 
         $wardrobe = $this->createStorage($manager, $bedroom, 'Armoire', Visibility::Followers);
         $drawer = $this->createStorage($manager, $bedroom, 'Tiroir de nuit', Visibility::Followers, true);
@@ -86,22 +84,33 @@ class AppFixtures extends Fixture
         $toolbox = $this->createStorage($manager, $cellar, 'Caisse à outils', Visibility::CloseFriends);
 
         // Logement de leo (privé par défaut)
-        $studio = (new Home())->setName('Studio étudiant')->setCity('Grenoble');
-        $leo->addHome($studio);
+        $studio = (new Place())->setName('Studio étudiant')->setCity('Grenoble');
+        $leo->addPlace($studio);
         $manager->persist($studio);
         $leoShelf = $this->createStorage($manager, $this->createRoom($manager, $studio, 'Pièce principale', Visibility::Private), 'Étagère', Visibility::Private);
 
-        // --- Objets ---
-        $tshirt = $this->createItem($manager, $alice, 'T-shirt blanc', $top, $wardrobe);
-        $jeans = $this->createItem($manager, $alice, 'Jean brut', $bottom, $wardrobe);
-        $sneakers = $this->createItem($manager, $alice, 'Baskets montantes', $shoes, $wardrobe);
-        $diary = $this->createItem($manager, $alice, 'Carnet intime', $tools, $wardrobe, isPersonal: true);
-        $this->createItem($manager, $alice, 'Bijoux de famille', $tools, $drawer);
-        $this->createItem($manager, $alice, 'Trousse de toilette', $tools, $cabinet);
-        $drill = $this->createItem($manager, $alice, 'Perceuse', $tools, $toolbox, ItemStatus::Lent);
-        $abbeyRoad = $this->createItem($manager, $alice, 'Abbey Road', $vinyl, $vinylBox);
-        $thriller = $this->createItem($manager, $alice, 'Thriller', $vinyl, $vinylBox, ItemStatus::ForSale);
-        $this->createItem($manager, $leo, 'Hoodie gris', $top, $leoShelf);
+        // --- Catégories (dans chaque storage) et objets ---
+        $wardrobeTops = $this->createCategory($manager, $wardrobe, 'T-shirts', CategoryType::Top);
+        $wardrobeBottoms = $this->createCategory($manager, $wardrobe, 'Pantalons', CategoryType::Bottom);
+        $wardrobeShoes = $this->createCategory($manager, $wardrobe, 'Baskets', CategoryType::Shoes);
+        $wardrobeMisc = $this->createCategory($manager, $wardrobe, 'Divers', CategoryType::Other);
+        $drawerMisc = $this->createCategory($manager, $drawer, 'Bijoux', CategoryType::Other);
+        $vinyls = $this->createCategory($manager, $vinylBox, 'Rock', CategoryType::Media);
+        $vinylsPop = $this->createCategory($manager, $vinylBox, 'Pop', CategoryType::Media);
+        $toiletries = $this->createCategory($manager, $cabinet, 'Toilette', CategoryType::Other);
+        $tools = $this->createCategory($manager, $toolbox, 'Électroportatif', CategoryType::Other);
+        $leoTops = $this->createCategory($manager, $leoShelf, 'Sweats', CategoryType::Top);
+
+        $tshirt = $this->createItem($manager, $alice, 'T-shirt blanc', $wardrobeTops);
+        $jeans = $this->createItem($manager, $alice, 'Jean brut', $wardrobeBottoms);
+        $sneakers = $this->createItem($manager, $alice, 'Baskets montantes', $wardrobeShoes);
+        $diary = $this->createItem($manager, $alice, 'Carnet intime', $wardrobeMisc, isPersonal: true);
+        $this->createItem($manager, $alice, 'Bijoux de famille', $drawerMisc);
+        $this->createItem($manager, $alice, 'Trousse de toilette', $toiletries);
+        $drill = $this->createItem($manager, $alice, 'Perceuse', $tools, ItemStatus::Lent);
+        $abbeyRoad = $this->createItem($manager, $alice, 'Abbey Road', $vinyls);
+        $thriller = $this->createItem($manager, $alice, 'Thriller', $vinylsPop, ItemStatus::ForSale);
+        $this->createItem($manager, $leo, 'Hoodie gris', $leoTops);
 
         // --- Look publié (contient un objet perso qui restera masqué) ---
         $look = (new Look())->setName('Look du dimanche')->setDescription('Simple et confortable')->setIsPublished(true);
@@ -155,10 +164,12 @@ class AppFixtures extends Fixture
         $user = (new User())
             ->setUsername($username)
             ->setEmail($email)
-            // Hash bcrypt compatible avec le hasher "auto" de Symfony (security-bundle pas encore installé)
-            ->setPassword(null !== $email ? password_hash('password', PASSWORD_BCRYPT) : null)
             ->setBirthDate(new \DateTimeImmutable($birthDate))
             ->setRoles($roles);
+        // Seuls les comptes avec email peuvent se connecter
+        if (null !== $email) {
+            $user->setPassword($this->passwordHasher->hashPassword($user, 'password'));
+        }
         $manager->persist($user);
 
         return $user;
@@ -172,18 +183,19 @@ class AppFixtures extends Fixture
         $manager->persist($relationship);
     }
 
-    private function createCategory(ObjectManager $manager, string $name, CategoryType $type): Category
+    private function createCategory(ObjectManager $manager, Storage $storage, string $name, CategoryType $type): Category
     {
         $category = (new Category())->setName($name)->setType($type);
+        $storage->addCategory($category);
         $manager->persist($category);
 
         return $category;
     }
 
-    private function createRoom(ObjectManager $manager, Home $home, string $name, Visibility $visibility, bool $isPersonal = false): Room
+    private function createRoom(ObjectManager $manager, Place $place, string $name, Visibility $visibility, bool $isPersonal = false): Room
     {
         $room = (new Room())->setName($name)->setVisibility($visibility)->setIsPersonal($isPersonal);
-        $home->addRoom($room);
+        $place->addRoom($room);
         $manager->persist($room);
 
         return $room;
@@ -198,12 +210,11 @@ class AppFixtures extends Fixture
         return $storage;
     }
 
-    private function createItem(ObjectManager $manager, User $owner, string $name, Category $category, Storage $storage, ItemStatus $status = ItemStatus::Available, bool $isPersonal = false): Item
+    private function createItem(ObjectManager $manager, User $owner, string $name, Category $category, ItemStatus $status = ItemStatus::Available, bool $isPersonal = false): Item
     {
         $item = (new Item())
             ->setName($name)
             ->setCategory($category)
-            ->setStorage($storage)
             ->setStatus($status)
             ->setIsPersonal($isPersonal);
         $owner->addItem($item);
