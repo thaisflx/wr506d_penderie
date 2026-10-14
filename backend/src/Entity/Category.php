@@ -24,6 +24,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[UniqueEntity(fields: ['storage', 'name'], message: 'Cette catégorie existe déjà dans ce rangement.')]
 #[ApiResource(
     operations: [
+        // Toutes mes catégories (choix de l'emplacement au scan)
+        new GetCollection(paginationEnabled: false),
         new Get(),
         new Patch(securityPostDenormalize: 'object.getStorage()?.getRoom()?.getPlace()?.getOwner() == user'),
         new Delete(),
@@ -34,7 +36,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 )]
 #[ApiResource(
     uriTemplate: '/storages/{storageId}/categories',
-    operations: [new GetCollection()],
+    operations: [new GetCollection(paginationEnabled: false)],
     uriVariables: ['storageId' => new Link(toProperty: 'storage', fromClass: Storage::class)],
     normalizationContext: ['groups' => ['category:read']],
 )]
@@ -111,6 +113,17 @@ class Category
         $this->storage = $storage;
 
         return $this;
+    }
+
+    // Emplacement lisible : « Pièce › Rangement »
+    #[Groups(['category:read'])]
+    public function getLocation(): ?string
+    {
+        if (null === $this->storage) {
+            return null;
+        }
+
+        return \sprintf('%s › %s', $this->storage->getRoom()?->getName(), $this->storage->getName());
     }
 
     #[Groups(['category:read'])]

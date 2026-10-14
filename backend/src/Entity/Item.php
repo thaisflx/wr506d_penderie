@@ -23,6 +23,8 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: ItemRepository::class)]
 #[ApiResource(
     operations: [
+        // Tous mes objets (dressing), sans pagination pour l'instant
+        new GetCollection(order: ['name' => 'ASC'], paginationEnabled: false),
         new Get(),
         new Patch(securityPostDenormalize: 'object.getCategory()?.getStorage()?.getRoom()?.getPlace()?.getOwner() == user'),
         new Delete(),
@@ -36,7 +38,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 )]
 #[ApiResource(
     uriTemplate: '/categories/{categoryId}/items',
-    operations: [new GetCollection()],
+    operations: [new GetCollection(order: ['name' => 'ASC'], paginationEnabled: false)],
     uriVariables: ['categoryId' => new Link(toProperty: 'category', fromClass: Category::class)],
     normalizationContext: ['groups' => ['item:read']],
 )]
@@ -53,8 +55,9 @@ class Item
     #[Groups(['item:read', 'item:write'])]
     private ?string $name = null;
 
+    // Envoyée via /api/items/{id}/photo (ItemPhotoController), pas modifiable directement
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['item:read', 'item:write'])]
+    #[Groups(['item:read'])]
     private ?string $photo = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -225,6 +228,19 @@ class Item
         $this->category = $category;
 
         return $this;
+    }
+
+    // Nom et type de la catégorie, pour afficher les listes sans requête supplémentaire
+    #[Groups(['item:read'])]
+    public function getCategoryName(): ?string
+    {
+        return $this->category?->getName();
+    }
+
+    #[Groups(['item:read'])]
+    public function getCategoryType(): ?string
+    {
+        return $this->category?->getType()->value;
     }
 
     // Storage déduit de la catégorie

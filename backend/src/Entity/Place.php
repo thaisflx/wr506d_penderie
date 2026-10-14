@@ -21,7 +21,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 #[ORM\Entity(repositoryClass: PlaceRepository::class)]
 #[ApiResource(
     operations: [
-        new GetCollection(),
+        new GetCollection(paginationEnabled: false),
         new Get(),
         new Post(processor: OwnerProcessor::class),
         new Patch(),

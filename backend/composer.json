@@ -1,4 +1,6 @@
 {
+    "name": "thaisflx/lendly-backend",
+    "description": "API Symfony de Lendly : ranger, retrouver et partager ses objets",
     "type": "project",
     "license": "proprietary",
     "minimum-stability": "stable",
@@ -22,6 +24,7 @@
         "symfony/expression-language": "7.4.*",
         "symfony/flex": "^2",
         "symfony/framework-bundle": "7.4.*",
+        "symfony/http-client": "7.4.*",
         "symfony/property-access": "7.4.*",
         "symfony/property-info": "7.4.*",
         "symfony/runtime": "7.4.*",
@@ -34,6 +37,7 @@
     "config": {
         "allow-plugins": {
             "php-http/discovery": true,
+            "phpstan/extension-installer": true,
             "symfony/flex": true,
             "symfony/runtime": true
         },
@@ -83,6 +87,10 @@
     },
     "require-dev": {
         "doctrine/doctrine-fixtures-bundle": "^4.3",
+        "phpstan/extension-installer": "^1.4",
+        "phpstan/phpstan": "^2.3",
+        "phpstan/phpstan-doctrine": "^2.0",
+        "phpstan/phpstan-symfony": "^2.1",
         "symfony/maker-bundle": "^1.68"
     }
 }

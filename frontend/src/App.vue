@@ -1,25 +1,14 @@
 <script setup>
-import { RouterLink, RouterView, useRouter } from 'vue-router'
-import { useAuthStore } from './stores/auth'
+import { RouterView, useRoute } from 'vue-router'
+import BottomNav from './components/BottomNav.vue'
 
-const auth = useAuthStore()
-const router = useRouter()
-
-function logout() {
-  auth.logout()
-  router.push({ name: 'login' })
-}
+const route = useRoute()
 </script>
 
 <template>
-  <header class="topbar">
-    <RouterLink to="/" class="brand">Penderie</RouterLink>
-    <div v-if="auth.user" class="topbar-user">
-      <span>{{ auth.user.username }}</span>
-      <button type="button" class="btn btn-ghost" @click="logout">Se déconnecter</button>
-    </div>
-  </header>
-  <main class="page">
-    <RouterView />
-  </main>
+  <!-- La classe --with-nav réserve la place de la navigation verticale sur ordinateur -->
+  <div class="app-shell" :class="{ 'app-shell--with-nav': route.meta.nav }">
+    <RouterView :key="route.path" />
+    <BottomNav v-if="route.meta.nav" :current="route.meta.nav" />
+  </div>
 </template>
