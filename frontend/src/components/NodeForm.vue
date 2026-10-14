@@ -1,15 +1,19 @@
 <script setup>
-import { computed, reactive } from 'vue'
+import { computed, reactive, ref } from 'vue'
 
-// Formulaire générique de création / modification, construit à partir des champs d'un niveau
+// Formulaire générique de création / modification, construit à partir d'une liste de champs.
+// Si "deletable" est vrai, propose aussi la suppression avec une confirmation dans le formulaire.
 const props = defineProps({
   fields: { type: Array, required: true },
   initial: { type: Object, default: null },
   submitLabel: { type: String, default: 'Enregistrer' },
   saving: { type: Boolean, default: false },
   error: { type: Object, default: null },
+  deletable: { type: Boolean, default: false },
+  deleteLabel: { type: String, default: 'Supprimer' },
+  deleteWarning: { type: String, default: '' },
 })
-const emit = defineEmits(['submit', 'cancel'])
+const emit = defineEmits(['submit', 'delete'])
 
 const values = reactive(
   Object.fromEntries(
@@ -19,6 +23,7 @@ const values = reactive(
     ]),
   ),
 )
+const confirmingDelete = ref(false)
 
 // Messages d'erreur de validation renvoyés par l'API, rangés par champ
 const fieldErrors = computed(() =>
@@ -46,13 +51,13 @@ function submit() {
 <template>
   <form class="form" @submit.prevent="submit">
     <template v-for="field in fields" :key="field.name">
-      <label v-if="field.type === 'checkbox'" class="field field-checkbox">
-        <input v-model="values[field.name]" type="checkbox" />
+      <label v-if="field.type === 'checkbox'" class="toggle">
         <span>{{ field.label }}</span>
+        <input v-model="values[field.name]" type="checkbox" />
       </label>
       <label v-else class="field">
-        <span>{{ field.label }}</span>
-        <select v-if="field.type === 'select'" v-model="values[field.name]">
+        <span class="field-label">{{ field.label }}</span>
+        <select v-if="field.type === 'select'" v-model="values[field.name]" class="input" :required="field.required">
           <option v-for="option in field.options" :key="option.value" :value="option.value">
             {{ option.label }}
           </option>
@@ -60,6 +65,7 @@ function submit() {
         <input
           v-else
           v-model.trim="values[field.name]"
+          class="input"
           type="text"
           :required="field.required"
           :placeholder="field.placeholder"
@@ -67,10 +73,23 @@ function submit() {
         <small v-if="fieldErrors[field.name]" class="error">{{ fieldErrors[field.name] }}</small>
       </label>
     </template>
+
     <p v-if="generalError" class="error" role="alert">{{ generalError }}</p>
+
     <div class="form-actions">
-      <button type="submit" class="btn btn-primary" :disabled="saving">{{ saving ? 'Enregistrement…' : submitLabel }}</button>
-      <button type="button" class="btn btn-ghost" @click="emit('cancel')">Annuler</button>
+      <button type="submit" class="btn btn--primary btn--large btn--block" :disabled="saving">
+        {{ saving ? 'Enregistrement…' : submitLabel }}
+      </button>
+      <template v-if="deletable">
+        <button v-if="!confirmingDelete" type="button" class="btn btn--danger btn--block" @click="confirmingDelete = true">
+          {{ deleteLabel }}
+        </button>
+        <div v-else class="confirm-box" role="alert">
+          <p>{{ deleteWarning || 'Cette suppression est définitive.' }}</p>
+          <button type="button" class="btn btn--primary btn--block" @click="emit('delete')">Oui, supprimer</button>
+          <button type="button" class="btn btn--soft btn--block" @click="confirmingDelete = false">Annuler</button>
+        </div>
+      </template>
     </div>
   </form>
 </template>

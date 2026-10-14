@@ -15,6 +15,11 @@ export default defineConfig(({ mode }) => {
           target: env.VITE_API_PROXY_TARGET || 'http://localhost:8000',
           changeOrigin: true,
         },
+        // Photos des objets, servies par nginx depuis backend/public/uploads
+        '/uploads': {
+          target: env.VITE_API_PROXY_TARGET || 'http://localhost:8000',
+          changeOrigin: true,
+        },
       },
     },
   }
