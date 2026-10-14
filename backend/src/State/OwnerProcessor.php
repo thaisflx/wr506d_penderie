@@ -19,6 +19,9 @@ use Symfony\Component\DependencyInjection\Attribute\Autowire;
  */
 final class OwnerProcessor implements ProcessorInterface
 {
+    /**
+     * @param ProcessorInterface<Place|Item, Place|Item> $persistProcessor
+     */
     public function __construct(
         #[Autowire(service: PersistProcessor::class)]
         private readonly ProcessorInterface $persistProcessor,
@@ -29,7 +32,7 @@ final class OwnerProcessor implements ProcessorInterface
     public function process(mixed $data, Operation $operation, array $uriVariables = [], array $context = []): mixed
     {
         $user = $this->security->getUser();
-        if (($data instanceof Place || $data instanceof Item) && null === $data->getOwner() && $user instanceof User) {
+        if (null === $data->getOwner() && $user instanceof User) {
             $data->setOwner($user);
         }
 

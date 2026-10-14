@@ -82,7 +82,7 @@ final class ClothingScanner
         $onlyBusy = true;
 
         foreach ($this->models as $model) {
-            for ($attempt = 1; $attempt <= 2; ++$attempt) {
+            foreach ([1, 2] as $attempt) {
                 $remaining = $deadline - microtime(true);
                 if ($remaining < 5) {
                     $errors[] = 'budget de temps dépassé, modèles suivants non essayés';
@@ -205,7 +205,7 @@ final class ClothingScanner
         };
 
         // Catégorie inconnue ou absente : "other"
-        $categoryType = CategoryType::tryFrom(strtolower((string) ($data['category'] ?? '')))?->value ?? CategoryType::Other->value;
+        $categoryType = (CategoryType::tryFrom(strtolower((string) ($data['category'] ?? ''))) ?? CategoryType::Other)->value;
 
         return [
             'name' => $text($data['name'] ?? null),

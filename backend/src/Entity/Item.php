@@ -64,6 +64,9 @@ class Item
     #[Groups(['item:read', 'item:write'])]
     private ?string $barcode = null;
 
+    /**
+     * @var array<string, mixed>|null
+     */
     #[ORM\Column(type: Types::JSON, nullable: true)]
     #[Groups(['item:read', 'item:write'])]
     private ?array $attributes = null;
