@@ -1,28 +1,27 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
-import LevelView from '../views/LevelView.vue'
+import DressingView from '../views/DressingView.vue'
+import HomeView from '../views/HomeView.vue'
+import ItemView from '../views/ItemView.vue'
 import LoginView from '../views/LoginView.vue'
+import ProfileView from '../views/ProfileView.vue'
+import RoomView from '../views/RoomView.vue'
+import ScanView from '../views/ScanView.vue'
 
-// Chaque page affiche les enfants d'un élément : /places/1 liste les pièces du logement 1, etc.
-const levelRoute = (path, name, level) => ({
-  path,
-  name,
-  component: LevelView,
-  props: (route) => ({ level, parentId: route.params.id ?? null }),
-  meta: { requiresAuth: true },
-})
-
+// meta.nav : onglet actif de la barre du bas (false = barre masquée)
 const router = createRouter({
   history: createWebHistory(),
   routes: [
-    { path: '/login', name: 'login', component: LoginView },
-    levelRoute('/', 'places', 'place'),
-    levelRoute('/places/:id', 'place', 'room'),
-    levelRoute('/rooms/:id', 'room', 'storage'),
-    levelRoute('/storages/:id', 'storage', 'category'),
-    levelRoute('/categories/:id', 'category', 'item'),
+    { path: '/login', name: 'login', component: LoginView, meta: { nav: false } },
+    { path: '/', name: 'home', component: HomeView, meta: { requiresAuth: true, nav: 'home' } },
+    { path: '/rooms/:id', name: 'room', component: RoomView, props: true, meta: { requiresAuth: true, nav: 'home' } },
+    { path: '/items/:id', name: 'item', component: ItemView, props: true, meta: { requiresAuth: true, nav: false } },
+    { path: '/dressing', name: 'dressing', component: DressingView, meta: { requiresAuth: true, nav: 'dressing' } },
+    { path: '/profile', name: 'profile', component: ProfileView, meta: { requiresAuth: true, nav: 'profile' } },
+    { path: '/scan', name: 'scan', component: ScanView, meta: { requiresAuth: true, nav: false } },
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
+  scrollBehavior: () => ({ top: 0 }),
 })
 
 router.beforeEach(async (to) => {
@@ -32,7 +31,7 @@ router.beforeEach(async (to) => {
     return { name: 'login', query: { redirect: to.fullPath } }
   }
   if (to.name === 'login' && auth.isAuthenticated) {
-    return { name: 'places' }
+    return { name: 'home' }
   }
   // Recharge le profil après un rafraîchissement de la page
   if (auth.isAuthenticated && !auth.user) {

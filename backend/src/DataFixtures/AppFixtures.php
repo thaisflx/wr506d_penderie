@@ -40,6 +40,7 @@ class AppFixtures extends Fixture
         // --- Comptes ---
         $admin = $this->createUser($manager, 'admin', 'admin@penderie.test', '1985-01-01', ['ROLE_ADMIN']);
         $alice = $this->createUser($manager, 'alice', 'alice@penderie.test', '1980-04-12');
+        $alice->setBio('Fan de vinyles et de vide-greniers');
 
         // Enfant +18 avec son propre compte
         $leo = $this->createUser($manager, 'leo', 'leo@penderie.test', '2004-09-03');

@@ -1,0 +1,10 @@
+parameters:
+    level: 6
+    paths:
+        - src/
+    symfony:
+        containerXmlPath: var/cache/dev/App_KernelDevDebugContainer.xml
+    doctrine:
+        # Les entités API Platform sont vides avant désérialisation : propriétés nullables
+        # côté PHP, contrainte NOT NULL garantie par la validation (#[Assert\NotBlank]…)
+        allowNullablePropertyForRequiredField: true

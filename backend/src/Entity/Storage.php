@@ -30,7 +30,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 )]
 #[ApiResource(
     uriTemplate: '/rooms/{roomId}/storages',
-    operations: [new GetCollection()],
+    operations: [new GetCollection(paginationEnabled: false)],
     uriVariables: ['roomId' => new Link(toProperty: 'room', fromClass: Room::class)],
     normalizationContext: ['groups' => ['storage:read']],
 )]
@@ -131,6 +131,13 @@ class Storage
         $this->room = $room;
 
         return $this;
+    }
+
+    // Nombre d'objets rangés dans toutes les catégories du rangement
+    #[Groups(['storage:read'])]
+    public function getItemCount(): int
+    {
+        return array_sum($this->categories->map(fn (Category $category) => $category->getItemCount())->toArray());
     }
 
     #[Groups(['storage:read'])]
