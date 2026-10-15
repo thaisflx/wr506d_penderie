@@ -8,6 +8,9 @@
 | Config Symfony | `lint:container`, `lint:yaml`, `lint:twig` | ✅ | ✅ |
 | `composer.json` | `composer validate` | ⚠️ 2 avertissements | ✅ |
 | Dépendances PHP / JS | `composer audit` / `npm audit` | ✅ / ❌ 1 faille haute | ✅ / ✅ |
+| Dépendances (Snyk) | Snyk Open Source | ✅ 0 faille | ✅ |
+| Image Docker | Snyk Container | ❌ 3 C · 23 H · 8 M · 236 L | [APRÈS RETEST] |
+| Code source | Snyk Code | ⚠️ 1 H · 1 L | [À COMPLÉTER] |
 | Accessibilité | Lighthouse, axe-core, clavier | 🟢 100 / 1 erreur | ✅ |
 | Performance (prod) | Lighthouse | 🟢 96 | |
 | Tests automatisés | — | ❌ aucun | prochaines séances |
@@ -80,10 +83,15 @@ strict errors that make it unable to be published as a package
 |---|---|---|---|
 | `composer audit` | dépendances PHP | ✅ aucune faille | ✅ |
 | `npm audit` | dépendances JS | ❌ 1 faille haute (`source-map-js`) | ✅ corrigé |
-| Snyk | dépôt GitHub | _(à compléter)_ | |
+| Snyk Open Source | `composer.lock`, `package.json` | ✅ 0 faille | ✅ |
+| Snyk Container | `docker/php/Dockerfile` | ❌ 3 critiques, 23 hautes, 8 moyennes, 236 basses | [APRÈS RETEST] |
+| Snyk Code | code source PHP / JS | ⚠️ 1 haute, 1 basse | [À COMPLÉTER] |
 
 **Analyse :**
 - **Front :** `source-map-js` 1.2.1 présentait une faille de déni de service ([GHSA-68fv-2mgg-jv7q](https://github.com/advisories/GHSA-68fv-2mgg-jv7q)). Dépendance **indirecte** des outils de build (`vite > postcss`, compilateur Vue), pas du code envoyé au navigateur : risque faible, corrigée avec `npm audit fix` (1.2.2).
+- **Snyk** confirme `composer audit` et `npm audit` : aucune faille dans les dépendances du projet. Il analyse aussi deux choses que ces outils ne voient pas :
+  - **l'image Docker** : les 270 failles venaient des paquets système de l'image `php:8.3-fpm` (Debian), pas du code du projet. Elles touchent l'environnement d'exécution, donc elles restent à prendre au sérieux. Correction : passage à `php:8.3-fpm-alpine`, une image minimale avec beaucoup moins de paquets, et version de Composer fixée (`composer:2` au lieu de `latest`) ;
+  - **le code source (Snyk Code)** : 1 problème de gravité haute et 1 de gravité basse, [DÉTAIL À COMPLÉTER].
 - **Secrets :** `.env` est versionné avec `JWT_PASSPHRASE`. Les clés JWT et la clé OpenRouter ne sont pas commitées, mais en production les secrets devront passer par `.env.local`.
 - **Bonne pratique :** lancer `make audit` régulièrement, de nouvelles failles sont publiées tous les jours.
 
@@ -183,6 +191,8 @@ Aucun test automatisé pour l'instant. Scénarios prioritaires : connexion JWT (
 | ✅ | `npm audit fix`, `composer.json` complété | Fait |
 | ✅ | Makefile (`lint`, `phpstan`, `audit`, `quality`) | Fait |
 | ✅ | Titres `h2`, `a:focus-visible`, meta description, `robots.txt`, `icons.svg` supprimé | Fait |
+| ✅ | Image Docker passée en Alpine, Composer fixé en version 2 (Snyk Container) | Fait |
+| 🔴 | Corriger le problème de gravité haute signalé par Snyk Code | [À FAIRE] |
 | 🔴 | `setAddress(?string)`, `setBirthDate(?…)` | [À FAIRE] |
 | 🟠 | Centraliser les droits dans des Voters | Prochaine étape |
 | 🟠 | Tests PHPUnit | Prochaines séances |
