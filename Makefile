@@ -1,7 +1,7 @@
 PHP  = docker exec -w /var/www/backend penderie_backend
 NODE = docker exec -w /app penderie_frontend
 
-.PHONY: help phpstan lint audit quality fixtures-dev fixtures-test test-db
+.PHONY: help phpstan lint audit quality fixtures-dev fixtures-test test-db test test-unit test-integration test-functional coverage
 
 help: ## Affiche les commandes disponibles
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -33,3 +33,18 @@ test-db: ## (Re)crée la base de test : création, migrations, fixtures du group
 	$(PHP) php bin/console doctrine:database:create --env=test
 	$(PHP) php bin/console doctrine:migrations:migrate -n --env=test
 	$(MAKE) fixtures-test
+
+test: ## Lance tous les tests PHPUnit (unit, integration, functional)
+	$(PHP) php bin/phpunit
+
+test-unit: ## Tests unitaires (sans base de données)
+	$(PHP) php bin/phpunit --testsuite unit
+
+test-integration: ## Tests d'intégration (base de test)
+	$(PHP) php bin/phpunit --testsuite integration
+
+test-functional: ## Tests fonctionnels de l'API (base de test)
+	$(PHP) php bin/phpunit --testsuite functional
+
+coverage: ## Couverture du code métier (texte + rapport HTML dans backend/var/coverage)
+	$(PHP) php bin/phpunit --coverage-text --coverage-html var/coverage
