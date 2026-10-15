@@ -21,7 +21,8 @@ async function submit() {
     await auth.login(email.value, password.value)
     router.push(route.query.redirect || '/')
   } catch (e) {
-    error.value = e.status === 401 ? 'Email ou mot de passe incorrect.' : e.message
+    // 401 : identifiants refusés, ou compte suspendu (l'API renvoie alors son propre message)
+    error.value = e.status === 401 && e.message === 'Invalid credentials.' ? 'Email ou mot de passe incorrect.' : e.message
   } finally {
     loading.value = false
   }
@@ -40,7 +41,7 @@ async function submit() {
         <button type="button" role="tab" :aria-selected="tab === 'signup'" @click="tab = 'signup'">Inscription</button>
       </div>
 
-      <form v-if="tab === 'login'" class="form form--loose" @submit.prevent="submit">
+      <form v-if="tab === 'login'" class="form form--loose" data-cy="login-form" @submit.prevent="submit">
         <div class="form">
           <label class="field">
             <span class="field-label">Email</span>
@@ -48,6 +49,7 @@ async function submit() {
               <span class="input-icon"><AppIcon name="mail" /></span>
               <input
                 v-model="email"
+                data-cy="login-email"
                 class="input input--with-icon"
                 type="email"
                 autocomplete="username"
@@ -62,6 +64,7 @@ async function submit() {
               <span class="input-icon"><AppIcon name="lock" /></span>
               <input
                 v-model="password"
+                data-cy="login-password"
                 class="input input--with-icon"
                 type="password"
                 autocomplete="current-password"
@@ -71,8 +74,8 @@ async function submit() {
             </span>
           </label>
         </div>
-        <p v-if="error" class="error" role="alert">{{ error }}</p>
-        <button type="submit" class="btn btn--primary btn--large btn--block" :disabled="loading">
+        <p v-if="error" class="error" role="alert" data-cy="login-error">{{ error }}</p>
+        <button type="submit" class="btn btn--primary btn--large btn--block" data-cy="login-submit" :disabled="loading">
           {{ loading ? 'Connexion…' : 'Me connecter' }}
           <AppIcon v-if="!loading" name="arrow" :stroke="2.4" />
         </button>

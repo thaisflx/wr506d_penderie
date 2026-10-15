@@ -22,7 +22,7 @@ defineProps({
     <RouterLink to="/dressing" class="nav-link" aria-label="Dressing" title="Dressing" :aria-current="current === 'dressing' ? 'page' : undefined">
       <NavIcon name="dressing" :size="31" />
     </RouterLink>
-    <RouterLink to="/profile" class="nav-link" aria-label="Profil" title="Profil" :aria-current="current === 'profile' ? 'page' : undefined">
+    <RouterLink to="/profile" class="nav-link" data-cy="nav-profile" aria-label="Profil" title="Profil" :aria-current="current === 'profile' ? 'page' : undefined">
       <NavIcon name="profile" :size="29" />
     </RouterLink>
   </nav>

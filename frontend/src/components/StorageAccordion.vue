@@ -113,11 +113,11 @@ const deleteCategory = () =>
 </script>
 
 <template>
-  <article class="card storage">
-    <button type="button" class="storage-head" :aria-expanded="expanded" @click="expanded = !expanded">
+  <article class="card storage" data-cy="storage">
+    <button type="button" class="storage-head" data-cy="storage-toggle" :aria-expanded="expanded" @click="expanded = !expanded">
       <span class="storage-icon" :class="tone"><AppIcon name="box" :size="22" /></span>
       <span class="storage-text">
-        <span class="storage-name">{{ storage.name }}</span>
+        <span class="storage-name" data-cy="storage-name">{{ storage.name }}</span>
         <span class="small muted">{{ subtitle }}</span>
         <span v-if="storage.isPersonal || storage.visibility !== 'private'" class="chips storage-chips">
           <span v-if="storage.isPersonal" class="chip chip--wine"><AppIcon name="lock" :size="12" :stroke="2.2" /> Perso</span>
@@ -133,9 +133,9 @@ const deleteCategory = () =>
       <template v-else>
         <p v-if="!categories.length" class="empty-note">Aucune catégorie : ajoute-en une pour y ranger des objets.</p>
 
-        <section v-for="category in categories" :key="category.id">
+        <section v-for="category in categories" :key="category.id" data-cy="category">
           <div class="category-head">
-            <span>{{ category.name }}</span>
+            <span data-cy="category-name">{{ category.name }}</span>
             <span class="category-actions">
               <button type="button" class="link-btn" @click="emit('add-item', category)">+ Objet</button>
               <button type="button" class="link-btn" :aria-label="`Modifier la catégorie ${category.name}`" @click="openSheet({ edit: category })">
@@ -144,12 +144,12 @@ const deleteCategory = () =>
             </span>
           </div>
           <p v-if="!itemsByCategory[category.id]?.length" class="empty-note">Aucun objet.</p>
-          <RouterLink v-for="item in itemsByCategory[category.id]" :key="item.id" :to="`/items/${item.id}`" class="item-row">
+          <RouterLink v-for="item in itemsByCategory[category.id]" :key="item.id" :to="`/items/${item.id}`" class="item-row" data-cy="item-row">
             <span class="item-row-mini" :class="category.type === 'media' ? '' : 'tone-peach'">
               <ItemVisual :item="item" :category-type="category.type" :size="category.type === 'media' ? 44 : 30" />
             </span>
             <span class="item-row-text">
-              <span class="item-row-name">{{ item.name }}</span>
+              <span class="item-row-name" data-cy="item-name">{{ item.name }}</span>
               <span class="small muted">{{ category.name }}<template v-if="item.isPersonal"> · Perso</template></span>
             </span>
             <span v-if="item.status !== 'available'" class="chip chip--glaucous">{{ optionLabel(ITEM_STATUS_OPTIONS, item.status) }}</span>

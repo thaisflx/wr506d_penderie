@@ -40,7 +40,7 @@ function logout() {
   <div class="screen--flush">
     <div class="hero profile-band">
       <div class="hero-inner profile-band-inner">
-        <button type="button" class="icon-btn icon-btn--on-dark" aria-label="Paramètres" @click="settingsOpen = true">
+        <button type="button" class="icon-btn icon-btn--on-dark" aria-label="Paramètres" data-cy="profile-settings" @click="settingsOpen = true">
           <AppIcon name="settings" />
         </button>
       </div>
@@ -111,7 +111,7 @@ function logout() {
     </div>
 
     <BottomSheet v-if="settingsOpen" title="Paramètres" @close="settingsOpen = false">
-      <button type="button" class="btn btn--primary btn--large btn--block" @click="logout">
+      <button type="button" class="btn btn--primary btn--large btn--block" data-cy="logout" @click="logout">
         <AppIcon name="logout" /> Se déconnecter
       </button>
     </BottomSheet>

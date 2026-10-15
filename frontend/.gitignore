@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Cypress : fichiers générés par les tests e2e
+cypress/screenshots
+cypress/videos
+cypress/downloads

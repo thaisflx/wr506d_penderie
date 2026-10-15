@@ -53,11 +53,11 @@ function submit() {
     <template v-for="field in fields" :key="field.name">
       <label v-if="field.type === 'checkbox'" class="toggle">
         <span>{{ field.label }}</span>
-        <input v-model="values[field.name]" type="checkbox" />
+        <input v-model="values[field.name]" type="checkbox" :data-cy="`field-${field.name}`" />
       </label>
       <label v-else class="field">
         <span class="field-label">{{ field.label }}</span>
-        <select v-if="field.type === 'select'" v-model="values[field.name]" class="input" :required="field.required">
+        <select v-if="field.type === 'select'" v-model="values[field.name]" class="input" :data-cy="`field-${field.name}`" :required="field.required">
           <option v-for="option in field.options" :key="option.value" :value="option.value">
             {{ option.label }}
           </option>
@@ -67,6 +67,7 @@ function submit() {
           v-model.trim="values[field.name]"
           class="input"
           type="text"
+          :data-cy="`field-${field.name}`"
           :required="field.required"
           :placeholder="field.placeholder"
         />
@@ -74,10 +75,10 @@ function submit() {
       </label>
     </template>
 
-    <p v-if="generalError" class="error" role="alert">{{ generalError }}</p>
+    <p v-if="generalError" class="error" role="alert" data-cy="form-error">{{ generalError }}</p>
 
     <div class="form-actions">
-      <button type="submit" class="btn btn--primary btn--large btn--block" :disabled="saving">
+      <button type="submit" class="btn btn--primary btn--large btn--block" data-cy="form-submit" :disabled="saving">
         {{ saving ? 'Enregistrement…' : submitLabel }}
       </button>
       <template v-if="deletable">

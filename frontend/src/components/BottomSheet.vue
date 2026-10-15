@@ -31,7 +31,7 @@ onBeforeUnmount(() => {
 <template>
   <Teleport to="body">
     <div class="sheet-backdrop" @click.self="emit('close')">
-      <section ref="panel" class="sheet" role="dialog" aria-modal="true" :aria-label="title">
+      <section ref="panel" class="sheet" role="dialog" aria-modal="true" :aria-label="title" data-cy="sheet">
         <span class="sheet-grip" aria-hidden="true"></span>
         <header class="sheet-head">
           <h2 class="display sheet-title">{{ title }}</h2>

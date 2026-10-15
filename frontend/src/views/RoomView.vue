@@ -155,8 +155,8 @@ function onStorageDeleted(storage) {
           </div>
         </div>
         <div v-if="room" class="hero-heading">
-          <span class="hero-eyebrow">{{ place?.name }}<template v-if="place?.city"> · {{ place.city }}</template></span>
-          <h1 class="display hero-title">{{ room.name }}</h1>
+          <span class="hero-eyebrow" data-cy="room-place">{{ place?.name }}<template v-if="place?.city"> · {{ place.city }}</template></span>
+          <h1 class="display hero-title" data-cy="room-name">{{ room.name }}</h1>
           <div class="chips hero-chips">
             <span class="chip chip--glass">{{ plural(room.storageCount ?? 0, 'rangement') }}</span>
             <span class="chip chip--glass">{{ plural(room.itemCount ?? 0, 'objet') }}</span>
@@ -198,6 +198,7 @@ function onStorageDeleted(storage) {
       v-if="room && storages.length"
       type="button"
       class="fab"
+      data-cy="add-item"
       :aria-label="`Ajouter un objet dans ${room.name}`"
       @click="openItemSheet()"
     >

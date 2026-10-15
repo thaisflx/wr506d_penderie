@@ -115,7 +115,7 @@ const createRoom = (payload) =>
       </RouterLink>
       <div class="home-greeting">
         <span class="muted">Bonjour</span>
-        <span class="display home-name">{{ auth.user?.username }}</span>
+        <span class="display home-name" data-cy="home-username">{{ auth.user?.username }}</span>
       </div>
       <form role="search" class="home-search" @submit.prevent="searchItems">
         <label for="home-search" class="visually-hidden">Rechercher un objet</label>
@@ -151,7 +151,7 @@ const createRoom = (payload) =>
 
     <section v-else-if="place" class="stack">
       <div class="section-head">
-        <h2 class="section-title">{{ place.name }}</h2>
+        <h2 class="section-title" data-cy="place-name">{{ place.name }}</h2>
         <button type="button" class="btn btn--soft btn--small" @click="openSheet('switch')">
           Changer <AppIcon name="down" :size="14" :stroke="2.4" />
         </button>
@@ -164,6 +164,7 @@ const createRoom = (payload) =>
           :key="room.id"
           :to="`/rooms/${room.id}`"
           class="room-tile"
+          data-cy="room-tile"
           :class="{ 'room-tile--featured': index === 0 }"
         >
           <span class="room-tile-icon"><AppIcon :name="roomIcon(room.name)" /></span>

@@ -1,7 +1,7 @@
 PHP  = docker exec -w /var/www/backend penderie_backend
 NODE = docker exec -w /app penderie_frontend
 
-.PHONY: help phpstan lint audit quality fixtures-dev fixtures-test test-db test test-unit test-integration test-functional coverage
+.PHONY: help phpstan lint audit quality fixtures-dev fixtures-test test-db test test-unit test-integration test-functional coverage e2e e2e-open
 
 help: ## Affiche les commandes disponibles
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -48,3 +48,14 @@ test-functional: ## Tests fonctionnels de l'API (base de test)
 
 coverage: ## Couverture du code métier (texte + rapport HTML dans backend/var/coverage)
 	$(PHP) php bin/phpunit --coverage-text --coverage-html var/coverage
+
+# Cypress tourne sur la machine hôte (pas dans le conteneur Alpine), contre l'application Docker
+# sur http://localhost:5173 ; chaque test recharge les fixtures test (prérequis : make test-db une fois).
+# ELECTRON_RUN_AS_NODE (défini par les outils basés sur Electron, ex. extensions VS Code) empêche Cypress de démarrer.
+CYPRESS = cd frontend && env -u ELECTRON_RUN_AS_NODE npm run
+
+e2e: ## Tests e2e Cypress en ligne de commande (depuis frontend/, sur la machine hôte)
+	$(CYPRESS) test:e2e
+
+e2e-open: ## Ouvre l'interface Cypress (depuis frontend/, sur la machine hôte)
+	$(CYPRESS) test:e2e:open
