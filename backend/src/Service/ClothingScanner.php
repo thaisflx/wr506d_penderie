@@ -4,6 +4,7 @@ namespace App\Service;
 
 use App\Enum\CategoryType;
 use Psr\Log\LoggerInterface;
+use Symfony\Component\Clock\ClockInterface;
 use Symfony\Component\DependencyInjection\Attribute\Autowire;
 use Symfony\Contracts\HttpClient\Exception\DecodingExceptionInterface;
 use Symfony\Contracts\HttpClient\Exception\ExceptionInterface;
@@ -21,8 +22,8 @@ final class ClothingScanner
     private const TIME_BUDGET = 50.0;
     // Durée maximale d'un appel à un modèle
     private const MODEL_TIMEOUT = 30.0;
-    // Pause avant la seconde tentative sur un modèle saturé (429) ou en erreur côté fournisseur (5xx)
-    private const RETRY_DELAY_US = 1_500_000;
+    // Pause (en secondes) avant la seconde tentative sur un modèle saturé (429) ou en erreur côté fournisseur (5xx)
+    private const RETRY_DELAY = 1.5;
 
     // Consignes communes : réponse JSON stricte, en français
     private const PROMPTS = [
@@ -52,6 +53,8 @@ final class ClothingScanner
     public function __construct(
         private readonly HttpClientInterface $httpClient,
         private readonly LoggerInterface $logger,
+        // Horloge injectée : les tests utilisent MockClock pour le budget de temps et les pauses
+        private readonly ClockInterface $clock,
         #[Autowire('%env(OPENROUTER_API_KEY)%')]
         private readonly string $apiKey,
         #[Autowire('%env(OPENROUTER_MODELS)%')]
@@ -76,14 +79,14 @@ final class ClothingScanner
     public function analyze(string $imageDataUrl, string $mode = 'photo'): array
     {
         $prompt = self::PROMPTS[$mode] ?? self::PROMPTS['photo'];
-        $deadline = microtime(true) + self::TIME_BUDGET;
+        $deadline = $this->now() + self::TIME_BUDGET;
         $errors = [];
         // Reste vrai tant que tous les échecs viennent d'une saturation des modèles gratuits
         $onlyBusy = true;
 
         foreach ($this->models as $model) {
             foreach ([1, 2] as $attempt) {
-                $remaining = $deadline - microtime(true);
+                $remaining = $deadline - $this->now();
                 if ($remaining < 5) {
                     $errors[] = 'budget de temps dépassé, modèles suivants non essayés';
                     break 2;
@@ -97,21 +100,23 @@ final class ClothingScanner
                     }
                     $errors[] = \sprintf('%s : réponse illisible', $model);
                     $onlyBusy = false;
+                } catch (ExceptionInterface $e) {
+                    // Délai dépassé ou réseau : on passe directement au modèle suivant.
+                    // Attrapé avant \RuntimeException, dont héritent les TransportException de HttpClient
+                    $errors[] = \sprintf('%s : %s', $model, $e->getMessage());
+                    $onlyBusy = false;
                 } catch (\RuntimeException $e) {
                     $status = $e->getCode();
                     $errors[] = \sprintf('%s (essai %d) : %s', $model, $attempt, $e->getMessage());
                     // Saturé ou erreur passagère du fournisseur : une seconde tentative après une pause
                     if (429 === $status || $status >= 500) {
                         if (1 === $attempt) {
-                            usleep(self::RETRY_DELAY_US);
+                            $this->clock->sleep(self::RETRY_DELAY);
                             continue;
                         }
                     } else {
                         $onlyBusy = false;
                     }
-                } catch (ExceptionInterface $e) {
-                    // Délai dépassé ou réseau : on passe directement au modèle suivant
-                    $errors[] = \sprintf('%s : %s', $model, $e->getMessage());
                 }
                 break;
             }
@@ -122,6 +127,12 @@ final class ClothingScanner
         throw new ScanFailedException($onlyBusy
             ? 'Les modèles d\'IA gratuits sont saturés en ce moment : réessaie dans une minute.'
             : 'Aucun modèle n\'a pu analyser la photo. Réessaie dans un instant.', $errors);
+    }
+
+    // Instant présent en secondes (avec les microsecondes), comme microtime(true)
+    private function now(): float
+    {
+        return (float) $this->clock->now()->format('U.u');
     }
 
     /**
