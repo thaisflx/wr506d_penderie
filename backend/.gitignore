@@ -16,3 +16,8 @@
 ###> uploads ###
 /public/uploads/
 ###< uploads ###
+
+###> phpunit/phpunit ###
+/phpunit.xml
+/.phpunit.cache/
+###< phpunit/phpunit ###

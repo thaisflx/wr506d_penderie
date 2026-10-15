@@ -22,6 +22,7 @@ use App\Enum\RelationshipType;
 use App\Enum\ReservationStatus;
 use App\Enum\Visibility;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Persistence\ObjectManager;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 
@@ -29,10 +30,15 @@ use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
  * Jeu de test couvrant le tableau des droits.
  * Tous les comptes avec email ont le mot de passe "password".
  */
-class AppFixtures extends Fixture
+class AppFixtures extends Fixture implements FixtureGroupInterface
 {
     public function __construct(private readonly UserPasswordHasherInterface $passwordHasher)
     {
+    }
+
+    public static function getGroups(): array
+    {
+        return ['dev'];
     }
 
     public function load(ObjectManager $manager): void

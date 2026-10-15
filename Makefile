@@ -1,10 +1,10 @@
 PHP  = docker exec -w /var/www/backend penderie_backend
 NODE = docker exec -w /app penderie_frontend
 
-.PHONY: help phpstan lint audit quality
+.PHONY: help phpstan lint audit quality fixtures-dev fixtures-test test-db
 
 help: ## Affiche les commandes disponibles
-	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-12s\033[0m %s\n", $$1, $$2}'
+	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
 
 phpstan: ## Analyse statique PHPStan (niveau 6)
 	$(PHP) php bin/console cache:warmup
@@ -21,3 +21,15 @@ audit: ## Failles de sécurité des dépendances (Composer + npm)
 	$(NODE) npm audit
 
 quality: lint phpstan audit ## Lance tous les contrôles qualité
+
+fixtures-dev: ## Recharge les fixtures du groupe dev dans la base de dev
+	$(PHP) php bin/console doctrine:fixtures:load --group=dev -n
+
+fixtures-test: ## Recharge les fixtures du groupe test dans la base de test (penderie_db_test)
+	$(PHP) php bin/console doctrine:fixtures:load --group=test -n --env=test
+
+test-db: ## (Re)crée la base de test : création, migrations, fixtures du groupe test
+	$(PHP) php bin/console doctrine:database:drop --if-exists --force --env=test
+	$(PHP) php bin/console doctrine:database:create --env=test
+	$(PHP) php bin/console doctrine:migrations:migrate -n --env=test
+	$(MAKE) fixtures-test
