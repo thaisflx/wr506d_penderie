@@ -49,6 +49,10 @@ Les 54 tests fonctionnels envoient de vraies requêtes HTTP à l'API. Plusieurs 
 
 Les 155 tests passent, et les 11 classes du périmètre métier sont couvertes à 100 % (190 lignes sur 190, 31 méthodes sur 31). La ligne `with PCOV 1.0.12` confirme que la couverture est mesurée par PCOV.
 
+![Rapport HTML de make coverage : 100 % par dossier](docs/captures/coverage-html.png)
+
+Le rapport HTML (`backend/var/coverage/index.html`) détaille la même couverture par dossier du périmètre (Controller, Doctrine, EventListener, Repository, Security, Service, State) : 100 % des lignes, des méthodes et des classes partout. Depuis chaque dossier, on peut ouvrir le code source et voir les lignes exécutées par les tests.
+
 ### Analyse statique : `make phpstan`
 
 ![make phpstan : aucune erreur au niveau 6](docs/captures/phpstan.png)
@@ -59,7 +63,7 @@ PHPStan analyse les 51 fichiers de `backend/src/` au niveau 6, sans aucune erreu
 
 ![make e2e : démarrage et première spec](docs/captures/cypress-run-start.png)
 
-Cypress 15.21.1 démarre en mode headless (Electron), trouve les 4 specs et joue la première, `add-item.cy.js`. Le texte violet affiché en haut de cette capture est l'avertissement `allowCypressEnv` de Cypress 15. Il a depuis été supprimé (`allowCypressEnv: false` dans `frontend/cypress.config.js`) et ne s'affiche plus.
+Cypress 15.21.1 démarre en mode headless (Electron), trouve les 4 specs et joue la première, `add-item.cy.js`, dont les 3 tests passent.
 
 ### Cypress, fin de `make e2e`
 
