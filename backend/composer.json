@@ -1,6 +1,6 @@
 {
-    "name": "thaisflx/lendly-backend",
-    "description": "API Symfony de Lendly : ranger, retrouver et partager ses objets",
+    "name": "thaisflx/penderie-backend",
+    "description": "API Symfony de Penderie : ranger, retrouver et partager ses objets",
     "type": "project",
     "license": "proprietary",
     "minimum-stability": "stable",
