@@ -197,10 +197,19 @@ Dans tous les cas d'erreur, aucun appel n'est envoyé au modèle. Le scanner sim
 
 Les éléments utilisés portent des attributs `data-cy`. Chaque test recharge les fixtures `test` avant de commencer : l'ajout d'objet, joué en premier, ne fausse pas la navigation, qui vérifie la liste exacte des objets.
 
-## Ce que les tests ont permis de trouver
+## Anomalies trouvées pendant la campagne de test
 
-1. **Bloc « erreur réseau » jamais exécuté dans `ClothingScanner`.** Le `catch (ExceptionInterface)` prévu pour les délais dépassés et les erreurs réseau était placé après `catch (\RuntimeException)`. Or `TransportException` et `TimeoutException` de Symfony HttpClient héritent de `\RuntimeException` : ces erreurs tombaient dans le premier bloc, et le second était du code mort. Les deux blocs ont été inversés. Le comportement visible est resté le même (pas de nouvelle tentative, modèle suivant, message générique). Seule la ligne de journal de ce cas change.
-2. **Message « compte suspendu » masqué dans `LoginView`.** Le front remplaçait toute réponse 401 par « Email ou mot de passe incorrect. ». Le message « Ce compte est suspendu. » renvoyé par l'API n'était donc jamais affiché. Le message générique est désormais réservé à `Invalid credentials.`.
+Les deux anomalies ont été repérées **en lisant le code pendant l'écriture des tests**, pas par un outil automatique : PHPStan était à 0 erreur sur le code d'origine, et la couverture n'a pas été mesurée avant les corrections.
+
+1. **Bloc « erreur réseau » jamais exécuté dans `ClothingScanner`.** Le `catch (ExceptionInterface)` prévu pour les délais dépassés et les erreurs réseau était placé après `catch (\RuntimeException)`. Or `TransportException` et `TimeoutException` de Symfony HttpClient héritent de `\RuntimeException` : ces erreurs tombaient dans le premier bloc, et le second était du code mort.
+   - **Repéré** en préparant le cas « erreur réseau » de `ClothingScannerTest`.
+   - **Confirmé** par la déclaration de la classe (`class TransportException extends \RuntimeException`), puis par un script exécuté dans le conteneur : une erreur réseau simulée avec `MockResponse` donnait une `TransportException`, de type `\RuntimeException`, avec le code 0.
+   - **Corrigé** en inversant les deux blocs. Le comportement visible est resté le même (pas de nouvelle tentative, modèle suivant, message générique). Seule la ligne de journal de ce cas change.
+   - **Vérifié ensuite** par les tests `testNetworkErrorMovesToNextModelWithoutRetry` et `testNetworkErrorOnEveryModelGivesGenericMessage`, qui passent dans le bloc réseau.
+2. **Message « compte suspendu » masqué dans `LoginView`.** Le front remplaçait toute réponse 401 par « Email ou mot de passe incorrect. ». Le message « Ce compte est suspendu. » renvoyé par l'API n'était donc jamais affiché.
+   - **Repéré** en lisant `LoginView.vue` pendant l'écriture de la spec `login.cy.js`.
+   - **Corrigé** avant le premier lancement de Cypress : le message générique est désormais réservé à `Invalid credentials.`.
+   - **Confirmé** par une mutation : avec l'ancien code remis temporairement, le test « refuse un compte suspendu avec un message clair » échoue (voir le tableau ci-dessous).
 
 ## Contrôle par mutation
 
