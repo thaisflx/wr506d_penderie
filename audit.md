@@ -81,13 +81,14 @@ strict errors that make it unable to be published as a package
 
 | Outil | Périmètre | Résultat initial | Résultat final |
 |---|---|---|---|
-| `composer audit` | dépendances PHP | ✅ aucune faille | ✅ |
+| `composer audit` | dépendances PHP | ✅ aucune faille | ✅ (CVE-2026-109449, publiée ensuite, corrigée) |
 | `npm audit` | dépendances JS | ❌ 1 faille haute (`source-map-js`) | ✅ corrigé |
 | Snyk Open Source | `composer.lock`, `package.json` | ✅ 0 faille | ✅ |
 | Snyk Container | `docker/php/Dockerfile` | ❌ 3 critiques, 23 hautes, 8 moyennes, 236 basses | ✅ 0 critique, 1 haute, 1 moyenne, 20 basses (270 → 22) |
 | Snyk Code | code source PHP / JS | ⚠️ 1 haute, 1 basse | ✅ 2 faux positifs, justifiés |
 
 **Analyse :**
+- **Back :** un nouvel avis, publié le 14/10/2026, touche `symfony/expression-language` 7.4.18 : CVE-2026-109449, une expression imbriquée sans limite peut faire planter le processus. Risque faible : les expressions du projet (`securityPostDenormalize`) sont écrites dans le code, jamais fournies par l'utilisateur. Corrigée avec `composer update symfony/expression-language` (7.4.21) : `composer audit` est de nouveau ✅.
 - **Front :** `source-map-js` 1.2.1 présentait une faille de déni de service ([GHSA-68fv-2mgg-jv7q](https://github.com/advisories/GHSA-68fv-2mgg-jv7q)). Dépendance **indirecte** des outils de build (`vite > postcss`, compilateur Vue), pas du code envoyé au navigateur : risque faible, corrigée avec `npm audit fix` (1.2.2).
 - **Snyk** confirme `composer audit` et `npm audit` : aucune faille dans les dépendances du projet. Il analyse aussi deux choses que ces outils ne voient pas :
   - **l'image Docker** : les 270 failles venaient des paquets système de l'image `php:8.3-fpm` (Debian), pas du code du projet. Elles touchent l'environnement d'exécution, donc elles restent à prendre au sérieux. Correction : passage à `php:8.3-fpm-alpine`, une image minimale avec beaucoup moins de paquets, et version de Composer fixée (`composer:2` au lieu de `latest`). **Résultat : 270 → 22 failles, 0 critique.**
