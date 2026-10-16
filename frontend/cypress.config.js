@@ -3,6 +3,8 @@ import { defineConfig } from 'cypress'
 // Tests e2e lancés sur le Mac (npm run test:e2e), contre l'application qui tourne dans Docker.
 // Les requêtes de l'application vers l'API passent en environnement test : voir cypress/support/e2e.js.
 export default defineConfig({
+  // Cypress.env() désactivé (lisible par tout le code du navigateur) : les specs n'en ont pas besoin
+  allowCypressEnv: false,
   e2e: {
     baseUrl: 'http://localhost:5173',
     specPattern: 'cypress/e2e/**/*.cy.js',
