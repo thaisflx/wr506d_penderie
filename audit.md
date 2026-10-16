@@ -159,7 +159,7 @@ fix available via `npm audit fix`
 
 | Critère | Constat | État |
 |---|---|---|
-| axe-core (WCAG 2.1 AA) | Connexion : 0 erreur. Accueil : titres `h1` → `h3` (niveau sauté) | ✅ Front actuel : plus aucun `h3`. L'accueil (`HomeView`) n'avait pas de `h1` → `h1` « Accueil » ajouté, masqué visuellement (`visually-hidden`). ⚠️ `ScanView` n'a toujours pas de titre (« Scanner » est un `span`) |
+| axe-core (WCAG 2.1 AA) | Connexion : 0 erreur. Accueil : titres `h1` → `h3` (niveau sauté) | ✅ Front actuel : plus aucun `h3`. L'accueil (`HomeView`) n'avait pas de `h1` → `h1` « Accueil » ajouté, masqué visuellement (`visually-hidden`). Le scanner (`ScanView`) : « Scanner » passé d'un `span` à un `h1`, même rendu (style calculé et position identiques) |
 | Navigation clavier | Tout est atteignable avec Tab, dans un ordre logique | ✅ |
 | Focus visible | Champs et boutons : contour de 2 px. Liens : contour par défaut, plus discret | ⚠️ → `a:focus-visible` ajouté |
 | Messages d'erreur | En français, annoncés (`role="alert"`), sans révéler si l'email existe | ✅ |
@@ -203,7 +203,7 @@ Page de connexion en production : **≈ 46 Ko en 4 requêtes** (JS 42,7 Ko compr
 | ✅ | PHPStan niveau 6 : 34 → 0 erreur | Fait |
 | ✅ | `npm audit fix`, `composer.json` complété | Fait |
 | ✅ | Makefile (`lint`, `phpstan`, `audit`, `quality`, puis `test`, `coverage`, `e2e`) | Fait |
-| ✅ | `:focus-visible` sur tous les éléments, plus de niveau de titre sauté, `h1` sur l'accueil | Fait |
+| ✅ | `:focus-visible` sur tous les éléments, plus de niveau de titre sauté, `h1` sur l'accueil et le scanner | Fait |
 | ✅ | Meta description, `robots.txt`, `public/icons.svg` supprimé, nom « Penderie » partout | Fait |
 | ✅ | Image Docker passée en Alpine, Composer fixé en version 2 (Snyk Container) | Fait |
 | ✅ | zlib mis à jour (`apk upgrade`) | Fait |

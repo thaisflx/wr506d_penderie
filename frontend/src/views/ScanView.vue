@@ -205,7 +205,7 @@ async function save() {
         <RouterLink to="/" class="icon-btn icon-btn--on-dark" aria-label="Fermer le scanner">
           <AppIcon name="close" :stroke="2.4" />
         </RouterLink>
-        <span class="scan-title">Scanner</span>
+        <h1 class="scan-title">Scanner</h1>
         <button
           v-if="torchAvailable && !photo"
           type="button"
