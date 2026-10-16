@@ -109,6 +109,8 @@ const createRoom = (payload) =>
 
 <template>
   <main class="screen">
+    <!-- Titre de la page pour les lecteurs d'écran (le design n'affiche pas de titre principal) -->
+    <h1 class="visually-hidden">Accueil</h1>
     <header class="home-header">
       <RouterLink to="/profile" aria-label="Mon profil" class="home-avatar">
         <UserAvatar :name="auth.user?.username ?? ''" :src="auth.user?.avatar" :size="48" />
