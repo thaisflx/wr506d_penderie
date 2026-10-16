@@ -120,7 +120,7 @@ fix available via `npm audit fix`
 
 ## 4. Inspection manuelle du code
 
-**Points forts :** une seule vue Vue (`LevelView`) gère les 5 niveaux de la hiérarchie à partir d'une configuration (`hierarchy.js`), sans duplication ; le client API centralise le jeton, les erreurs et l'expiration de session ; côté back, chaque classe a une responsabilité claire (`OwnerProcessor`, `CurrentOwnerExtension`, `UserChecker`).
+**Points forts :** les formulaires des 5 niveaux de la hiérarchie sont générés par un seul composant (`NodeForm`) à partir d'une configuration (`hierarchy.js`), sans duplication ; chaque vue a un rôle clair : `HomeView` (logement et pièces), `RoomView` (rangements, catégories et objets d'une pièce, via `StorageAccordion`), `ItemView` (fiche objet) ; le client API centralise le jeton, les erreurs et l'expiration de session ; côté back, chaque classe a une responsabilité claire (`OwnerProcessor`, `CurrentOwnerExtension`, `UserChecker`).
 
 **Dette technique :**
 
@@ -145,7 +145,7 @@ fix available via `npm audit fix`
 
 **Analyse :**
 - **Accessibilité et bonnes pratiques à 100** : labels de formulaires présents, contrastes suffisants, `lang="fr"`.
-- **SEO à 82** : `<meta name="description">` et `robots.txt` manquants → à ajouter (voir plan d'action).
+- **SEO à 82** : `<meta name="description">` et `robots.txt` manquants → ajoutés (description de l'application, `robots.txt` qui exclut `/api/`).
 - **Performance à 55** : **pas représentatif**. Le serveur de développement de Vite sert le code non minifié, un fichier par module. Mesure refaite en production.
 
 ### Mesure 2 : version de production (`vite preview`, port 4173)
@@ -158,7 +158,7 @@ fix available via `npm audit fix`
 
 | Critère | Constat | État |
 |---|---|---|
-| axe-core (WCAG 2.1 AA) | Connexion : 0 erreur. Accueil : titres `h1` → `h3` (niveau sauté) | ⚠️ → `h2` dans `NodeCard.vue` |
+| axe-core (WCAG 2.1 AA) | Connexion : 0 erreur. Accueil : titres `h1` → `h3` (niveau sauté) | ✅ Front actuel : plus aucun `h3`. L'accueil (`HomeView`) n'avait pas de `h1` → `h1` « Accueil » ajouté, masqué visuellement (`visually-hidden`). ⚠️ `ScanView` n'a toujours pas de titre (« Scanner » est un `span`) |
 | Navigation clavier | Tout est atteignable avec Tab, dans un ordre logique | ✅ |
 | Focus visible | Champs et boutons : contour de 2 px. Liens : contour par défaut, plus discret | ⚠️ → `a:focus-visible` ajouté |
 | Messages d'erreur | En français, annoncés (`role="alert"`), sans révéler si l'email existe | ✅ |
@@ -177,8 +177,9 @@ Page de connexion en production : **≈ 46 Ko en 4 requêtes** (JS 42,7 Ko compr
 
 ## 7. Expérience utilisateur (UX)
 
-- ✅ Fil d'Ariane à chaque niveau, états de chargement, bouton désactivé pendant l'envoi
-- ✅ Suppression en deux temps : « Supprimer « Chambre » et tout son contenu ? »
+- ✅ États de chargement, bouton désactivé pendant l'envoi
+- ✅ Fil d'Ariane (logement › pièce › rangement) sur la fiche objet (`ItemView`) seulement
+- ✅ Suppression en deux temps : le formulaire avertit de ce qui sera supprimé (« Tous ses rangements et tous les objets qu'ils contiennent seront supprimés. ») et demande « Oui, supprimer »
 - ✅ Erreurs de validation affichées sous le champ concerné, message d'invitation quand une liste est vide
 - ⚠️ Pas de confirmation après une création ou une modification
 - ✅ Couleurs de la DA appliquées (bordeaux `#71103c`, cyan, glauque dans `style.css`)
@@ -201,7 +202,8 @@ Page de connexion en production : **≈ 46 Ko en 4 requêtes** (JS 42,7 Ko compr
 | ✅ | PHPStan niveau 6 : 34 → 0 erreur | Fait |
 | ✅ | `npm audit fix`, `composer.json` complété | Fait |
 | ✅ | Makefile (`lint`, `phpstan`, `audit`, `quality`, puis `test`, `coverage`, `e2e`) | Fait |
-| ✅ | `:focus-visible` sur tous les éléments, plus de niveau de titre sauté | Fait |
+| ✅ | `:focus-visible` sur tous les éléments, plus de niveau de titre sauté, `h1` sur l'accueil | Fait |
+| ✅ | Meta description, `robots.txt`, `public/icons.svg` supprimé, nom « Penderie » partout | Fait |
 | ✅ | Image Docker passée en Alpine, Composer fixé en version 2 (Snyk Container) | Fait |
 | ✅ | zlib mis à jour (`apk upgrade`) | Fait |
 | ✅ | Snyk Code : 2 faux positifs analysés et justifiés | Fait |
@@ -209,6 +211,5 @@ Page de connexion en production : **≈ 46 Ko en 4 requêtes** (JS 42,7 Ko compr
 | 🔴 | `setAddress(?string)`, `setBirthDate(?…)` | À faire |
 | 🟠 | Centraliser les droits dans des Voters | Prochaine étape |
 | 🟠 | Tests des droits quand les Voters seront écrits | À faire |
-| 🟢 | Meta description (contient encore « Lendly »), `robots.txt`, suppression de `public/icons.svg` | À faire |
 | 🟢 | Notification de succès, favicon Penderie (celui de Vite est encore en place) | À faire |
 | 🟢 | Jeton JWT en cookie `HttpOnly` | Piste |
