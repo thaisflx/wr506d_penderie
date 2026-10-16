@@ -1,5 +1,8 @@
 FROM php:8.3-fpm-alpine
 
+# Correctifs de sécurité des paquets Alpine de l'image de base (ex. zlib, signalé par Snyk Container)
+RUN apk upgrade --no-cache
+
 RUN apk add --no-cache git unzip icu-dev libpq-dev libzip-dev \
     && docker-php-ext-install intl pdo pdo_pgsql zip
 
