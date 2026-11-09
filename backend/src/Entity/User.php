@@ -2,21 +2,42 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
 use App\Repository\UserRepository;
+use App\State\PublicProfileProvider;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
 #[ORM\Entity(repositoryClass: UserRepository::class)]
 #[ORM\Table(name: 'app_user')]
+// Profil public, en lecture seule : seul le groupe user:public est exposé (jamais email, mot de passe,
+// rôles, date de naissance, parent ni logements). Filtrage : App\Doctrine\PublicUserExtension
+#[ApiResource(
+    operations: [
+        // Recherche par pseudo : GET /api/users?username=so
+        new GetCollection(order: ['username' => 'ASC'], paginationItemsPerPage: 20),
+        // Profil public, avec mon lien avec cette personne
+        new Get(
+            normalizationContext: ['groups' => ['user:public', 'user:profile']],
+            provider: PublicProfileProvider::class,
+        ),
+    ],
+    normalizationContext: ['groups' => ['user:public']],
+    security: "is_granted('ROLE_USER')",
+)]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['user:public'])]
     private ?int $id = null;
 
     // Nullable : un compte enfant créé et géré par son parent n'a pas d'email
@@ -28,6 +49,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?string $password = null;
 
     #[ORM\Column(length: 50)]
+    #[Groups(['user:public'])]
     private ?string $username = null;
 
     /**
@@ -41,10 +63,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     private ?\DateTimeImmutable $birthDate = null;
 
     #[ORM\Column(length: 255, nullable: true)]
+    #[Groups(['user:public'])]
     private ?string $avatar = null;
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
+    #[Groups(['user:public'])]
     private ?string $bio = null;
+
+    /**
+     * Lien de l'utilisateur connecté avec ce compte, calculé par PublicProfileProvider (non enregistré).
+     *
+     * @var array{isMe: bool, follower: array{status: string, id: ?int}, closeFriend: array{status: string, id: ?int}}|null
+     */
+    #[Groups(['user:profile'])]
+    private ?array $viewerRelationship = null;
 
     // Modération par un admin
     #[ORM\Column(options: ['default' => false])]
@@ -609,6 +641,24 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
                 $sale->setBuyer(null);
             }
         }
+
+        return $this;
+    }
+
+    /**
+     * @return array{isMe: bool, follower: array{status: string, id: ?int}, closeFriend: array{status: string, id: ?int}}|null
+     */
+    public function getViewerRelationship(): ?array
+    {
+        return $this->viewerRelationship;
+    }
+
+    /**
+     * @param array{isMe: bool, follower: array{status: string, id: ?int}, closeFriend: array{status: string, id: ?int}} $viewerRelationship
+     */
+    public function setViewerRelationship(array $viewerRelationship): static
+    {
+        $this->viewerRelationship = $viewerRelationship;
 
         return $this;
     }
