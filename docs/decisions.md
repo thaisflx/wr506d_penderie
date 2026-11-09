@@ -2,6 +2,8 @@
 
 Décisions de conception prises au fil du projet, avec leur justification. Une décision qui change est corrigée ici, avec sa date, plutôt que supprimée.
 
+Voir aussi le [journal d'utilisation de l'IA](journal-ia.md) : ce que l'IA a proposé, ce qui a été retenu et pourquoi.
+
 ## 2026-11-08 · Volet social
 
 Décisions prises à partir du tableau des droits, avant le développement du volet social en trois lots :
