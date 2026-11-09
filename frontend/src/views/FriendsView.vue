@@ -1,11 +1,14 @@
 <script setup>
-import { computed, ref } from 'vue'
+import { computed, ref, watch } from 'vue'
+import { RouterLink } from 'vue-router'
 import { api } from '../api/client'
+import AppIcon from '../components/AppIcon.vue'
 import BottomSheet from '../components/BottomSheet.vue'
 import UserAvatar from '../components/UserAvatar.vue'
 import { useAuthStore } from '../stores/auth'
 
-// Page Amis : demandes reçues (accepter, refuser) et relations en cours (retirer, se désabonner, annuler)
+// Page Amis : demandes reçues (accepter, refuser), relations en cours (retirer, se désabonner, annuler)
+// et recherche d'un compte par pseudo
 const auth = useAuthStore()
 
 const relationships = ref([])
@@ -18,6 +21,33 @@ const busyId = ref(null)
 const confirm = ref(null)
 
 const TYPE_LABELS = { follower: 'Abonnement', close_friend: 'Ami proche' }
+
+// Recherche : lancée 300 ms après la dernière frappe, à partir de 2 caractères (comme l'API)
+const search = ref('')
+const results = ref([])
+const searching = ref(false)
+let searchTimer = null
+
+watch(search, (value) => {
+  clearTimeout(searchTimer)
+  const query = value.trim()
+  if (query.length < 2) {
+    results.value = []
+    searching.value = false
+    return
+  }
+  searching.value = true
+  searchTimer = setTimeout(async () => {
+    try {
+      results.value = await api.list(`/users?username=${encodeURIComponent(query)}`)
+      error.value = ''
+    } catch (e) {
+      error.value = e.message
+    } finally {
+      searching.value = false
+    }
+  }, 300)
+})
 
 async function load() {
   error.value = ''
@@ -98,10 +128,47 @@ function statusLabel(r, mine) {
       <button type="button" role="tab" data-cy="friends-tab-relations" :aria-selected="tab === 'relations'" @click="tab = 'relations'">
         Mes relations
       </button>
+      <button type="button" role="tab" data-cy="friends-tab-search" :aria-selected="tab === 'search'" @click="tab = 'search'">
+        Rechercher
+      </button>
     </div>
 
     <p v-if="error" class="error" role="alert" data-cy="friends-error">{{ error }}</p>
-    <p v-if="loading" class="loading">Chargement…</p>
+    <!-- Recherche par pseudo -->
+    <section v-if="tab === 'search'" class="stack" aria-label="Rechercher un compte">
+      <div role="search">
+        <label for="friends-search" class="visually-hidden">Rechercher un pseudo</label>
+        <span class="input-wrap">
+          <span class="input-icon input-icon--search"><AppIcon name="search" :stroke="2.2" /></span>
+          <input
+            id="friends-search"
+            v-model="search"
+            class="input input--pill input--search"
+            type="search"
+            placeholder="Pseudo d'un ami"
+            autocomplete="off"
+            data-cy="friends-search"
+          />
+        </span>
+      </div>
+      <p v-if="search.trim().length < 2" class="small muted">Tape au moins 2 caractères du pseudo.</p>
+      <p v-else-if="searching" class="loading">Recherche…</p>
+      <ul v-else-if="results.length" class="person-list">
+        <li v-for="user in results" :key="user.id">
+          <RouterLink :to="`/users/${user.id}`" class="person-row person-row--link" data-cy="search-result">
+            <UserAvatar :name="user.username" :src="user.avatar" :size="44" />
+            <span class="person-row-text">
+              <span class="person-row-name" data-cy="search-name">{{ user.username }}</span>
+              <span v-if="user.bio" class="small muted">{{ user.bio }}</span>
+            </span>
+            <AppIcon name="next" :size="16" :stroke="2.2" />
+          </RouterLink>
+        </li>
+      </ul>
+      <p v-else class="small muted" data-cy="search-empty">Aucun compte ne correspond.</p>
+    </section>
+
+    <p v-else-if="loading" class="loading">Chargement…</p>
 
     <!-- Demandes reçues en attente -->
     <section v-else-if="tab === 'requests'" class="stack" aria-label="Demandes reçues">
@@ -109,7 +176,7 @@ function statusLabel(r, mine) {
         <li v-for="r in requests" :key="r.id" class="person-row" data-cy="request-row">
           <UserAvatar :name="r.requester.username" :src="r.requester.avatar" :size="44" />
           <span class="person-row-text">
-            <span class="person-row-name" data-cy="request-name">{{ r.requester.username }}</span>
+            <RouterLink :to="`/users/${r.requester.id}`" class="person-row-name person-row-name--link" data-cy="request-name">{{ r.requester.username }}</RouterLink>
             <span class="chips">
               <span class="chip" :class="r.type === 'close_friend' ? 'chip--wine' : 'chip--glaucous'" data-cy="request-type">
                 {{ TYPE_LABELS[r.type] }}
@@ -139,7 +206,7 @@ function statusLabel(r, mine) {
           <li v-for="{ r, user } in section.people" :key="r.id" class="person-row" data-cy="relation-row">
             <UserAvatar :name="user.username" :src="user.avatar" :size="44" />
             <span class="person-row-text">
-              <span class="person-row-name" data-cy="relation-name">{{ user.username }}</span>
+              <RouterLink :to="`/users/${user.id}`" class="person-row-name person-row-name--link" data-cy="relation-name">{{ user.username }}</RouterLink>
               <span v-if="statusLabel(r, section.key === 'sent')" class="small muted">{{ statusLabel(r, section.key === 'sent') }}</span>
             </span>
             <span class="person-row-actions">

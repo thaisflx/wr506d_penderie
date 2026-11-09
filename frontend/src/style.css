@@ -1110,6 +1110,53 @@ textarea::placeholder {
   gap: 6px;
 }
 
+.person-row-name--link {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.person-row-name--link:hover {
+  color: var(--wine);
+}
+
+.person-row--link {
+  color: var(--ink);
+  text-decoration: none;
+}
+
+@media (hover: hover) {
+  .person-row--link:hover .person-row-name {
+    color: var(--wine);
+  }
+}
+
+/* Profil public d'un autre compte */
+.profile-band-inner--start {
+  justify-content: flex-start;
+}
+
+.profile-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.profile-block {
+  align-self: flex-start;
+  margin-top: 12px;
+}
+
+.link-btn--danger {
+  color: var(--danger);
+}
+
+/* En-tête de page avec bouton retour */
+.page-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
 .children-list {
   display: flex;
   flex-wrap: wrap;

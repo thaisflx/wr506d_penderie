@@ -112,6 +112,9 @@ function logout() {
     </div>
 
     <BottomSheet v-if="settingsOpen" title="Paramètres" @close="settingsOpen = false">
+      <RouterLink to="/blocked" class="btn btn--soft btn--large btn--block" data-cy="settings-blocked">
+        <AppIcon name="lock" /> Comptes bloqués
+      </RouterLink>
       <button type="button" class="btn btn--primary btn--large btn--block" data-cy="logout" @click="logout">
         <AppIcon name="logout" /> Se déconnecter
       </button>
