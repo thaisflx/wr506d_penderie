@@ -13,6 +13,7 @@ use Doctrine\Persistence\ObjectManager;
 
 /**
  * Relations avec Camille : un cas par statut et par type.
+ * Aucun blocage dans les fixtures : les tests bloquent Marc eux-mêmes (entité Block).
  */
 class TestRelationshipFixtures extends Fixture implements DependentFixtureInterface, FixtureGroupInterface
 {
@@ -37,8 +38,8 @@ class TestRelationshipFixtures extends Fixture implements DependentFixtureInterf
         $this->link($manager, $this->user(TestUserFixtures::FOLLOWER), $owner, RelationshipType::Follower, RelationshipStatus::Accepted);
         // Demande en attente : aucun droit, traité comme un random
         $this->link($manager, $this->user(TestUserFixtures::PENDING), $owner, RelationshipType::CloseFriend, RelationshipStatus::Pending);
-        // Bloqué : aucun droit
-        $this->link($manager, $this->user(TestUserFixtures::BLOCKED), $owner, RelationshipType::Follower, RelationshipStatus::Blocked);
+        // Abonné accepté, que les tests bloquent pour vérifier que ses relations disparaissent
+        $this->link($manager, $this->user(TestUserFixtures::TO_BLOCK), $owner, RelationshipType::Follower, RelationshipStatus::Accepted);
         // Relation réciproque : Camille est amie proche de Sophie
         $this->link($manager, $owner, $this->user(TestUserFixtures::CLOSE_FRIEND), RelationshipType::CloseFriend, RelationshipStatus::Accepted);
 

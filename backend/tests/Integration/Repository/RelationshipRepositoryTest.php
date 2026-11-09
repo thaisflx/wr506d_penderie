@@ -12,7 +12,7 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 /**
  * Compteurs calculés sur la base de test (fixtures du groupe test, voir docs/campagne-test.md).
  * Demandes reçues par Camille : Sophie (amie proche + abonnée, acceptées), Théo (abonné, accepté),
- * Nina (amie proche, en attente), Marc (abonné, bloqué).
+ * Nina (amie proche, en attente), Marc (abonné, accepté). Le blocage n'est plus un statut (entité Block).
  */
 final class RelationshipRepositoryTest extends KernelTestCase
 {
@@ -29,13 +29,12 @@ final class RelationshipRepositoryTest extends KernelTestCase
      */
     public static function countProvider(): iterable
     {
-        yield 'Camille : acceptées, tous types' => ['camille', RelationshipStatus::Accepted, null, 3];
-        yield 'Camille : abonnés acceptés' => ['camille', RelationshipStatus::Accepted, RelationshipType::Follower, 2];
+        yield 'Camille : acceptées, tous types' => ['camille', RelationshipStatus::Accepted, null, 4];
+        yield 'Camille : abonnés acceptés' => ['camille', RelationshipStatus::Accepted, RelationshipType::Follower, 3];
         yield 'Camille : amis proches acceptés' => ['camille', RelationshipStatus::Accepted, RelationshipType::CloseFriend, 1];
         yield 'Camille : demandes en attente' => ['camille', RelationshipStatus::Pending, null, 1];
         yield 'Camille : demande d\'ami proche en attente' => ['camille', RelationshipStatus::Pending, RelationshipType::CloseFriend, 1];
         yield 'Camille : aucun abonnement en attente' => ['camille', RelationshipStatus::Pending, RelationshipType::Follower, 0];
-        yield 'Camille : bloqués' => ['camille', RelationshipStatus::Blocked, null, 1];
         // Relation réciproque : Camille est amie proche de Sophie
         yield 'Sophie : amie proche de Camille' => ['sophie', RelationshipStatus::Accepted, RelationshipType::CloseFriend, 1];
         // Les demandes envoyées ne comptent pas : Théo a demandé, il n'a rien reçu

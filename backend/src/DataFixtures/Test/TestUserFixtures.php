@@ -20,7 +20,7 @@ class TestUserFixtures extends Fixture implements FixtureGroupInterface
     public const CLOSE_FRIEND = 'user-close-friend'; // Sophie : amie proche acceptée
     public const FOLLOWER = 'user-follower';     // Théo : abonné accepté
     public const PENDING = 'user-pending';       // Nina : demande en attente
-    public const BLOCKED = 'user-blocked';       // Marc : bloqué
+    public const TO_BLOCK = 'user-to-block';     // Marc : abonné, que les tests bloquent
     public const RANDOM = 'user-random';         // Zoé : aucune relation
     public const SUSPENDED = 'user-suspended';   // Compte suspendu par la modération
     public const ADMIN = 'user-admin';
@@ -49,7 +49,7 @@ class TestUserFixtures extends Fixture implements FixtureGroupInterface
         $this->createUser($manager, self::CLOSE_FRIEND, 'sophie', 'sophie@test.local', '1991-08-02');
         $this->createUser($manager, self::FOLLOWER, 'theo', 'theo@test.local', '1998-12-11');
         $this->createUser($manager, self::PENDING, 'nina', 'nina@test.local', '1995-01-27');
-        $this->createUser($manager, self::BLOCKED, 'marc', 'marc@test.local', '1988-06-09');
+        $this->createUser($manager, self::TO_BLOCK, 'marc', 'marc@test.local', '1988-06-09');
         $this->createUser($manager, self::RANDOM, 'zoe', 'zoe@test.local', '2000-10-05');
 
         $suspended = $this->createUser($manager, self::SUSPENDED, 'suspendu', 'suspendu@test.local', '1990-01-01');
