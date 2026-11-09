@@ -1,10 +1,13 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
+import BlockedView from '../views/BlockedView.vue'
 import DressingView from '../views/DressingView.vue'
+import FriendsView from '../views/FriendsView.vue'
 import HomeView from '../views/HomeView.vue'
 import ItemView from '../views/ItemView.vue'
 import LoginView from '../views/LoginView.vue'
 import ProfileView from '../views/ProfileView.vue'
+import PublicProfileView from '../views/PublicProfileView.vue'
 import RoomView from '../views/RoomView.vue'
 import ScanView from '../views/ScanView.vue'
 
@@ -16,6 +19,9 @@ const router = createRouter({
     { path: '/', name: 'home', component: HomeView, meta: { requiresAuth: true, nav: 'home' } },
     { path: '/rooms/:id', name: 'room', component: RoomView, props: true, meta: { requiresAuth: true, nav: 'home' } },
     { path: '/items/:id', name: 'item', component: ItemView, props: true, meta: { requiresAuth: true, nav: false } },
+    { path: '/friends', name: 'friends', component: FriendsView, meta: { requiresAuth: true, nav: 'friends' } },
+    { path: '/users/:id', name: 'user', component: PublicProfileView, props: true, meta: { requiresAuth: true, nav: 'friends' } },
+    { path: '/blocked', name: 'blocked', component: BlockedView, meta: { requiresAuth: true, nav: 'profile' } },
     { path: '/dressing', name: 'dressing', component: DressingView, meta: { requiresAuth: true, nav: 'dressing' } },
     { path: '/profile', name: 'profile', component: ProfileView, meta: { requiresAuth: true, nav: 'profile' } },
     { path: '/scan', name: 'scan', component: ScanView, meta: { requiresAuth: true, nav: false } },

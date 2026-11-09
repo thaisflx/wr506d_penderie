@@ -44,7 +44,8 @@ abstract class ApiTestCase extends WebTestCase
     protected function request(string $method, string $uri, array|string|null $body = null): array
     {
         $this->client->request($method, $uri, server: [
-            'CONTENT_TYPE' => 'application/ld+json',
+            // PATCH : format merge-patch, comme le front (src/api/client.js)
+            'CONTENT_TYPE' => 'PATCH' === $method ? 'application/merge-patch+json' : 'application/ld+json',
             'HTTP_ACCEPT' => 'application/ld+json',
         ], content: \is_array($body) ? (string) json_encode($body) : $body);
 

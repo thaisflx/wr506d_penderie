@@ -13,7 +13,7 @@
 | Code source | Snyk Code | ⚠️ 1 H · 1 L | ✅ 2 faux positifs, justifiés |
 | Accessibilité | Lighthouse, axe-core, clavier | 🟢 100 / 1 erreur | ✅ |
 | Performance (prod) | Lighthouse | 🟢 96 | |
-| Tests automatisés | PHPUnit, Cypress | ❌ aucun | ✅ 155 PHPUnit + 13 Cypress, 100 % sur le métier (voir [coverage.md](coverage.md)) |
+| Tests automatisés | PHPUnit, Cypress | ❌ aucun | ✅ 253 PHPUnit + 22 Cypress, 100 % sur le métier (voir [coverage.md](coverage.md)) |
 
 ---
 
@@ -190,7 +190,7 @@ Page de connexion en production : **≈ 46 Ko en 4 requêtes** (JS 42,7 Ko compr
 ## 8. Testabilité
 
 - **Tests** : `backend/tests/` (Unit, Integration, Functional) et `frontend/cypress/e2e/`.
-- **Résultat** : 155 tests PHPUnit et 13 tests Cypress, 100 % de couverture sur les classes métier. Détail dans [coverage.md](coverage.md), commandes et captures dans [ci.md](ci.md).
+- **Résultat** : 253 tests PHPUnit et 22 tests Cypress, 100 % de couverture sur les classes métier (19 classes, dont le volet social). Détail dans [coverage.md](coverage.md), commandes et captures dans [ci.md](ci.md).
 - **Anomalies trouvées** : un `catch` « erreur réseau » jamais exécuté dans `ClothingScanner`, et le message « Ce compte est suspendu. » masqué dans `LoginView`. Les deux sont corrigées.
 - **Données** : les fixtures de test (groupe `test` : camille, sophie, theo…) sont séparées des fixtures de démo (groupe `dev` : alice, leo, bob…), dans une base dédiée `penderie_db_test`.
 
@@ -209,8 +209,9 @@ Page de connexion en production : **≈ 46 Ko en 4 requêtes** (JS 42,7 Ko compr
 | ✅ | zlib mis à jour (`apk upgrade`) | Fait |
 | ✅ | Snyk Code : 2 faux positifs analysés et justifiés | Fait |
 | ✅ | Tests PHPUnit et e2e Cypress | Fait |
+| ✅ | Volet social, lot 1 : blocage, demandes d'abonnement et d'ami proche, profil public, recherche, page Amis ([decisions.md](docs/decisions.md)) | Fait |
 | 🔴 | `setAddress(?string)`, `setBirthDate(?…)` | À faire |
-| 🟠 | Centraliser les droits dans des Voters | Prochaine étape |
-| 🟠 | Tests des droits quand les Voters seront écrits | À faire |
+| 🟠 | Centraliser les droits dans des Voters (`OotdVoter`, premier Voter, au lot 2 du volet social) | Prochaine étape |
+| 🟠 | Tests des droits quand les Voters seront écrits (la matrice de `RelationshipChecker` est déjà testée) | À faire |
 | 🟢 | Notification de succès, favicon Penderie (celui de Vite est encore en place) | À faire |
 | 🟢 | Jeton JWT en cookie `HttpOnly` | Piste |

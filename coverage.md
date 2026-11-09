@@ -18,7 +18,7 @@ Les deux tournent dans Docker (conteneurs `penderie_backend`, `penderie_frontend
 | `frontend/cypress/e2e/` | Parcours utilisateur dans le navigateur | Cypress 15.21.1 |
 | `backend/src/DataFixtures/Test/` | Jeu de données du groupe `test`, décrit dans [docs/campagne-test.md](docs/campagne-test.md) | Doctrine Fixtures |
 
-Tous les tests s'appuient sur les mêmes comptes et les mêmes données : Camille (propriétaire), Sacha et Lou (comptes enfants), Sophie (amie proche), Théo (abonné), Nina (demande en attente), Marc (bloqué), Zoé (aucune relation), un compte suspendu et un administrateur.
+Tous les tests s'appuient sur les mêmes comptes et les mêmes données : Camille (propriétaire), Sacha et Lou (comptes enfants), Sophie (amie proche), Théo (abonné), Nina (demande en attente), Marc (abonné, que les tests bloquent), Zoé (aucune relation), un compte suspendu et un administrateur.
 
 ## Périmètre de couverture
 
@@ -26,13 +26,13 @@ La couverture est mesurée avec PCOV sur le **code métier écrit pour l'applica
 
 | Inclus | Rôle |
 |---|---|
-| `src/Service` | Scan IA des vêtements (`ClothingScanner`), stockage des photos (`ItemPhotoStorage`), `ScanFailedException` |
+| `src/Service` | Scan IA des vêtements (`ClothingScanner`), stockage des photos (`ItemPhotoStorage`), `ScanFailedException`, droits entre deux personnes (`RelationshipChecker`) |
 | `src/Security` | `UserChecker` : refus des comptes suspendus |
-| `src/State` | `OwnerProcessor` : le créateur d'un logement ou d'un objet en devient propriétaire |
-| `src/Doctrine` | `CurrentOwnerExtension` : chaque utilisateur ne voit que son contenu |
+| `src/State` | `OwnerProcessor` : le créateur d'un logement ou d'un objet en devient propriétaire ; `PublicProfileProvider`, `RelationshipProcessor`, `BlockProcessor` (volet social) |
+| `src/Doctrine` | `CurrentOwnerExtension` : chaque utilisateur ne voit que son contenu ; `PublicUserExtension`, `RelationshipExtension`, `BlockExtension` (qui peut voir qui, quelle relation, quel blocage) |
 | `src/EventListener` | `ItemPhotoCleaner` : suppression du fichier photo avec l'objet |
 | `src/Controller` | `/api/me`, `/api/scan`, `/api/items/{id}/photo` |
-| `src/Repository/RelationshipRepository.php` | Seul repository qui contient une requête écrite à la main (`countReceived`) |
+| `src/Repository/RelationshipRepository.php`, `src/Repository/BlockRepository.php` | Seuls repositories qui contiennent des requêtes écrites à la main (`countReceived`, `hasAccepted`, `deleteBetween`, `existsBetween`) |
 
 | Exclu | Pourquoi |
 |---|---|
@@ -49,20 +49,22 @@ Le but est de mesurer ce qui peut contenir une erreur de raisonnement : du code 
 | Suite | Tests | Assertions |
 |---|---|---|
 | Unit | 68 | 166 |
-| Integration | 33 | 67 |
-| Functional | 54 | 214 |
-| **PHPUnit, total** | **155** | **447** |
-| Cypress e2e | 13 | — |
+| Integration | 51 | 201 |
+| Functional | 134 | 659 |
+| **PHPUnit, total** | **253** | **1026** |
+| Cypress e2e | 22 | — |
 
 ```
 Code Coverage Report:
  Summary:
-  Classes: 100.00% (11/11)
-  Methods: 100.00% (31/31)
-  Lines:   100.00% (190/190)
+  Classes: 100.00% (19/19)
+  Methods: 100.00% (63/63)
+  Lines:   100.00% (363/363)
 ```
 
-Les 11 classes du périmètre sont à 100 % en lignes et en méthodes. Le rapport HTML est généré dans `backend/var/coverage/` par `make coverage`. Les 13 tests Cypress passent (`make e2e`).
+Les 19 classes du périmètre sont à 100 % en lignes et en méthodes. Le rapport HTML est généré dans `backend/var/coverage/` par `make coverage`. Les 22 tests Cypress passent (`make e2e`).
+
+La première campagne comptait 155 tests PHPUnit, 13 tests Cypress et 11 classes. Le lot 1 du volet social (relations et blocage, voir [docs/decisions.md](docs/decisions.md)) a ajouté 98 tests PHPUnit, 9 tests Cypress et 8 classes.
 
 ## Ce que vérifie chaque fichier de test
 
@@ -134,8 +136,8 @@ Les 11 classes du périmètre sont à 100 % en lignes et en méthodes. Le rappor
 
 ### Integration (`backend/tests/Integration/`)
 
-**`Repository/RelationshipRepositoryTest.php`** (10 tests). `countReceived()` sur la vraie base de test, par statut et par type.
-- Camille : 3 relations acceptées, dont 2 abonnés et 1 amie proche ; 1 demande en attente ; 1 bloqué.
+**`Repository/RelationshipRepositoryTest.php`** (9 tests). `countReceived()` sur la vraie base de test, par statut et par type.
+- Camille : 4 relations acceptées, dont 3 abonnés (Sophie, Théo, Marc) et 1 amie proche ; 1 demande en attente.
 - Relation réciproque : Sophie a reçu une relation « amie proche » de Camille.
 - Les demandes envoyées ne comptent pas : Théo a envoyé, il n'a rien reçu. Zoé n'a aucune relation.
 
@@ -144,6 +146,26 @@ Les 11 classes du périmètre sont à 100 % en lignes et en méthodes. Le rappor
 - Sacha n'obtient que son studio. Théo, abonné sans contenu, et un anonyme n'obtiennent rien.
 - En lecture d'un élément : Théo ne trouve pas la Maison, Sophie ne trouve pas une catégorie du garage, en passant par les jointures pièce > logement.
 - Les ressources hors hiérarchie (les looks) ne sont pas filtrées.
+
+**`Service/RelationshipCheckerTest.php`** (15 tests). Matrice des droits sur le contenu de Camille, d'après les fixtures et [decisions.md](docs/decisions.md) :
+
+| Qui | Situation | abonné | ami proche | enfant | voit | commente |
+|---|---|---|---|---|---|---|
+| Sacha | enfant +18 | ❌ | ❌ | ✅ | ✅ | ✅ |
+| Lou | enfant -18 | ❌ | ❌ | ✅ | ✅ | ❌ |
+| Sophie | amie proche et abonnée | ✅ | ✅ | ❌ | ✅ | ✅ |
+| Théo | abonné | ✅ | ❌ | ❌ | ✅ | ❌ |
+| Nina | demande en attente | ❌ | ❌ | ❌ | ❌ | ❌ |
+| Nina | **amie proche acceptée, sans abonnement** | ✅ | ✅ | ❌ | ✅ | ✅ |
+| Marc | bloqué par Camille, ou qui a bloqué Camille | – | – | – | ❌ | ❌ |
+| Sacha | **enfant bloqué** | ❌ | ❌ | ✅ | ❌ | ❌ |
+| Zoé | inconnue | ❌ | ❌ | ❌ | ❌ | ❌ |
+
+Plus : le propriétaire a tous les droits sur son contenu, le blocage agit dans les deux sens, une relation a un sens (Camille ne suit pas Théo), et un petit-enfant n'a aucun droit chez sa grand-mère.
+
+**`Entity/BlockValidationTest.php`** (3 tests). Blocage valide, se bloquer soi-même refusé, doublon refusé (« Cette personne est déjà bloquée. »).
+
+**`Doctrine/PublicUserExtensionTest.php`** (1 test). Sans utilisateur connecté, l'extension ne renvoie personne, ni en recherche ni en lecture d'un profil (cas que l'API ne peut pas atteindre, puisqu'elle exige un jeton).
 
 ### Functional (`backend/tests/Functional/`)
 
@@ -156,7 +178,7 @@ Les 11 classes du périmètre sont à 100 % en lignes et en méthodes. Le rappor
 
 **`MeTest.php`** (5 tests). `/api/me` de Camille :
 - 14 objets ;
-- **2 abonnés** (Sophie, Théo ; Marc, bloqué, n'est pas compté) ;
+- **3 abonnés** (Sophie, Théo, Marc) ;
 - **1 amie proche** (Sophie ; la demande de Nina est en attente) ;
 - **1 demande en attente** (Nina) ;
 - comptes enfants Sacha (majeur) et Lou (mineur).
@@ -179,6 +201,31 @@ Les compteurs sont vides pour Théo. La relation réciproque est comptée pour S
 
 Dans tous les cas d'erreur, aucun appel n'est envoyé au modèle. Le scanner simulé est un vrai `ClothingScanner` branché sur `MockHttpClient` et `MockClock`.
 
+**`UserSearchTest.php`** (13 tests). `GET /api/users?username=…` :
+- recherche partielle, insensible à la casse et aux espaces ; 400 sous 2 caractères ;
+- jamais trouvés : moi-même, le compte suspendu, Lou (-18, même par sa mère), ni Camille et Marc l'un pour l'autre après un blocage ; Sacha (enfant majeur) est trouvé ;
+- `__` et `%%` ne trouvent personne (caractères génériques échappés) ; 20 résultats par page ;
+- seules les clés `id`, `username`, `avatar`, `bio` sont renvoyées : ni email, ni mot de passe, ni rôles, ni date de naissance, ni parent, ni logements.
+
+**`PublicProfileTest.php`** (18 tests). `GET /api/users/{id}` :
+- mêmes vérifications des données sensibles, y compris dans le texte brut de la réponse (email, date de naissance, adresse de la Maison) ;
+- mon lien avec le compte (`viewerRelationship`) vu par Théo, Sophie, Nina, Zoé et Camille elle-même ;
+- 404 : compte suspendu, Lou vue par un autre que sa mère, identifiant inconnu, blocage dans les deux sens ; 401 sans jeton ;
+- **lecture seule** : POST, PUT, PATCH et DELETE répondent 405, sans rien modifier.
+
+**`RelationshipApiTest.php`** (32 tests). `/api/relationships` :
+- envoi : demandeur et statut imposés par le serveur ; à soi-même, doublon, type manquant → 422 ; destinataire manquant → 400 ; compte inexistant, suspendu, -18 (même pour son parent) ou bloqué dans un sens ou dans l'autre → **404** ;
+- acceptation : par la destinataire seulement (demandeuse → 403, tiers → 404), seule transition `pending` → `accepted` (422 sinon, 400 pour un statut inconnu), type et destinataire non modifiables ;
+- suppression : refuser, annuler, se désabonner, retirer un abonné ; un tiers → 404 ;
+- liste : seulement mes relations, filtres `direction`, `status`, `type` (400 sur une valeur inconnue).
+
+**`BlockApiTest.php`** (17 tests). `/api/blocks` :
+- bloquer Marc supprime son abonnement ; bloquer Sophie supprime ses 3 relations avec Camille, sans toucher aux autres ;
+- bloqueur imposé par le serveur ; se bloquer soi-même → 422 ; parent ↔ enfant (Sacha, Lou, dans les deux sens) → 422 ;
+- compte introuvable, suspendu, -18 d'une autre famille, déjà bloqué ou qui m'a bloqué → 404 ;
+- effets dans les deux sens : recherche vide, profil 404, demande 404 ;
+- liste limitée à mes blocages ; la personne bloquée ne voit ni ne supprime le blocage ; débloquer ne rétablit pas les relations.
+
 **`ItemPhotoTest.php`** (14 tests). `/api/items/{id}/photo` :
 - envoi : fichier écrit et URL enregistrée en base ;
 - suppression : fichier et URL retirés ; une suppression sans photo répond aussi 204 ;
@@ -194,6 +241,7 @@ Dans tous les cas d'erreur, aucun appel n'est envoyé au modèle. Le scanner sim
 | `navigation.cy.js` | 4 | Pièces de la Maison ; Dressing > Penderie (catégories et objets exacts) ; dépliage du Coffre à bijoux ; retour à l'accueil puis Grenier |
 | `add-item.cy.js` | 3 | Ajout d'un « Pull rayé » « Au sale » dans Penderie › Hauts, toujours présent après rechargement ; liste des catégories proposées ; fermeture du formulaire sans ajout |
 | `logout.cy.js` | 2 | Déconnexion depuis les paramètres du profil ; pages protégées inaccessibles ensuite |
+| `friends.cy.js` | 9 | Accepter la demande de Nina depuis la cloche (le badge disparaît) ; la refuser ; bandeau du profil → page Amis ; Zoé cherche et suit Camille puis annule ; Lou absente de la recherche ; profil introuvable ; Camille bloque Marc puis le débloque (abonnement non rétabli) ; Marc ne trouve plus Camille ; blocage de Sacha refusé avec un message |
 
 Les éléments utilisés portent des attributs `data-cy`. Chaque test recharge les fixtures `test` avant de commencer : l'ajout d'objet, joué en premier, ne fausse pas la navigation, qui vérifie la liste exacte des objets.
 
@@ -222,6 +270,31 @@ Une couverture de 100 % prouve que chaque ligne s'exécute, pas que les tests d�
 | `ClothingScanner` : plus de nouvelle tentative sur les erreurs 5xx | Détecté (suite unit en échec) |
 | `LoginView` (e2e) : retour à l'ancien message unique pour toute réponse 401 | Détecté (« refuse un compte suspendu » en échec) |
 
+**Volet social, lot 1** : chaque bug a été introduit seul, puis le fichier restauré à l'identique.
+
+| Classe | Bug introduit | Tests en échec |
+|---|---|---|
+| `RelationshipChecker` | un ami proche n'a plus les droits d'un abonné | 1 |
+| `RelationshipChecker` | le blocage est ignoré pour voir | 3 |
+| `RelationshipChecker` | un enfant -18 peut commenter | 1 |
+| `BlockRepository` | le blocage ne compte que dans un sens | 3 |
+| `PublicUserExtension` | comptes suspendus visibles | 2 |
+| `PublicUserExtension` | `%` et `_` non échappés dans la recherche | 1 |
+| `PublicUserExtension` | comptes -18 visibles par tout le monde | 2 |
+| `PublicUserExtension` | blocage dans un seul sens | 2 |
+| `RelationshipProcessor` | demande à un compte -18 autorisée | 1 |
+| `RelationshipProcessor` | transition `pending` → `accepted` non vérifiée | 1 |
+| `RelationshipExtension` | les relations des autres deviennent visibles | 16 |
+| `Relationship` (sécurité) | la demandeuse peut accepter sa propre demande | 1 |
+| `RelationshipRepository` | relations supprimées dans un seul sens au blocage | 3 |
+| `BlockProcessor` | relations non supprimées au blocage | 3 |
+| `BlockProcessor` | un enfant peut bloquer son parent | 1 |
+| `BlockExtension` | les blocages des autres deviennent visibles | 2 |
+| `Block` (groupes) | le client choisit le bloqueur | 1 |
+| `FriendsView` (e2e) | le badge de la cloche n'est plus rechargé après une action | 1 |
+
+Une mutation n'a pas été détectée : ne plus forcer le statut `pending` à la création d'une demande. Ce n'était pas un trou dans les tests mais une ligne sans effet : le statut ne fait pas partie des champs modifiables à la création, et une relation est `pending` par défaut. La ligne a été retirée ; le test `testRequesterAndStatusAreAlwaysSetByTheServer` vérifie toujours qu'un statut envoyé par le client est ignoré.
+
 ## Choix techniques
 
 - **Horloge injectée.** `ClothingScanner` reçoit `Symfony\Component\Clock\ClockInterface` au lieu d'appeler `microtime()` et `usleep()`. En production, `NativeClock` attend réellement 1,5 s (mesuré : 1,507 s). En test, `MockClock` avance instantanément, ce qui permet de vérifier le budget de 50 s et les pauses sans ralentir la suite.
@@ -231,13 +304,16 @@ Une couverture de 100 % prouve que chaque ligne s'exécute, pas que les tests d�
 - **En-tête `X-Penderie-Env: test`, réservé au Docker local.** Les tests Cypress utilisent l'application lancée sur `http://localhost:5173`. Un `cy.intercept()` ajoute cet en-tête à toutes les requêtes `/api` et `/uploads`. La configuration nginx ([docker/nginx/default.conf](docker/nginx/default.conf)) transmet alors `APP_ENV=test` à Symfony, qui utilise `penderie_db_test`. Sans l'en-tête, rien ne change.
 
   ⚠️ **Cette configuration ne doit jamais être utilisée en production** : n'importe qui pourrait envoyer l'en-tête et passer l'application en environnement de test, en mode debug et sur une autre base. Après les tests Cypress, la base de dev a été comparée à un instantané pris avant : elle est identique.
+- **404 plutôt que 400 pour un compte introuvable (volet social).** Une demande ou un blocage vise un compte par son IRI (`/api/users/{id}`), résolue à travers `PublicUserExtension`. Avec l'option `denormalize_throw_on_relation_not_found: false`, un compte invisible (bloqué, suspendu, -18, inexistant) laisse le champ vide au lieu de déclencher une erreur 400, et le processor répond 404 : rien ne révèle un blocage.
+- **Validation dans le processor.** Le doublon et la demande à soi-même dépendent du demandeur, qui n'est connu qu'une fois l'utilisateur connecté renseigné par le processor : celui-ci lance donc lui-même la validation, après coup.
 - **Journal du kernel en fichier en test.** Sans Monolog, Symfony écrit son journal sur la sortie d'erreur. En test, il est redirigé vers `backend/var/cache/test/test.log`, pour que les 404 attendues n'apparaissent pas comme des erreurs dans le terminal. Les échecs de test restent affichés par PHPUnit.
 
 ## Limites
 
 - **Couverture des lignes seulement.** PCOV mesure les lignes exécutées, pas chaque branche d'une condition. Les cas limites listés plus haut compensent en partie, mais ne garantissent pas que toutes les combinaisons sont testées.
-- **Contrôle par mutation manuel.** Quatre mutations ont été essayées à la main. Un outil comme Infection en essaierait des centaines.
-- **Règles de visibilité pas encore testables.** Les scénarios de [docs/campagne-test.md](docs/campagne-test.md) (Théo voit la Penderie mais pas le carnet perso, Sophie voit le garage, liens de partage…) dépendent des Voters, qui ne sont pas écrits. Pour l'instant, `CurrentOwnerExtension` limite chacun à son propre contenu, et c'est ce comportement provisoire qui est testé.
+- **Contrôle par mutation manuel.** 23 mutations ont été essayées à la main : 4 pour la première campagne, 19 pour le volet social (dont une non détectée, expliquée plus haut). Un outil comme Infection en essaierait des centaines.
+- **Règles de visibilité pas encore testables.** Les scénarios de [docs/campagne-test.md](docs/campagne-test.md) (Théo voit la Penderie mais pas le carnet perso, Sophie voit le garage, liens de partage…) dépendent des Voters, qui ne sont pas écrits. Pour l'instant, `CurrentOwnerExtension` limite chacun à son propre contenu, et c'est ce comportement provisoire qui est testé. `RelationshipChecker` (qui peut voir ou commenter le contenu de qui) est testé, mais ne sera utilisé sur du contenu qu'au lot 2, avec `OotdVoter`.
+- **Front du volet social.** Les écrans Amis, profil public et comptes bloqués sont couverts par `friends.cy.js` uniquement, sans tests unitaires des composants.
 - **Configuration API Platform non couverte.** Les expressions `securityPostDenormalize` (créer une pièce dans le logement d'un autre), les validations des entités et les opérations PATCH/DELETE générées ne sont pas incluses dans la mesure, et ne sont testées qu'indirectement.
 - **OpenRouter jamais appelé.** Si le format de réponse réel change, les tests ne le verront pas.
 - **Front partiellement couvert.** Il n'y a pas de tests unitaires des composants Vue. Les parcours e2e ne passent pas par le scan, l'envoi de photo depuis l'interface, le dressing ni la fiche objet.

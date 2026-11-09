@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures;
 
+use App\Entity\Block;
 use App\Entity\Category;
 use App\Entity\Comment;
 use App\Entity\Place;
@@ -71,8 +72,9 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
         $this->createRelationship($manager, $carla, $alice, RelationshipType::Follower, RelationshipStatus::Accepted);
         // En attente : dan est traité comme un random
         $this->createRelationship($manager, $dan, $alice, RelationshipType::Follower, RelationshipStatus::Pending);
-        $this->createRelationship($manager, $eve, $alice, RelationshipType::Follower, RelationshipStatus::Blocked);
         $this->createRelationship($manager, $alice, $bob, RelationshipType::CloseFriend, RelationshipStatus::Accepted);
+        // alice a bloqué eve : aucune relation entre elles, dans un sens comme dans l'autre
+        $manager->persist((new Block())->setBlocker($alice)->setBlocked($eve));
 
         // --- Logement, pièces et storages d'alice ---
         $place = (new Place())->setName('Appartement Lyon')->setCity('Lyon')->setVisibility(Visibility::Followers);

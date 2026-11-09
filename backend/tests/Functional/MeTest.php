@@ -21,8 +21,8 @@ final class MeTest extends ApiTestCase
         self::assertSame(['ROLE_USER'], $me['roles']);
         self::assertFalse($me['isMinor']);
         self::assertSame(14, $me['itemCount']);
-        // Abonnés acceptés : Sophie et Théo (Marc est bloqué, il ne compte pas)
-        self::assertSame(2, $me['followerCount']);
+        // Abonnés acceptés : Sophie, Théo et Marc
+        self::assertSame(3, $me['followerCount']);
         // Amie proche acceptée : Sophie (la demande de Nina est en attente)
         self::assertSame(1, $me['closeFriendCount']);
         // Demande en attente : Nina

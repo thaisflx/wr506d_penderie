@@ -29,4 +29,31 @@ class RelationshipRepository extends ServiceEntityRepository
 
         return $this->count($criteria);
     }
+
+    /**
+     * Une demande acceptée de requester vers addressee existe-t-elle, pour l'un des types donnés ?
+     *
+     * @param list<RelationshipType> $types
+     */
+    public function hasAccepted(User $requester, User $addressee, array $types): bool
+    {
+        return $this->count([
+            'requester' => $requester,
+            'addressee' => $addressee,
+            'status' => RelationshipStatus::Accepted,
+            'type' => $types,
+        ]) > 0;
+    }
+
+    // Supprime toutes les relations entre deux personnes, dans les deux sens et de tous types (blocage)
+    public function deleteBetween(User $a, User $b): int
+    {
+        return (int) $this->createQueryBuilder('r')
+            ->delete()
+            ->where('(r.requester = :a AND r.addressee = :b) OR (r.requester = :b AND r.addressee = :a)')
+            ->setParameter('a', $a)
+            ->setParameter('b', $b)
+            ->getQuery()
+            ->execute();
+    }
 }
