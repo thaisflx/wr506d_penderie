@@ -44,6 +44,7 @@
             <directory>src/EventListener</directory>
             <directory>src/Controller</directory>
             <file>src/Repository/RelationshipRepository.php</file>
+            <file>src/Repository/BlockRepository.php</file>
         </include>
 
         <deprecationTrigger>

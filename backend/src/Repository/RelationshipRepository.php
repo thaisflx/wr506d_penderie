@@ -29,4 +29,19 @@ class RelationshipRepository extends ServiceEntityRepository
 
         return $this->count($criteria);
     }
+
+    /**
+     * Une demande acceptée de requester vers addressee existe-t-elle, pour l'un des types donnés ?
+     *
+     * @param list<RelationshipType> $types
+     */
+    public function hasAccepted(User $requester, User $addressee, array $types): bool
+    {
+        return $this->count([
+            'requester' => $requester,
+            'addressee' => $addressee,
+            'status' => RelationshipStatus::Accepted,
+            'type' => $types,
+        ]) > 0;
+    }
 }
