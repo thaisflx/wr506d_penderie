@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { RouterLink, useRouter } from 'vue-router'
 import { api } from '../api/client'
 import AppIcon from '../components/AppIcon.vue'
 import BottomSheet from '../components/BottomSheet.vue'
@@ -74,13 +74,14 @@ function logout() {
           </div>
         </div>
 
-        <!-- Bandeau d'information : la page de gestion des demandes viendra avec la page Amis -->
-        <div v-if="user.pendingRequestCount" class="notice tone-orange">
+        <!-- Bandeau des demandes reçues : ouvre la page Amis -->
+        <RouterLink v-if="user.pendingRequestCount" to="/friends" class="notice notice--link tone-orange" data-cy="profile-requests-notice">
           <span class="notice-icon"><AppIcon name="friends" /></span>
           <span class="notice-text">
             {{ user.pendingRequestCount }} demande{{ user.pendingRequestCount > 1 ? 's' : '' }} en attente
           </span>
-        </div>
+          <AppIcon name="next" :size="16" :stroke="2.2" />
+        </RouterLink>
 
         <section v-if="user.children?.length" class="stack stack--tight">
           <h2 class="section-title">Comptes rattachés</h2>

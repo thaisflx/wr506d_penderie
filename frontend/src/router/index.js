@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuthStore } from '../stores/auth'
 import DressingView from '../views/DressingView.vue'
+import FriendsView from '../views/FriendsView.vue'
 import HomeView from '../views/HomeView.vue'
 import ItemView from '../views/ItemView.vue'
 import LoginView from '../views/LoginView.vue'
@@ -16,6 +17,7 @@ const router = createRouter({
     { path: '/', name: 'home', component: HomeView, meta: { requiresAuth: true, nav: 'home' } },
     { path: '/rooms/:id', name: 'room', component: RoomView, props: true, meta: { requiresAuth: true, nav: 'home' } },
     { path: '/items/:id', name: 'item', component: ItemView, props: true, meta: { requiresAuth: true, nav: false } },
+    { path: '/friends', name: 'friends', component: FriendsView, meta: { requiresAuth: true, nav: 'friends' } },
     { path: '/dressing', name: 'dressing', component: DressingView, meta: { requiresAuth: true, nav: 'dressing' } },
     { path: '/profile', name: 'profile', component: ProfileView, meta: { requiresAuth: true, nav: 'profile' } },
     { path: '/scan', name: 'scan', component: ScanView, meta: { requiresAuth: true, nav: false } },

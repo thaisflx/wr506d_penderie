@@ -13,9 +13,9 @@ defineProps({
     <RouterLink to="/" class="nav-link" aria-label="Accueil" title="Accueil" :aria-current="current === 'home' ? 'page' : undefined">
       <NavIcon name="home" :size="29" />
     </RouterLink>
-    <span class="nav-link" role="link" aria-label="Amis (bientôt disponible)" aria-disabled="true" title="Bientôt disponible">
+    <RouterLink to="/friends" class="nav-link" data-cy="nav-friends" aria-label="Amis" title="Amis" :aria-current="current === 'friends' ? 'page' : undefined">
       <NavIcon name="friends" :size="33" />
-    </span>
+    </RouterLink>
     <RouterLink to="/scan" class="nav-scan" aria-label="Scanner" title="Scanner">
       <NavIcon name="scan" :size="84" />
     </RouterLink>

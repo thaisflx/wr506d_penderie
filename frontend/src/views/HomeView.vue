@@ -133,12 +133,13 @@ const createRoom = (payload) =>
         </span>
       </form>
       <RouterLink
-        to="/profile"
+        to="/friends"
         class="icon-btn icon-btn--solid icon-btn--badge"
+        data-cy="home-bell"
         :aria-label="auth.user?.pendingRequestCount ? `Demandes en attente : ${auth.user.pendingRequestCount}` : 'Notifications'"
       >
         <AppIcon name="bell" />
-        <span v-if="auth.user?.pendingRequestCount" class="badge-count">{{ auth.user.pendingRequestCount }}</span>
+        <span v-if="auth.user?.pendingRequestCount" class="badge-count" data-cy="home-bell-count">{{ auth.user.pendingRequestCount }}</span>
       </RouterLink>
     </header>
 

@@ -1044,6 +1044,11 @@ textarea::placeholder {
   border-radius: var(--radius);
 }
 
+.notice--link {
+  color: var(--ink);
+  text-decoration: none;
+}
+
 .notice-icon {
   display: flex;
   flex-shrink: 0;
@@ -1060,6 +1065,49 @@ textarea::placeholder {
   flex-grow: 1;
   font-size: 14px;
   font-weight: 700;
+}
+
+/* Liste de personnes (page Amis) : avatar, pseudo, actions à droite */
+.person-list {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.person-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--line);
+}
+
+.person-row:last-child {
+  border-bottom: 0;
+}
+
+.person-row-text {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+  gap: 4px;
+  min-width: 0;
+}
+
+.person-row-name {
+  overflow: hidden;
+  font-size: 15px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.person-row-actions {
+  display: flex;
+  flex-shrink: 0;
+  gap: 6px;
 }
 
 .children-list {
