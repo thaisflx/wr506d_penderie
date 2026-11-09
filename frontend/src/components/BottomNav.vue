@@ -10,7 +10,7 @@ defineProps({
 
 <template>
   <nav class="bottom-nav" aria-label="Navigation principale">
-    <RouterLink to="/" class="nav-link" aria-label="Accueil" title="Accueil" :aria-current="current === 'home' ? 'page' : undefined">
+    <RouterLink to="/" class="nav-link" data-cy="nav-home" aria-label="Accueil" title="Accueil" :aria-current="current === 'home' ? 'page' : undefined">
       <NavIcon name="home" :size="29" />
     </RouterLink>
     <RouterLink to="/friends" class="nav-link" data-cy="nav-friends" aria-label="Amis" title="Amis" :aria-current="current === 'friends' ? 'page' : undefined">
