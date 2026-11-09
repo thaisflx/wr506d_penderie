@@ -44,4 +44,16 @@ class RelationshipRepository extends ServiceEntityRepository
             'type' => $types,
         ]) > 0;
     }
+
+    // Supprime toutes les relations entre deux personnes, dans les deux sens et de tous types (blocage)
+    public function deleteBetween(User $a, User $b): int
+    {
+        return (int) $this->createQueryBuilder('r')
+            ->delete()
+            ->where('(r.requester = :a AND r.addressee = :b) OR (r.requester = :b AND r.addressee = :a)')
+            ->setParameter('a', $a)
+            ->setParameter('b', $b)
+            ->getQuery()
+            ->execute();
+    }
 }

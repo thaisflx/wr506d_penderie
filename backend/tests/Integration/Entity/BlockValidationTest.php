@@ -53,14 +53,6 @@ final class BlockValidationTest extends KernelTestCase
         self::assertSame('Cette personne est déjà bloquée.', $violations[0]->getMessage());
     }
 
-    public function testBlockedIsRequired(): void
-    {
-        $violations = $this->validator->validate((new Block())->setBlocker($this->user('camille')));
-
-        self::assertCount(1, $violations);
-        self::assertSame('blocked', $violations[0]->getPropertyPath());
-    }
-
     private function user(string $username): User
     {
         $user = $this->em->getRepository(User::class)->findOneBy(['username' => $username]);

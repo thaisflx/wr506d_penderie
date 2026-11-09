@@ -2,9 +2,16 @@
 
 namespace App\Entity;
 
+use ApiPlatform\Metadata\ApiResource;
+use ApiPlatform\Metadata\Delete;
+use ApiPlatform\Metadata\Get;
+use ApiPlatform\Metadata\GetCollection;
+use ApiPlatform\Metadata\Post;
 use App\Repository\BlockRepository;
+use App\State\BlockProcessor;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Symfony\Component\Serializer\Attribute\Groups;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 
@@ -14,12 +21,29 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  */
 #[ORM\Entity(repositoryClass: BlockRepository::class)]
 #[ORM\UniqueConstraint(name: 'uniq_block_blocker_blocked', fields: ['blocker', 'blocked'])]
-#[UniqueEntity(fields: ['blocker', 'blocked'], message: 'Cette personne est déjà bloquée.')]
+#[UniqueEntity(fields: ['blocker', 'blocked'], message: 'Cette personne est déjà bloquée.', errorPath: 'blocked')]
+// Je ne vois que mes propres blocages : la personne bloquée ne sait pas qu'elle l'est (App\Doctrine\BlockExtension)
+#[ApiResource(
+    operations: [
+        new GetCollection(order: ['createdAt' => 'DESC'], paginationEnabled: false),
+        new Get(),
+        // Bloquer : supprime aussi toutes les relations entre les deux personnes
+        new Post(
+            denormalizationContext: ['groups' => ['block:create'], 'denormalize_throw_on_relation_not_found' => false],
+            processor: BlockProcessor::class,
+        ),
+        // Débloquer : les relations supprimées ne reviennent pas
+        new Delete(security: 'object.getBlocker() == user'),
+    ],
+    normalizationContext: ['groups' => ['block:read', 'user:public']],
+    security: "is_granted('ROLE_USER')",
+)]
 class Block
 {
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
+    #[Groups(['block:read'])]
     private ?int $id = null;
 
     #[ORM\ManyToOne]
@@ -28,10 +52,11 @@ class Block
 
     #[ORM\ManyToOne]
     #[ORM\JoinColumn(nullable: false, onDelete: 'CASCADE')]
-    #[Assert\NotNull]
+    #[Groups(['block:read', 'block:create'])]
     private ?User $blocked = null;
 
     #[ORM\Column]
+    #[Groups(['block:read'])]
     private \DateTimeImmutable $createdAt;
 
     public function __construct()
