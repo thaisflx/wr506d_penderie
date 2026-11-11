@@ -22,7 +22,7 @@ const router = createRouter({
     { path: '/friends', name: 'friends', component: FriendsView, meta: { requiresAuth: true, nav: 'friends' } },
     { path: '/users/:id', name: 'user', component: PublicProfileView, props: true, meta: { requiresAuth: true, nav: 'friends' } },
     { path: '/blocked', name: 'blocked', component: BlockedView, meta: { requiresAuth: true, nav: 'profile' } },
-    { path: '/dressing', name: 'dressing', component: DressingView, meta: { requiresAuth: true, nav: 'dressing' } },
+    { path: '/dressing', name: 'dressing', component: DressingView, meta: { requiresAuth: true, nav: 'home' } },
     { path: '/profile', name: 'profile', component: ProfileView, meta: { requiresAuth: true, nav: 'profile' } },
     { path: '/scan', name: 'scan', component: ScanView, meta: { requiresAuth: true, nav: false } },
     { path: '/:pathMatch(.*)*', redirect: '/' },

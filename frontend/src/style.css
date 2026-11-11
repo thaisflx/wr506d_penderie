@@ -625,36 +625,16 @@ textarea::placeholder {
   white-space: nowrap;
 }
 
-.item-tile {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-  padding: 6px 6px 12px;
-  color: var(--ink);
-  text-decoration: none;
-}
-
-.item-tile-name {
-  padding: 0 6px;
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.item-tile-meta {
-  padding: 0 6px;
-  margin-top: -6px;
-}
-
 @media (hover: hover) {
-  .item-tile,
+  .item-card,
   .room-tile,
-  .thumb {
+  .thumb-card {
     transition: transform 0.15s ease;
   }
 
-  .item-tile:hover,
+  .item-card:hover,
   .room-tile:hover,
-  a.thumb:hover {
+  .thumb-card:hover {
     transform: translateY(-2px);
   }
 }
@@ -2055,10 +2035,6 @@ select.input {
   .item-grid {
     grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
     gap: 16px;
-  }
-
-  .item-grid .thumb {
-    height: 150px;
   }
 
   .thumb-grid {

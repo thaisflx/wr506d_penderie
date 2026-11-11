@@ -127,6 +127,14 @@ export function toneFor(index) {
   return TONES[index % TONES.length]
 }
 
+// Couleur de la puce de statut d'un objet : « Au sale » rose pâle, « Prêté » cyan, « En vente » violet pâle.
+// Sur un fond de la même couleur, la puce passe en blanc pour rester visible.
+const STATUS_CHIPS = { in_laundry: 'chip--peach', lent: 'chip--sky', for_sale: 'chip--glaucous', reserved: 'chip--white' }
+export function statusChip(status, tone) {
+  const chip = STATUS_CHIPS[status] ?? 'chip--white'
+  return chip.replace('chip--', 'tone-') === tone ? 'chip--white' : chip
+}
+
 export function plural(count, singular, pluralForm = `${singular}s`) {
   return `${count} ${count > 1 ? pluralForm : singular}`
 }

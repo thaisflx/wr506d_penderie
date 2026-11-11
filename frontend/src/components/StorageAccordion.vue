@@ -2,7 +2,7 @@
 import { computed, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { api } from '../api/client'
-import { ITEM_STATUS_OPTIONS, LEVELS, VISIBILITY_OPTIONS, iri, optionLabel, plural } from '../hierarchy'
+import { ITEM_STATUS_OPTIONS, LEVELS, VISIBILITY_OPTIONS, iri, optionLabel, plural, statusChip } from '../hierarchy'
 import AppIcon from './AppIcon.vue'
 import BottomSheet from './BottomSheet.vue'
 import ItemVisual from './ItemVisual.vue'
@@ -31,14 +31,6 @@ const formError = ref(null)
 
 // Fonds des cartes d'objet sans photo, en alternance (maquette v2)
 const TONES = ['tone-glaucous', 'tone-sky', 'tone-peach']
-
-// Couleur de la puce de statut : « Au sale » rose pâle, « Prêté » cyan, « En vente » violet pâle.
-// Sur un fond de la même couleur, la puce passe en blanc pour rester visible.
-const STATUS_CHIPS = { in_laundry: 'chip--peach', lent: 'chip--sky', for_sale: 'chip--glaucous', reserved: 'chip--white' }
-function statusChip(status, tone) {
-  const chip = STATUS_CHIPS[status] ?? 'chip--white'
-  return chip.replace('chip--', 'tone-') === tone ? 'chip--white' : chip
-}
 
 // Objets du rangement à plat, pour l'alternance des fonds et la grande carte (le premier objet)
 const flatItems = computed(() => categories.value.flatMap((category) => itemsByCategory.value[category.id] ?? []))

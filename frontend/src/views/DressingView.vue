@@ -56,20 +56,20 @@ const visibleItems = computed(() => {
         <input
           id="dressing-search"
           v-model.trim="search"
-          class="input input--pill input--search"
+          class="input input--search"
           type="search"
           placeholder="Où est mon pull bleu ?"
         />
       </span>
     </div>
 
-    <div class="segmented" role="tablist" aria-label="Filtrer les objets">
+    <div class="pills" role="group" aria-label="Filtrer les objets">
       <button
         v-for="option in FILTERS"
         :key="option.value"
         type="button"
-        role="tab"
-        :aria-selected="filter === option.value"
+        class="pill"
+        :aria-pressed="filter === option.value"
         @click="filter = option.value"
       >
         {{ option.label }}
@@ -80,7 +80,7 @@ const visibleItems = computed(() => {
     <p v-else-if="error" class="error" role="alert">{{ error }}</p>
     <template v-else>
       <p class="small muted" aria-live="polite">{{ plural(visibleItems.length, 'objet') }}</p>
-      <div v-if="visibleItems.length" class="item-grid">
+      <div v-if="visibleItems.length" class="item-cards item-grid">
         <ItemTile v-for="(item, index) in visibleItems" :key="item.id" :item="item" :tone="toneFor(index)" />
       </div>
       <div v-else class="empty-state">
