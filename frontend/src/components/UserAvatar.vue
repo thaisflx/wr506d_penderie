@@ -1,18 +1,19 @@
 <script setup>
 import { computed } from 'vue'
 
-// Avatar : la photo si elle existe, sinon l'initiale sur une couleur de la palette, stable selon le pseudo
+// Avatar : la photo si elle existe, sinon l'initiale sur une couleur de la palette, stable selon le pseudo.
+// L'initiale est en minuscule : Mono Scribble l'affiche en capitale grasse (règle de casse de la maquette)
 const props = defineProps({
   name: { type: String, default: '' },
   src: { type: String, default: null },
   size: { type: Number, default: 48 },
 })
 
+// Fonds pastel de la maquette v2, initiale bordeaux (contraste 8:1 à 10:1)
 const PALETTE = [
-  { background: '#EEB4B3', color: '#71103C' },
-  { background: '#7180B9', color: '#FFFFFF' },
+  { background: '#F6D6D5', color: '#71103C' },
+  { background: '#D5F5FA', color: '#71103C' },
   { background: '#DADFF1', color: '#71103C' },
-  { background: '#71103C', color: '#EEB4B3' },
 ]
 
 const colors = computed(() => {
@@ -20,7 +21,7 @@ const colors = computed(() => {
   return PALETTE[hash % PALETTE.length]
 })
 
-const initial = computed(() => (props.name.trim()[0] ?? '?').toUpperCase())
+const initial = computed(() => (props.name.trim()[0] ?? '?').toLowerCase())
 </script>
 
 <template>

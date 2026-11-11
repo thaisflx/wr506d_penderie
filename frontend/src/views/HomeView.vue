@@ -155,6 +155,8 @@ const createRoom = (payload) =>
     <section v-else-if="place" class="stack">
       <div class="section-head">
         <h2 class="section-title" data-cy="place-name">{{ place.name }}</h2>
+        <!-- Le dressing n'a plus d'entrée dans la barre de navigation (remplacée par Looks) -->
+        <RouterLink to="/dressing" class="text-link" data-cy="home-dressing">Mon dressing</RouterLink>
         <button type="button" class="btn btn--soft btn--small" @click="openSheet('switch')">
           Changer <AppIcon name="down" :size="14" :stroke="2.4" />
         </button>

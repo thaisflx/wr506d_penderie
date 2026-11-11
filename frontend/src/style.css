@@ -178,15 +178,38 @@ textarea::placeholder {
   border-radius: 999px;
 }
 
+/* Grand titre de page : initiale manuscrite (majuscule), le reste en capitales grasses (minuscules) */
 .page-title {
-  font-size: 34px;
+  font-size: 44px;
+  line-height: 0.95;
+  color: var(--wine);
+  text-transform: lowercase;
 }
 
+.page-title::first-letter {
+  text-transform: uppercase;
+}
+
+/* Titre de section : tout en minuscules, donc en capitales grasses avec Mono Scribble */
 .section-title {
   font-family: var(--font-display);
-  font-size: 21px;
+  font-size: 22px;
   font-weight: 400;
-  letter-spacing: 0.01em;
+  line-height: 1;
+  text-transform: lowercase;
+}
+
+/* Lien bordeaux souligné (« Mon dressing », « Maison ▾ ») */
+.text-link {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--wine);
+}
+
+@media (hover: hover) {
+  .text-link:hover {
+    color: #4f0a2a;
+  }
 }
 
 .section-head {
@@ -257,6 +280,11 @@ textarea::placeholder {
 .hero-title {
   font-size: 40px;
   color: var(--white);
+  text-transform: lowercase;
+}
+
+.hero-title::first-letter {
+  text-transform: uppercase;
 }
 
 .hero-chips {
@@ -275,10 +303,9 @@ textarea::placeholder {
   width: 44px;
   height: 44px;
   padding: 0;
-  color: var(--wine);
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(10px);
-  border: 0;
+  color: var(--ink);
+  background: var(--white);
+  border: 1.5px solid var(--rose);
   border-radius: 999px;
   cursor: pointer;
   text-decoration: none;
@@ -287,11 +314,12 @@ textarea::placeholder {
 .icon-btn--on-dark {
   color: var(--white);
   background: rgba(255, 255, 255, 0.16);
+  border-color: transparent;
 }
 
+/* Ancienne variante « pleine » : même rendu que le bouton icône par défaut */
 .icon-btn--solid {
   background: var(--white);
-  box-shadow: var(--shadow);
 }
 
 .icon-btn--badge {
@@ -300,19 +328,18 @@ textarea::placeholder {
 
 .badge-count {
   position: absolute;
-  top: -4px;
-  right: -4px;
+  top: -3px;
+  right: -3px;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 5px;
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--ink);
-  background: var(--rose);
-  border: 2px solid var(--bg);
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--white);
+  background: var(--wine);
   border-radius: 999px;
 }
 
@@ -320,18 +347,17 @@ textarea::placeholder {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   height: 44px;
-  padding: 0 18px;
-  font-size: 15px;
+  padding: 0 20px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--wine);
   background: var(--white);
-  border: 0;
+  border: 1.5px solid var(--wine);
   border-radius: 999px;
   cursor: pointer;
   text-decoration: none;
-  box-shadow: var(--shadow);
 }
 
 .btn:disabled {
@@ -339,37 +365,39 @@ textarea::placeholder {
   cursor: default;
 }
 
+/* Bouton principal : pilule bordeaux */
 .btn--primary {
   color: var(--white);
   background: var(--wine);
-  box-shadow: none;
+  border-color: var(--wine);
 }
 
 .btn--large {
-  height: 56px;
-  font-size: 17px;
+  height: 50px;
+  font-size: 15px;
 }
 
 .btn--block {
   width: 100%;
 }
 
+/* Bouton discret (Retirer, Changer…) : pilule blanche bordée de rose, texte foncé */
 .btn--soft {
-  color: var(--wine);
-  background: var(--rose-soft);
-  box-shadow: none;
+  color: var(--ink);
+  background: var(--white);
+  border-color: var(--rose);
 }
 
 .btn--small {
   height: 34px;
-  padding: 0 12px;
-  font-size: 13px;
+  padding: 0 14px;
+  font-size: 12px;
 }
 
 .btn--danger {
   color: var(--danger);
   background: transparent;
-  box-shadow: none;
+  border-color: transparent;
 }
 
 .link-btn {
@@ -401,14 +429,20 @@ textarea::placeholder {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  height: 26px;
-  padding: 0 11px;
-  font-size: 12px;
-  font-weight: 700;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.2;
   white-space: nowrap;
   color: var(--ink);
   background: var(--white);
+  border: 1px solid var(--rose);
   border-radius: 999px;
+}
+
+/* Pastilles colorées : sans bord */
+.chip[class*='chip--'] {
+  border-color: transparent;
 }
 
 .chip--glass {
@@ -432,7 +466,9 @@ textarea::placeholder {
   background: var(--rose);
 }
 
+/* Statut « Au sale » : texte bordeaux sur rose pâle */
 .chip--peach {
+  color: var(--wine);
   background: var(--rose-soft);
 }
 
@@ -447,15 +483,77 @@ textarea::placeholder {
   gap: 6px;
 }
 
+/* Pilules de filtre : rangée qui défile horizontalement, active en violet foncé */
+.pills {
+  display: flex;
+  gap: 8px;
+  margin: 0 -20px;
+  padding: 0 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.pill {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--white);
+  border: 1.5px solid var(--rose);
+  border-radius: 999px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.pill[aria-pressed='true'],
+.pill[aria-current='page'] {
+  font-weight: 700;
+  color: var(--white);
+  background: var(--violet);
+  border-color: var(--violet);
+}
+
 /* ============================================================
    Cartes, statistiques, grilles
    ============================================================ */
 
+/* Carte : fond blanc, bord rose 1.5 px, rayon 24 */
 .card {
   background: var(--white);
-  border: 1px solid var(--line);
+  border: 1.5px solid var(--rose);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
+}
+
+/* Bas festonné d'une zone image : cercles de 9 px répétés sur le bas + rectangle au-dessus */
+.scallop {
+  -webkit-mask:
+    radial-gradient(circle 9px at 50% 50%, #000 97%, #0000 100%) 0 100% / 18px 18px repeat-x,
+    linear-gradient(#000 0 0) 0 0 / 100% calc(100% - 9px) no-repeat;
+  mask:
+    radial-gradient(circle 9px at 50% 50%, #000 97%, #0000 100%) 0 100% / 18px 18px repeat-x,
+    linear-gradient(#000 0 0) 0 0 / 100% calc(100% - 9px) no-repeat;
+}
+
+/* Forme fleur (FlowerShape) en fond, et la même forme en masque pour une photo */
+.flower {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.flower-mask {
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg%3E%3Ccircle cx='50' cy='50' r='34'/%3E%3Ccircle cx='50' cy='18' r='16'/%3E%3Ccircle cx='72.6' cy='27.4' r='16'/%3E%3Ccircle cx='82' cy='50' r='16'/%3E%3Ccircle cx='72.6' cy='72.6' r='16'/%3E%3Ccircle cx='50' cy='82' r='16'/%3E%3Ccircle cx='27.4' cy='72.6' r='16'/%3E%3Ccircle cx='18' cy='50' r='16'/%3E%3Ccircle cx='27.4' cy='27.4' r='16'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg%3E%3Ccircle cx='50' cy='50' r='34'/%3E%3Ccircle cx='50' cy='18' r='16'/%3E%3Ccircle cx='72.6' cy='27.4' r='16'/%3E%3Ccircle cx='82' cy='50' r='16'/%3E%3Ccircle cx='72.6' cy='72.6' r='16'/%3E%3Ccircle cx='50' cy='82' r='16'/%3E%3Ccircle cx='27.4' cy='72.6' r='16'/%3E%3Ccircle cx='18' cy='50' r='16'/%3E%3Ccircle cx='27.4' cy='27.4' r='16'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* Étoiles décoratives (DecoStar) : jamais cliquables */
+.deco-star {
+  pointer-events: none;
 }
 
 .stat-grid {
@@ -682,6 +780,7 @@ textarea::placeholder {
   line-height: 1.05;
   font-weight: 400;
   letter-spacing: 0.01em;
+  text-transform: lowercase;
 }
 
 .room-tile-meta {
@@ -1096,21 +1195,21 @@ textarea::placeholder {
 .person-list {
   display: flex;
   flex-direction: column;
+  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+/* Ligne de personne : carte blanche bordée de rose */
 .person-row {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--line);
-}
-
-.person-row:last-child {
-  border-bottom: 0;
+  padding: 10px 12px;
+  background: var(--white);
+  border: 1.5px solid var(--rose);
+  border-radius: 22px;
 }
 
 .person-row-text {
@@ -1121,11 +1220,14 @@ textarea::placeholder {
   min-width: 0;
 }
 
+/* Pseudo : en minuscules, donc en capitales grasses avec Mono Scribble */
 .person-row-name {
   overflow: hidden;
-  font-size: 15px;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 400;
   text-overflow: ellipsis;
+  text-transform: lowercase;
   white-space: nowrap;
 }
 
@@ -1276,16 +1378,15 @@ textarea::placeholder {
 
 .input {
   width: 100%;
-  height: 52px;
+  height: 48px;
   padding: 0 16px;
   font: inherit;
   font-size: 15px;
   color: var(--ink);
   background: var(--white);
-  border: 0;
-  border-radius: 16px;
+  border: 1.5px solid var(--rose);
+  border-radius: 999px;
   outline: none;
-  box-shadow: var(--shadow);
   appearance: none;
 }
 
@@ -1302,7 +1403,8 @@ textarea::placeholder {
 }
 
 .input:focus-visible {
-  box-shadow: var(--shadow), 0 0 0 3px var(--glaucous);
+  border-color: var(--violet);
+  box-shadow: 0 0 0 3px var(--glaucous-soft);
 }
 
 select.input {
@@ -1321,8 +1423,8 @@ select.input {
   font-size: 14px;
   font-weight: 600;
   background: var(--white);
-  border-radius: 16px;
-  box-shadow: var(--shadow);
+  border: 1.5px solid var(--rose);
+  border-radius: 20px;
   cursor: pointer;
 }
 
@@ -1334,32 +1436,35 @@ select.input {
 
 .segmented {
   display: flex;
+  gap: 6px;
   padding: 4px;
-  background: var(--glaucous-soft);
+  background: var(--white);
+  border: 1.5px solid var(--rose);
   border-radius: 999px;
 }
 
 .segmented button {
-  flex-grow: 1;
-  height: 40px;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--muted);
+  flex: 1;
+  height: 38px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
   background: transparent;
   border: 0;
   border-radius: 999px;
   cursor: pointer;
 }
 
-.segmented button[aria-selected='true'] {
-  color: var(--wine);
-  background: var(--white);
-  box-shadow: 0 2px 10px rgba(113, 16, 60, 0.14);
+.segmented button[aria-selected='true'],
+.segmented button[aria-pressed='true'] {
+  font-weight: 700;
+  color: var(--white);
+  background: var(--violet);
 }
 
 .segmented--large button {
-  height: 44px;
-  font-size: 15px;
+  height: 42px;
+  font-size: 14px;
 }
 
 /* ============================================================
@@ -1374,54 +1479,60 @@ select.input {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   align-items: center;
-  justify-items: center;
-  width: min(448px, calc(100% - 28px));
-  height: 74px;
-  padding: 0 8px;
-  background: var(--wine);
+  width: min(452px, calc(100% - 28px));
+  height: 70px;
+  background: var(--white);
+  border: 1.5px solid var(--rose);
   border-radius: 999px;
-  box-shadow: var(--shadow-strong);
+  box-shadow: 0 10px 30px rgba(113, 16, 60, 0.12);
   transform: translateX(-50%);
 }
 
 .nav-link {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  width: 62px;
-  height: 62px;
-  color: var(--white);
+  gap: 2px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
   text-decoration: none;
-  border-radius: 999px;
 }
 
-/* Page courante : pastille claire, picto bordeaux */
+/* Page courante : bordeaux, 800 */
 .nav-link[aria-current='page'] {
+  font-weight: 800;
   color: var(--wine);
-  background: var(--white);
 }
 
+/* Entrée pas encore disponible (Looks, lot 2) */
 .nav-link[aria-disabled='true'] {
-  opacity: 0.4;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
 @media (hover: hover) {
   a.nav-link:not([aria-current='page']):hover {
-    background: rgba(255, 255, 255, 0.12);
+    color: var(--wine);
   }
 }
 
-/* Bouton Scanner : fleur rose qui dépasse de la barre */
+/* Bouton Scanner : fleur rose et viseur bordeaux, centrée et surélevée au-dessus de la pilule */
 .nav-scan {
+  justify-self: center;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 84px;
-  height: 84px;
-  margin-top: -12px;
-  filter: drop-shadow(0 6px 10px rgba(58, 20, 38, 0.25));
+  width: 76px;
+  height: 76px;
+  margin-top: -30px;
+  filter: drop-shadow(0 6px 10px rgba(113, 16, 60, 0.25));
   transition: transform 0.15s ease;
+}
+
+.nav-scan svg {
+  width: 100%;
+  height: 100%;
 }
 
 .nav-scan-flower {
@@ -1567,7 +1678,8 @@ select.input {
   padding: 28px 20px;
   text-align: center;
   color: var(--muted);
-  border: 2px dashed rgba(113, 16, 60, 0.2);
+  background: var(--white);
+  border: 1.5px dashed var(--rose);
   border-radius: var(--radius);
 }
 
@@ -1775,15 +1887,20 @@ select.input {
     left: 20px;
     grid-template-columns: 1fr;
     grid-auto-rows: auto;
-    row-gap: 12px;
-    width: 78px;
+    row-gap: 18px;
+    width: 82px;
     height: auto;
-    padding: 12px 0;
+    padding: 18px 0;
+    border-radius: 41px;
     transform: translateY(-50%);
   }
 
+  /* Scanner en tête de la barre verticale, un peu plus petit pour tenir dans sa largeur */
   .nav-scan {
-    margin: 0 -6px;
+    order: -1;
+    width: 66px;
+    height: 66px;
+    margin: 0;
   }
 
   .screen,
