@@ -109,3 +109,13 @@ Avant de créer les entités, l'IA m'a posé 5 questions pour cadrer le travail.
 
 ### Bilan
 L'IA m'a fait gagner du temps sur l'analyse du code et la structuration des règles. J'ai rejeté ses propositions quand elles ajoutaient de la complexité (points 7 et 8) ou ne correspondaient pas au besoin (points 1 et 5). Mon tableau des droits reste la référence.
+
+---
+
+## 09/11/2026 : nom de l'application
+
+**Outil :** Claude Code
+
+- **Constat de l'IA :** l'audit avait relevé une incohérence de nom (la meta description affichait « Lendly », le reste « Penderie »). L'IA avait alors tout harmonisé en « Penderie ». En intégrant mon logo, elle a vu qu'il écrivait « LENDLY » et s'est arrêtée pour me demander quoi faire, au lieu de l'intégrer.
+- **Mon choix :** l'application s'appelle **Lendly**. PENDERIE reste le nom du projet scolaire (dépôt, documentation, README).
+- **Pourquoi :** Lendly est le nom de marque, celui de mon logo. Le nom du projet sert au cadre scolaire, pas à l'utilisateur. Les noms techniques (base, clés, en-têtes) gardent « penderie » pour ne rien casser.

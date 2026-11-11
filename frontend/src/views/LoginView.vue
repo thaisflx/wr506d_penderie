@@ -32,7 +32,7 @@ async function submit() {
 <template>
   <main class="auth">
     <section class="auth-brand">
-      <h1 class="display auth-title">Penderie</h1>
+      <h1 class="display auth-title">Lendly</h1>
     </section>
 
     <section class="auth-panel">

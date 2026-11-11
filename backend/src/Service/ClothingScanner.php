@@ -144,7 +144,7 @@ final class ClothingScanner
             'headers' => [
                 'Authorization' => 'Bearer '.$this->apiKey,
                 // En-têtes facultatifs d'identification de l'application auprès d'OpenRouter
-                'X-Title' => 'Penderie',
+                'X-Title' => 'Lendly',
             ],
             'json' => [
                 'model' => $model,

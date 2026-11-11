@@ -64,3 +64,10 @@ Justification : le commentaire est réservé au cercle proche. Un abonné peut r
 | 5 | Pas de compteurs (abonnés, amis proches) sur le profil public dans ce lot. | Profil public minimal : pseudo, avatar, bio et lien avec moi. Les compteurs pourront être ajoutés plus tard. |
 | — | Le profil public n'expose jamais l'email, le mot de passe, les rôles, la date de naissance, le compte parent ni aucune adresse. | Données personnelles : seul le groupe de sérialisation `user:public` (`id`, `username`, `avatar`, `bio`) est utilisé pour un autre utilisateur. |
 | — | Aucun Voter dans ce lot : les règles passent par des expressions `security`, des processors et des extensions Doctrine. `OotdVoter` (lot 2) sera le premier Voter du projet. | Les règles du lot 1 portent sur une seule entité à la fois et s'expriment simplement ; le Voter devient utile avec la visibilité des OOTD. |
+
+## 2026-11-09 · Nom de l'application
+
+| Décision | Justification |
+|---|---|
+| L'application s'appelle **Lendly** : titre de l'onglet, meta description, logo de l'écran de connexion, titre de l'API (`Lendly API`), en-tête envoyé au service d'IA, nom du paquet Composer (`thaisflx/lendly-backend`). | C'est le nom de marque, celui que voit l'utilisateur. Il correspond au logo dessiné pour l'application. |
+| **PENDERIE** reste le nom du projet scolaire (module WR506D) : dépôt, dossiers, documentation, README. Les noms techniques ne changent pas : base `penderie_db`, clé `penderie_token` du navigateur, en-tête `X-Penderie-Env`, comptes de démo `@penderie.test`. | Le nom du projet et celui du produit sont deux choses distinctes. Renommer les noms techniques n'apporterait rien à l'utilisateur et casserait les sessions, les bases et la configuration existantes. |
