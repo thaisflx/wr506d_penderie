@@ -1147,146 +1147,189 @@ textarea::placeholder {
 }
 
 /* ============================================================
-   Fiche objet
+   Fiche objet (maquette v2 : Objet.png)
    ============================================================ */
 
-.item-visual {
-  position: relative;
+.item-page {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 380px;
+  flex-direction: column;
+  gap: 16px;
+  padding: calc(24px + var(--safe-top)) 20px calc(130px + var(--safe-bottom));
 }
 
-.item-visual-bar {
-  position: absolute;
-  top: calc(52px + var(--safe-top));
-  left: 16px;
-  right: 16px;
+.item-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Retour à gauche, modifier à droite */
+.item-bar {
   display: flex;
   justify-content: space-between;
 }
 
-.item-visual-art {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 220px;
-  height: 230px;
-  margin-top: 20px;
-  overflow: hidden;
-  color: var(--wine);
-  border-radius: 24px;
+/* Grande forme fleur : la photo y est découpée, sinon fleur violet pâle et pictogramme */
+.item-flower {
+  position: relative;
+  align-self: center;
+  width: 250px;
+  height: 250px;
 }
 
-.item-visual-art img {
+.item-flower-photo {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-/* Boutons photo sous le visuel de l'objet */
-.item-photo-actions {
+.item-flower-icon {
   position: absolute;
-  bottom: 44px;
-  left: 0;
-  right: 0;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--wine);
+}
+
+.item-star {
+  position: absolute;
+}
+
+.item-star--big {
+  top: 14px;
+  right: -14px;
+}
+
+.item-star--small {
+  top: 44px;
+  right: 2px;
+}
+
+.item-photo-actions {
   display: flex;
   justify-content: center;
   gap: 8px;
 }
 
-.chip--photo {
-  height: 32px;
-  padding: 0 14px;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 700;
-  border: 0;
-  cursor: pointer;
-  box-shadow: 0 4px 14px rgba(42, 10, 24, 0.12);
-}
-
-.chip--photo:disabled {
-  opacity: 0.6;
-  cursor: wait;
-}
-
 .item-photo-error {
-  position: absolute;
-  bottom: 84px;
-  left: 16px;
-  right: 16px;
-  margin: 0;
-  padding: 8px 12px;
-  font-size: 13px;
   text-align: center;
-  color: var(--white);
-  background: var(--wine);
-  border-radius: 12px;
 }
 
 .item-details {
-  position: relative;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  margin-top: -26px;
-  padding: 20px 18px 40px;
-  background: var(--bg);
-  border-radius: 30px 30px 0 0;
 }
 
-.item-heading {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.item-title {
-  font-size: 30px;
-  line-height: 1.02;
-}
-
-.item-subtitle {
-  font-size: 14px;
-}
-
-.visibility-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  padding: 0 4px;
-}
-
-.visibility-row-label {
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.visibility-help {
-  margin-top: -8px;
-  padding: 0 4px;
-}
-
-.breadcrumb-line {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px;
+/* Emplacement : Maison › Dressing › Penderie */
+.item-place {
   font-size: 12px;
-  font-weight: 700;
   color: var(--muted);
 }
 
-.breadcrumb-line a {
-  color: inherit;
+.item-place a {
+  color: var(--muted);
   text-decoration: none;
 }
 
-.breadcrumb-line a:hover {
+.item-place a:hover {
   text-decoration: underline;
+}
+
+.item-title {
+  margin-top: 4px;
+  font-size: 42px;
+}
+
+.item-chips {
+  margin-top: 10px;
+}
+
+.item-chip {
+  padding: 5px 11px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.item-description {
+  margin-top: 10px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* État de l'objet : 5 statuts sur 2 lignes (3 + 2), tous visibles sans défilement */
+.segmented--wrap {
+  flex-wrap: wrap;
+  gap: 4px;
+  border-radius: 24px;
+}
+
+.segmented.segmented--wrap button {
+  flex: 1 0 30%;
+  height: 36px;
+  padding: 0 10px;
+  white-space: nowrap;
+}
+
+/* Infos en grille de 2 colonnes, séparées par un trait rose pâle */
+.item-infos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 16px;
+  margin: 0;
+  padding: 4px 16px;
+  font-size: 13px;
+}
+
+.item-info {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--rose-soft);
+}
+
+.item-info:nth-last-child(-n + 2):nth-child(odd),
+.item-info:last-child {
+  border-bottom: 0;
+}
+
+.item-info dt {
+  color: var(--muted);
+}
+
+.item-info dd {
+  margin: 2px 0 0;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+/* Barre d'action en bas : prêter (principal) et vendre (secondaire) */
+.item-actions {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 4;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  padding: 10px 20px calc(22px + var(--safe-bottom));
+  background: var(--bg);
+  border-top: 1px solid var(--rose-soft);
+}
+
+.item-actions .btn {
+  flex: 1;
+  padding: 0 12px;
+  white-space: nowrap;
+}
+
+.item-actions-soon {
+  flex-basis: 100%;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--muted);
 }
 
 /* ============================================================
@@ -1970,43 +2013,46 @@ select.input {
    ============================================================ */
 
 @media (min-width: 900px) {
+  /* Fiche objet : fleur à gauche (fixe au défilement), détails à droite */
   .item-page {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: start;
-    gap: 48px;
+    column-gap: 48px;
     max-width: calc(var(--page-max) + 64px);
     margin: 0 auto;
-    padding: 40px 32px 64px;
+    padding: 40px 32px 140px;
   }
 
-  .item-visual {
+  .item-hero {
     position: sticky;
     top: 32px;
-    height: min(560px, calc(100vh - 80px));
-    border-radius: 32px;
   }
 
-  .item-visual-bar {
-    top: 16px;
-  }
-
-  .item-visual-art {
-    width: 300px;
-    height: 320px;
-    margin-top: 0;
-  }
-
-  .item-details {
-    margin-top: 0;
-    padding: 24px 0 0;
-    background: transparent;
-    border-radius: 0;
-    gap: 20px;
+  .item-flower {
+    width: 340px;
+    height: 340px;
+    margin-top: 16px;
   }
 
   .item-title {
-    font-size: 44px;
+    font-size: 52px;
+  }
+
+  .item-actions {
+    justify-content: flex-end;
+    padding-right: 32px;
+  }
+
+  .item-actions-soon {
+    flex-basis: auto;
+    align-self: center;
+    margin-right: 8px;
+  }
+
+  .item-actions .btn {
+    flex: none;
+    min-width: 220px;
   }
 
   .auth {
@@ -2199,8 +2245,8 @@ select.input {
 }
 
 .scan-modes button[aria-selected='true'] {
-  color: var(--wine);
-  background: var(--white);
+  color: var(--white);
+  background: var(--violet);
 }
 
 .scan-modes button:disabled {
@@ -2332,6 +2378,7 @@ select.input {
   margin: 0 10px calc(10px + var(--safe-bottom));
   padding: 10px 16px 18px;
   background: var(--bg);
+  border: 1.5px solid var(--rose);
   border-radius: 32px;
 }
 
@@ -2356,8 +2403,8 @@ select.input {
   overflow: hidden;
   color: var(--wine);
   background: var(--white);
+  border: 1.5px solid var(--rose);
   border-radius: 18px;
-  box-shadow: var(--shadow);
 }
 
 .scan-thumb img {
@@ -2377,6 +2424,7 @@ select.input {
 .scan-summary-title {
   font-size: 20px;
   line-height: 1.1;
+  text-transform: lowercase;
 }
 
 .scan-fields-row {
@@ -2387,6 +2435,7 @@ select.input {
 
 .input--area {
   height: auto;
+  border-radius: 20px;
   min-height: 72px;
   padding-top: 14px;
   padding-bottom: 14px;

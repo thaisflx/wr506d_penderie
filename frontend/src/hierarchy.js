@@ -20,7 +20,7 @@ export const ITEM_STATUS_OPTIONS = [
   { value: 'in_laundry', label: 'Au sale' },
   { value: 'reserved', label: 'Réservé' },
   { value: 'lent', label: 'Prêté' },
-  { value: 'for_sale', label: 'À la vente' },
+  { value: 'for_sale', label: 'En vente' },
 ]
 
 export function optionLabel(options, value) {
