@@ -4,6 +4,8 @@ import { RouterLink, useRouter } from 'vue-router'
 import { api } from '../api/client'
 import AppIcon from '../components/AppIcon.vue'
 import BottomSheet from '../components/BottomSheet.vue'
+import DecoStar from '../components/DecoStar.vue'
+import FlowerShape from '../components/FlowerShape.vue'
 import ItemVisual from '../components/ItemVisual.vue'
 import NodeForm from '../components/NodeForm.vue'
 import {
@@ -56,13 +58,46 @@ const visibility = computed(() =>
   item.value ? effectiveVisibility(item.value, [storage.value, room.value, place.value]) : null,
 )
 
-// Informations issues du scan (ou saisies), rangées dans le champ JSON "attributes"
-const ATTRIBUTE_LABELS = { type: 'Type', color: 'Couleur', brand: 'Marque', size: 'Taille', composition: 'Composition' }
-const attributeList = computed(() =>
-  Object.entries(ATTRIBUTE_LABELS)
-    .filter(([key]) => item.value?.attributes?.[key])
-    .map(([key, label]) => ({ key, label, value: item.value.attributes[key] })),
-)
+// Puces sous le titre : catégorie, taille et matière quand elles sont connues
+const chips = computed(() => {
+  if (!item.value) return []
+  const attributes = item.value.attributes ?? {}
+  return [
+    category.value?.name,
+    attributes.size ? `Taille ${attributes.size}` : null,
+    attributes.composition,
+  ].filter(Boolean)
+})
+
+// Informations en grille : champ JSON "attributes" (scan ou saisie), type de catégorie, code-barres, visibilité
+const infos = computed(() => {
+  if (!item.value) return []
+  const attributes = item.value.attributes ?? {}
+  return [
+    { label: 'Marque', value: attributes.brand },
+    { label: 'Couleur', value: attributes.color },
+    { label: 'Type', value: attributes.type ?? optionLabel(CATEGORY_TYPE_OPTIONS, category.value?.type) },
+    { label: 'Code-barres', value: item.value.barcode },
+    { label: 'Visible par', value: visibility.value?.value === 'private' ? 'Moi seul' : visibility.value?.label },
+  ].filter((info) => info.value)
+})
+
+// État : un clic enregistre le nouveau statut (même PATCH que le formulaire « Modifier »)
+const statusSaving = ref(false)
+const statusError = ref('')
+
+async function setStatus(status) {
+  if (status === item.value.status || statusSaving.value) return
+  statusSaving.value = true
+  statusError.value = ''
+  try {
+    item.value = await api.patch(iri('item', props.id), { status })
+  } catch (e) {
+    statusError.value = e.message
+  } finally {
+    statusSaving.value = false
+  }
+}
 
 const backLink = computed(() => (room.value ? `/rooms/${room.value.id}` : '/'))
 
@@ -128,95 +163,91 @@ async function remove() {
 
 <template>
   <div class="item-page">
-    <div class="item-visual tone-glaucous">
-      <div class="item-visual-bar">
+    <div class="item-hero">
+      <div class="item-bar">
         <RouterLink :to="backLink" class="icon-btn" aria-label="Retour">
-          <AppIcon name="back" :stroke="2.6" />
+          <AppIcon name="back" :stroke="2.4" />
         </RouterLink>
         <button v-if="item" type="button" class="icon-btn" aria-label="Modifier l'objet" @click="editing = true; formError = null">
           <AppIcon name="edit" :size="19" />
         </button>
       </div>
-      <div v-if="item" class="item-visual-art">
-        <ItemVisual :item="item" :category-type="category?.type" :size="item.photo ? 220 : 96" />
+
+      <!-- Photo principale dans la forme fleur ; sans photo, fleur colorée et pictogramme -->
+      <div v-if="item" class="item-flower">
+        <img v-if="item.photo" :src="item.photo" :alt="item.name" class="item-flower-photo flower-mask" />
+        <template v-else>
+          <FlowerShape fill="var(--glaucous-soft)" />
+          <span class="item-flower-icon"><ItemVisual :item="item" :category-type="category?.type" :size="96" /></span>
+        </template>
+        <DecoStar class="item-star item-star--big" :size="26" />
+        <DecoStar class="item-star item-star--small" :size="16" color="var(--wine)" />
       </div>
+
       <div v-if="item" class="item-photo-actions">
-        <button type="button" class="chip chip--photo" :disabled="photoBusy" @click="photoInput.click()">
+        <button type="button" class="btn btn--soft btn--small" :disabled="photoBusy" @click="photoInput.click()">
           <AppIcon name="image" :size="14" />
           {{ photoBusy ? 'Envoi…' : item.photo ? 'Changer la photo' : 'Ajouter une photo' }}
         </button>
-        <button
-          v-if="item.photo"
-          type="button"
-          class="chip chip--photo"
-          :disabled="photoBusy"
-          aria-label="Retirer la photo"
-          @click="removePhoto"
-        >
+        <button v-if="item.photo" type="button" class="btn btn--soft btn--small" :disabled="photoBusy" aria-label="Retirer la photo" @click="removePhoto">
           <AppIcon name="trash" :size="14" />
         </button>
         <!-- Sans "capture" : le téléphone propose la galerie ou l'appareil photo -->
         <input ref="photoInput" type="file" accept="image/*,.heic,.heif" hidden @change="onPhotoChosen" />
       </div>
-      <p v-if="photoError" class="item-photo-error" role="alert">{{ photoError }}</p>
+      <p v-if="photoError" class="error item-photo-error" role="alert">{{ photoError }}</p>
     </div>
 
     <main class="item-details">
       <p v-if="loading" class="loading">Chargement…</p>
       <p v-else-if="error" class="error" role="alert">{{ error }}</p>
       <template v-else-if="item">
-        <div class="item-heading">
-          <nav class="breadcrumb-line" aria-label="Emplacement">
-            <RouterLink to="/">{{ place.name }}</RouterLink>
-            <AppIcon name="next" :size="12" :stroke="2.4" />
-            <RouterLink :to="`/rooms/${room.id}`">{{ room.name }}</RouterLink>
-            <AppIcon name="next" :size="12" :stroke="2.4" />
+        <div>
+          <nav class="item-place" aria-label="Emplacement">
+            <RouterLink to="/">{{ place.name }}</RouterLink> ›
+            <RouterLink :to="`/rooms/${room.id}`">{{ room.name }}</RouterLink> ›
             <span>{{ storage.name }}</span>
           </nav>
-          <h1 class="display item-title">{{ item.name }}</h1>
-          <span class="muted item-subtitle">
-            {{ category.name }} · {{ optionLabel(CATEGORY_TYPE_OPTIONS, category.type) }}
-          </span>
+          <h1 class="display page-title item-title">{{ item.name }}</h1>
+          <div v-if="chips.length" class="chips item-chips">
+            <span v-for="chip in chips" :key="chip" class="chip chip--sky item-chip">{{ chip }}</span>
+          </div>
+          <p v-if="item.attributes?.description" class="item-description">{{ item.attributes.description }}</p>
         </div>
 
-        <div class="stat-grid">
-          <div class="card stat">
-            <span class="display stat-value stat-value--text">{{ optionLabel(ITEM_STATUS_OPTIONS, item.status) }}</span>
-            <span class="stat-label">statut</span>
-          </div>
-          <div class="card stat">
-            <span class="display stat-value stat-value--text">{{ category.name }}</span>
-            <span class="stat-label">catégorie</span>
-          </div>
-          <div class="card stat">
-            <span class="display stat-value stat-value--text">{{ item.barcode || '—' }}</span>
-            <span class="stat-label">code-barres</span>
-          </div>
+        <div class="segmented segmented--wrap" role="group" aria-label="État de l'objet">
+          <button
+            v-for="option in ITEM_STATUS_OPTIONS"
+            :key="option.value"
+            type="button"
+            :aria-pressed="item.status === option.value"
+            :disabled="statusSaving"
+            @click="setStatus(option.value)"
+          >
+            {{ option.label }}
+          </button>
         </div>
+        <p v-if="statusError" class="error" role="alert">{{ statusError }}</p>
 
-        <div v-if="attributeList.length || item.attributes?.description" class="card attributes-card">
-          <p v-if="item.attributes?.description" class="attributes-description">{{ item.attributes.description }}</p>
-          <dl v-if="attributeList.length" class="attributes-list">
-            <div v-for="attribute in attributeList" :key="attribute.key">
-              <dt>{{ attribute.label }}</dt>
-              <dd>{{ attribute.value }}</dd>
-            </div>
-          </dl>
-          <p v-if="item.attributes?.scannedWith" class="small muted">Reconnu par l'IA ({{ item.attributes.scannedWith }})</p>
-        </div>
-
-        <div class="visibility-row">
-          <span class="visibility-row-label">Qui peut le voir ?</span>
-          <span class="chip" :class="visibility.value === 'personal' || visibility.value === 'private' ? 'chip--wine' : 'chip--glaucous'">
-            <AppIcon :name="visibility.value === 'personal' || visibility.value === 'private' ? 'lock' : 'eye'" :size="13" />
-            {{ visibility.value === 'private' ? 'Moi seul' : visibility.label }}
-          </span>
-        </div>
-        <p class="small muted visibility-help">
-          Calculé à partir de l'objet et de son rangement, de sa pièce et de son logement : le plus fermé l'emporte.
+        <dl class="card item-infos">
+          <div v-for="info in infos" :key="info.label" class="item-info">
+            <dt>{{ info.label }}</dt>
+            <dd>{{ info.value }}</dd>
+          </div>
+        </dl>
+        <p class="small muted">
+          La visibilité est calculée à partir de l'objet et de son rangement, de sa pièce et de son logement : le plus fermé
+          l'emporte.<template v-if="item.attributes?.scannedWith"> Reconnu par l'IA ({{ item.attributes.scannedWith }}).</template>
         </p>
       </template>
     </main>
+
+    <!-- Prêt et vente : pas encore d'API (entités Sale et Reservation sans endpoint) -->
+    <div v-if="item" class="item-actions">
+      <p class="item-actions-soon">Prêt et vente entre amis : bientôt disponibles</p>
+      <span class="btn btn--primary btn--large" role="button" aria-disabled="true" title="Bientôt disponible">Prêter à un ami</span>
+      <span class="btn btn--large" role="button" aria-disabled="true" title="Bientôt disponible">Vendre à un ami</span>
+    </div>
 
     <BottomSheet v-if="editing" title="Modifier l'objet" @close="editing = false">
       <NodeForm

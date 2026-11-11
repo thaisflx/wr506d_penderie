@@ -13,7 +13,8 @@
 | Code source | Snyk Code | ⚠️ 1 H · 1 L | ✅ 2 faux positifs, justifiés |
 | Accessibilité | Lighthouse, axe-core, clavier | 🟢 100 / 1 erreur | ✅ |
 | Performance (prod) | Lighthouse | 🟢 96 | |
-| Tests automatisés | PHPUnit, Cypress | ❌ aucun | ✅ 253 PHPUnit + 22 Cypress, 100 % sur le métier (voir [coverage.md](coverage.md)) |
+| Tests automatisés | PHPUnit, Cypress | ❌ aucun | ✅ 253 PHPUnit + 24 Cypress, 100 % sur le métier (voir [coverage.md](coverage.md)) |
+| Contrastes (refonte Lendly) | Calcul WCAG 2.1 | | ✅ tous les textes ≥ 4,5:1, logo exempté |
 
 ---
 
@@ -159,7 +160,7 @@ fix available via `npm audit fix`
 
 | Critère | Constat | État |
 |---|---|---|
-| axe-core (WCAG 2.1 AA) | Connexion : 0 erreur. Accueil : titres `h1` → `h3` (niveau sauté) | ✅ Front actuel : plus aucun `h3`. L'accueil (`HomeView`) n'avait pas de `h1` → `h1` « Accueil » ajouté, masqué visuellement (`visually-hidden`). Le scanner (`ScanView`) : « Scanner » passé d'un `span` à un `h1`, même rendu (style calculé et position identiques) |
+| axe-core (WCAG 2.1 AA) | Connexion : 0 erreur. Accueil : titres `h1` → `h3` (niveau sauté) | ✅ Front actuel : plus aucun `h3`. L'accueil (`HomeView`) n'avait pas de `h1` → `h1` ajouté ; depuis la refonte, c'est le titre visible « Bonjour {pseudo} ». Le scanner (`ScanView`) : « Scanner » passé d'un `span` à un `h1`, même rendu (style calculé et position identiques) |
 | Navigation clavier | Tout est atteignable avec Tab, dans un ordre logique | ✅ |
 | Focus visible | Champs et boutons : contour de 2 px. Liens : contour par défaut, plus discret | ⚠️ → `a:focus-visible` ajouté |
 | Messages d'erreur | En français, annoncés (`role="alert"`), sans révéler si l'email existe | ✅ |
@@ -170,27 +171,42 @@ fix available via `npm audit fix`
 
 ## 6. Écoconception
 
-Page de connexion en production : **≈ 46 Ko en 4 requêtes** (JS 42,7 Ko compressé, CSS 2,1 Ko), premier affichage en 1,1 s, aucune police externe ni image.
+Page de connexion en production, mesurée avant la refonte Lendly : **≈ 46 Ko en 4 requêtes** (JS 42,7 Ko compressé, CSS 2,1 Ko), premier affichage en 1,1 s, aucune police externe ni image. La refonte ajoute la police des titres (voir ci-dessous).
 
-**Améliorations :** suppression de `public/icons.svg` (reste du template Vite, jamais utilisé) ; favicon Vite par défaut à remplacer par le logo ; à prévoir pour le scan : photos compressées (WebP) et chargées en `loading="lazy"`.
+**Améliorations :** suppression de `public/icons.svg` (reste du template Vite, jamais utilisé) ; favicon Vite par défaut (9,5 Ko) remplacé par le « Y. » du logo en tracés SVG (1,2 Ko) ; à prévoir pour le scan : photos compressées (WebP) et chargées en `loading="lazy"`.
+
+### Refonte visuelle Lendly (maquette v2)
+
+Référence : [`docs/maquette-v2/`](docs/maquette-v2/README.md) ; décisions dans [decisions.md](docs/decisions.md) (« Refonte visuelle »).
+
+| Point | Constat | État |
+|---|---|---|
+| Police des titres | **Mono Scribble, version démo** (TimelessType, « All Rights Reserved »), sans chiffres : `unicode-range` les fait passer en Bricolage Grotesque 800 (Google Fonts). Usage limité au projet scolaire : la licence n'autorise ni l'usage commercial ni la modification du fichier (pas de sous-ensemble ni de conversion). | ⚠️ licence à acheter avant toute mise en ligne publique |
+| Poids de la police | `MonoScribble.ttf` : **96,6 Ko**, servi **sans compression** par le serveur Vite en développement (nginx ne sert que l'API) ; **≈ 29,7 Ko en gzip**. `font-display: block` pour ne pas afficher un instant la police de secours. | ⚠️ voir plan d'action |
+| Contrastes (WCAG 2.1 AA) | Calculés pour chaque couple texte / fond : blanc sur violet foncé `#5E6CA8` 5,0:1 ; texte indicatif `#7D6F80` sur blanc 4,7:1 ; texte secondaire sur rose pâle 5,0:1 ; tous les autres couples > 6:1. | ✅ |
+| Logo | Texte en Mono Scribble, `role="img"` et `aria-label="Lendly"`. Le rose `#EEB4B3` (1,7:1) est accepté : un logo est exempté du critère de contraste (WCAG 1.4.3). | ✅ exempté |
+| Éléments à venir | Entrée « Looks » de la barre, « Poster mon look », « Prêter / Vendre à un ami » : affichés désactivés (`aria-disabled`, « Bientôt ») tant que l'API n'existe pas. | ✅ |
+| Décor | Étoiles décoratives en `aria-hidden`, sans `pointer-events` ; pas de ligne violette (choix visuel). | ✅ |
+| Photo de démo | `backend/public/uploads/demo/t-shirt-blanc.jpg` (14 Ko), illustration générée par script pour les fixtures `dev`. | ✅ |
 
 ---
 
 ## 7. Expérience utilisateur (UX)
 
 - ✅ États de chargement, bouton désactivé pendant l'envoi
-- ✅ Fil d'Ariane (logement › pièce › rangement) sur la fiche objet (`ItemView`) seulement
+- ✅ Fil d'Ariane sur la page pièce (« Maison / Dressing ») et sur la fiche objet (« Maison › Dressing › Penderie »)
 - ✅ Suppression en deux temps : le formulaire avertit de ce qui sera supprimé (« Tous ses rangements et tous les objets qu'ils contiennent seront supprimés. ») et demande « Oui, supprimer »
 - ✅ Erreurs de validation affichées sous le champ concerné, message d'invitation quand une liste est vide
 - ⚠️ Pas de confirmation après une création ou une modification
-- ✅ Couleurs de la DA appliquées (bordeaux `#71103c`, cyan, glauque dans `style.css`)
+- ✅ Charte Lendly (maquette v2) appliquée à tous les écrans : variables de couleur dans `style.css`, pilules, cartes festonnées, forme fleur, barre de navigation flottante
+- ✅ Statut d'un objet modifiable en un clic depuis la fiche (pilules d'état, testé par `item.cy.js`)
 
 ---
 
 ## 8. Testabilité
 
 - **Tests** : `backend/tests/` (Unit, Integration, Functional) et `frontend/cypress/e2e/`.
-- **Résultat** : 253 tests PHPUnit et 22 tests Cypress, 100 % de couverture sur les classes métier (19 classes, dont le volet social). Détail dans [coverage.md](coverage.md), commandes et captures dans [ci.md](ci.md).
+- **Résultat** : 253 tests PHPUnit et 24 tests Cypress, 100 % de couverture sur les classes métier (19 classes, dont le volet social). Détail dans [coverage.md](coverage.md), commandes et captures dans [ci.md](ci.md).
 - **Anomalies trouvées** : un `catch` « erreur réseau » jamais exécuté dans `ClothingScanner`, et le message « Ce compte est suspendu. » masqué dans `LoginView`. Les deux sont corrigées.
 - **Données** : les fixtures de test (groupe `test` : camille, sophie, theo…) sont séparées des fixtures de démo (groupe `dev` : alice, leo, bob…), dans une base dédiée `penderie_db_test`.
 
@@ -204,7 +220,8 @@ Page de connexion en production : **≈ 46 Ko en 4 requêtes** (JS 42,7 Ko compr
 | ✅ | `npm audit fix`, `composer.json` complété | Fait |
 | ✅ | Makefile (`lint`, `phpstan`, `audit`, `quality`, puis `test`, `coverage`, `e2e`) | Fait |
 | ✅ | `:focus-visible` sur tous les éléments, plus de niveau de titre sauté, `h1` sur l'accueil et le scanner | Fait |
-| ✅ | Meta description, `robots.txt`, `public/icons.svg` supprimé, nom « Penderie » partout | Fait |
+| ✅ | Meta description, `robots.txt`, `public/icons.svg` supprimé, nom de l'application Lendly harmonisé | Fait |
+| ✅ | Refonte visuelle Lendly d'après la maquette v2 : police, palette, composants, tous les écrans, favicon « Y. » | Fait |
 | ✅ | Image Docker passée en Alpine, Composer fixé en version 2 (Snyk Container) | Fait |
 | ✅ | zlib mis à jour (`apk upgrade`) | Fait |
 | ✅ | Snyk Code : 2 faux positifs analysés et justifiés | Fait |
@@ -213,5 +230,8 @@ Page de connexion en production : **≈ 46 Ko en 4 requêtes** (JS 42,7 Ko compr
 | 🔴 | `setAddress(?string)`, `setBirthDate(?…)` | À faire |
 | 🟠 | Centraliser les droits dans des Voters (`OotdVoter`, premier Voter, au lot 2 du volet social) | Prochaine étape |
 | 🟠 | Tests des droits quand les Voters seront écrits (la matrice de `RelationshipChecker` est déjà testée) | À faire |
-| 🟢 | Notification de succès, favicon Penderie (celui de Vite est encore en place) | À faire |
+| 🟠 | Lot 2 du volet social : écran « Looks » (`/feed`, entrée de la barre aujourd'hui désactivée) et « Poster mon look » | Prochaine étape |
+| 🟢 | Notification de succès | À faire |
+| 🟢 | Police des titres en woff2 sous-ensemblé (≈ 20 Ko au lieu de 96 Ko) après achat de la licence | Piste |
+| 🟢 | Invitation d'amis par lien (« comme Duolingo », brief) : carte « Invite tes proches » de la maquette, non affichée faute d'API | Piste |
 | 🟢 | Jeton JWT en cookie `HttpOnly` | Piste |

@@ -1,8 +1,8 @@
-/* Charte graphique Penderie (d'après les maquettes mobiles), adaptée tablette et ordinateur.
+/* Charte graphique Lendly (maquette v2, docs/maquette-v2), mobile d'abord, adaptée tablette et ordinateur.
    Paliers : mobile par défaut, tablette à partir de 700px, ordinateur à partir de 1024px. */
 :root {
-  /* Palette : fond blanc, cyan clair, rose coton, bordeaux, glauque */
-  --bg: #ffffff;
+  /* Palette (maquette v2) */
+  --bg: #fff8f6;
   --white: #ffffff;
   --cyan: #d5f5fa;
   --rose: #eeb4b3;
@@ -10,9 +10,12 @@
   --wine: #71103c;
   --glaucous: #7180b9;
   --glaucous-soft: #dadff1;
+  /* Violet foncé : filtre ou onglet actif, texte blanc (contraste 5:1) */
+  --violet: #5e6ca8;
   --ink: #2a0a18;
   --muted: #66566a;
-  --placeholder: #a397a6;
+  /* Texte indicatif des champs : contraste 4.5:1 sur blanc */
+  --placeholder: #7d6f80;
   --line: #ebe6ee;
   --wine-soft: rgba(113, 16, 60, 0.07);
   --danger: #b3261e;
@@ -27,8 +30,9 @@
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 
   --font-body: 'Figtree', system-ui, sans-serif;
-  /* Titres : Defante (police locale, un seul style) */
-  --font-display: 'Defante', 'Figtree', system-ui, sans-serif;
+  /* Titres : Mono Scribble. Une MAJUSCULE donne une lettre manuscrite, une minuscule une capitale grasse.
+     La démo n'a pas de chiffres : ils tombent sur Bricolage Grotesque grâce à unicode-range. */
+  --font-display: 'Mono Scribble', 'Bricolage Grotesque', sans-serif;
 
   font: 15px/1.45 var(--font-body);
   color: var(--ink);
@@ -38,9 +42,12 @@
 }
 
 @font-face {
-  font-family: 'Defante';
-  src: url('./assets/fonts/defante.otf') format('opentype');
-  font-display: swap;
+  font-family: 'Mono Scribble';
+  src: url('./assets/fonts/MonoScribble.ttf') format('truetype');
+  /* Sans les chiffres (U+0030-0039) : la démo affiche un logo à leur place */
+  unicode-range: U+0020-002F, U+003A-007E, U+00A0-017F;
+  /* block : évite d'afficher un instant les minuscules de la police de secours */
+  font-display: block;
 }
 
 *,
@@ -141,6 +148,24 @@ textarea::placeholder {
   line-height: 1.05;
 }
 
+/* Logo Lendly en texte (AppLogo) */
+.app-logo {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.app-logo-rose {
+  color: var(--rose);
+}
+
+.app-logo-wine {
+  color: var(--wine);
+}
+
 /* Avatar sans photo : initiale sur une pastille de couleur */
 .avatar-initial {
   display: inline-flex;
@@ -153,15 +178,38 @@ textarea::placeholder {
   border-radius: 999px;
 }
 
+/* Grand titre de page : initiale manuscrite (majuscule), le reste en capitales grasses (minuscules) */
 .page-title {
-  font-size: 34px;
+  font-size: 44px;
+  line-height: 0.95;
+  color: var(--wine);
+  text-transform: lowercase;
 }
 
+.page-title::first-letter {
+  text-transform: uppercase;
+}
+
+/* Titre de section : tout en minuscules, donc en capitales grasses avec Mono Scribble */
 .section-title {
   font-family: var(--font-display);
-  font-size: 21px;
+  font-size: 22px;
   font-weight: 400;
-  letter-spacing: 0.01em;
+  line-height: 1;
+  text-transform: lowercase;
+}
+
+/* Lien bordeaux souligné (« Mon dressing », « Maison ▾ ») */
+.text-link {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--wine);
+}
+
+@media (hover: hover) {
+  .text-link:hover {
+    color: #4f0a2a;
+  }
 }
 
 .section-head {
@@ -186,59 +234,6 @@ textarea::placeholder {
 }
 
 /* ============================================================
-   En-tête bordeaux
-   ============================================================ */
-
-.hero {
-  position: relative;
-  padding: calc(52px + var(--safe-top)) 18px 20px;
-  background: var(--wine);
-  color: var(--white);
-  border-radius: 0 0 32px 32px;
-}
-
-.hero-inner {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  width: 100%;
-  max-width: var(--page-max);
-  margin: 0 auto;
-}
-
-.hero-bar {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.hero-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.hero-heading {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.hero-eyebrow {
-  font-size: 13px;
-  color: var(--white);
-  opacity: 0.8;
-}
-
-.hero-title {
-  font-size: 40px;
-  color: var(--white);
-}
-
-.hero-chips {
-  margin-top: 6px;
-}
-
-/* ============================================================
    Boutons
    ============================================================ */
 
@@ -250,10 +245,9 @@ textarea::placeholder {
   width: 44px;
   height: 44px;
   padding: 0;
-  color: var(--wine);
-  background: rgba(255, 255, 255, 0.72);
-  backdrop-filter: blur(10px);
-  border: 0;
+  color: var(--ink);
+  background: var(--white);
+  border: 1.5px solid var(--rose);
   border-radius: 999px;
   cursor: pointer;
   text-decoration: none;
@@ -262,11 +256,12 @@ textarea::placeholder {
 .icon-btn--on-dark {
   color: var(--white);
   background: rgba(255, 255, 255, 0.16);
+  border-color: transparent;
 }
 
+/* Ancienne variante « pleine » : même rendu que le bouton icône par défaut */
 .icon-btn--solid {
   background: var(--white);
-  box-shadow: var(--shadow);
 }
 
 .icon-btn--badge {
@@ -275,19 +270,18 @@ textarea::placeholder {
 
 .badge-count {
   position: absolute;
-  top: -4px;
-  right: -4px;
+  top: -3px;
+  right: -3px;
   display: flex;
   align-items: center;
   justify-content: center;
-  min-width: 20px;
-  height: 20px;
-  padding: 0 5px;
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--ink);
-  background: var(--rose);
-  border: 2px solid var(--bg);
+  min-width: 18px;
+  height: 18px;
+  padding: 0 4px;
+  font-size: 11px;
+  font-weight: 800;
+  color: var(--white);
+  background: var(--wine);
   border-radius: 999px;
 }
 
@@ -295,18 +289,17 @@ textarea::placeholder {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 8px;
+  gap: 6px;
   height: 44px;
-  padding: 0 18px;
-  font-size: 15px;
+  padding: 0 20px;
+  font-size: 14px;
   font-weight: 700;
   color: var(--wine);
   background: var(--white);
-  border: 0;
+  border: 1.5px solid var(--wine);
   border-radius: 999px;
   cursor: pointer;
   text-decoration: none;
-  box-shadow: var(--shadow);
 }
 
 .btn:disabled {
@@ -314,37 +307,39 @@ textarea::placeholder {
   cursor: default;
 }
 
+/* Bouton principal : pilule bordeaux */
 .btn--primary {
   color: var(--white);
   background: var(--wine);
-  box-shadow: none;
+  border-color: var(--wine);
 }
 
 .btn--large {
-  height: 56px;
-  font-size: 17px;
+  height: 50px;
+  font-size: 15px;
 }
 
 .btn--block {
   width: 100%;
 }
 
+/* Bouton discret (Retirer, Changer…) : pilule blanche bordée de rose, texte foncé */
 .btn--soft {
-  color: var(--wine);
-  background: var(--rose-soft);
-  box-shadow: none;
+  color: var(--ink);
+  background: var(--white);
+  border-color: var(--rose);
 }
 
 .btn--small {
   height: 34px;
-  padding: 0 12px;
-  font-size: 13px;
+  padding: 0 14px;
+  font-size: 12px;
 }
 
 .btn--danger {
   color: var(--danger);
   background: transparent;
-  box-shadow: none;
+  border-color: transparent;
 }
 
 .link-btn {
@@ -376,14 +371,20 @@ textarea::placeholder {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  height: 26px;
-  padding: 0 11px;
-  font-size: 12px;
-  font-weight: 700;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.2;
   white-space: nowrap;
   color: var(--ink);
   background: var(--white);
+  border: 1px solid var(--rose);
   border-radius: 999px;
+}
+
+/* Pastilles colorées : sans bord */
+.chip[class*='chip--'] {
+  border-color: transparent;
 }
 
 .chip--glass {
@@ -407,8 +408,14 @@ textarea::placeholder {
   background: var(--rose);
 }
 
+/* Statut « Au sale » : texte bordeaux sur rose pâle */
 .chip--peach {
+  color: var(--wine);
   background: var(--rose-soft);
+}
+
+.chip--white {
+  background: var(--white);
 }
 
 .chip--wine {
@@ -422,15 +429,77 @@ textarea::placeholder {
   gap: 6px;
 }
 
+/* Pilules de filtre : rangée qui défile horizontalement, active en violet foncé */
+.pills {
+  display: flex;
+  gap: 8px;
+  margin: 0 -20px;
+  padding: 0 20px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.pill {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 36px;
+  padding: 0 16px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
+  background: var(--white);
+  border: 1.5px solid var(--rose);
+  border-radius: 999px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.pill[aria-pressed='true'],
+.pill[aria-current='page'] {
+  font-weight: 700;
+  color: var(--white);
+  background: var(--violet);
+  border-color: var(--violet);
+}
+
 /* ============================================================
    Cartes, statistiques, grilles
    ============================================================ */
 
+/* Carte : fond blanc, bord rose 1.5 px, rayon 24 */
 .card {
   background: var(--white);
-  border: 1px solid var(--line);
+  border: 1.5px solid var(--rose);
   border-radius: var(--radius);
-  box-shadow: var(--shadow);
+}
+
+/* Bas festonné d'une zone image : cercles de 9 px répétés sur le bas + rectangle au-dessus */
+.scallop {
+  -webkit-mask:
+    radial-gradient(circle 9px at 50% 50%, #000 97%, #0000 100%) 0 100% / 18px 18px repeat-x,
+    linear-gradient(#000 0 0) 0 0 / 100% calc(100% - 9px) no-repeat;
+  mask:
+    radial-gradient(circle 9px at 50% 50%, #000 97%, #0000 100%) 0 100% / 18px 18px repeat-x,
+    linear-gradient(#000 0 0) 0 0 / 100% calc(100% - 9px) no-repeat;
+}
+
+/* Forme fleur (FlowerShape) en fond, et la même forme en masque pour une photo */
+.flower {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.flower-mask {
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg%3E%3Ccircle cx='50' cy='50' r='34'/%3E%3Ccircle cx='50' cy='18' r='16'/%3E%3Ccircle cx='72.6' cy='27.4' r='16'/%3E%3Ccircle cx='82' cy='50' r='16'/%3E%3Ccircle cx='72.6' cy='72.6' r='16'/%3E%3Ccircle cx='50' cy='82' r='16'/%3E%3Ccircle cx='27.4' cy='72.6' r='16'/%3E%3Ccircle cx='18' cy='50' r='16'/%3E%3Ccircle cx='27.4' cy='27.4' r='16'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
+  mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cg%3E%3Ccircle cx='50' cy='50' r='34'/%3E%3Ccircle cx='50' cy='18' r='16'/%3E%3Ccircle cx='72.6' cy='27.4' r='16'/%3E%3Ccircle cx='82' cy='50' r='16'/%3E%3Ccircle cx='72.6' cy='72.6' r='16'/%3E%3Ccircle cx='50' cy='82' r='16'/%3E%3Ccircle cx='27.4' cy='72.6' r='16'/%3E%3Ccircle cx='18' cy='50' r='16'/%3E%3Ccircle cx='27.4' cy='27.4' r='16'/%3E%3C/g%3E%3C/svg%3E") center / contain no-repeat;
+}
+
+/* Étoiles décoratives (DecoStar) : jamais cliquables */
+.deco-star {
+  pointer-events: none;
 }
 
 .stat-grid {
@@ -467,7 +536,10 @@ textarea::placeholder {
 }
 
 .stat-number {
-  font-size: 22px;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 1;
 }
 
 .stat-label {
@@ -530,220 +602,353 @@ textarea::placeholder {
   object-fit: cover;
 }
 
-.item-tile {
+/* Vignette compacte (profil) : image festonnée et nom dessous */
+.thumb-card {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  padding: 6px 6px 12px;
+  min-width: 0;
   color: var(--ink);
   text-decoration: none;
 }
 
-.item-tile-name {
-  padding: 0 6px;
-  font-size: 14px;
-  font-weight: 700;
+.thumb-card .thumb {
+  height: 132px;
+  border-radius: 18px 18px 0 0;
 }
 
-.item-tile-meta {
-  padding: 0 6px;
-  margin-top: -6px;
+.thumb-card-name {
+  margin-top: 6px;
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 @media (hover: hover) {
-  .item-tile,
+  .item-card,
   .room-tile,
-  .thumb {
+  .thumb-card {
     transition: transform 0.15s ease;
   }
 
-  .item-tile:hover,
+  .item-card:hover,
   .room-tile:hover,
-  a.thumb:hover {
+  .thumb-card:hover {
     transform: translateY(-2px);
   }
 }
 
 /* ============================================================
-   Accueil
+   Accueil (maquette v2 : Accueil.png)
    ============================================================ */
 
-/* Mobile : avatar, salutation et cloche, puis la recherche sur toute la largeur */
+.home {
+  gap: 18px;
+  padding-top: calc(24px + var(--safe-top));
+}
+
+/* Logo à gauche, cloche et avatar à droite */
 .home-header {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
-  grid-template-areas:
-    'avatar greeting bell'
-    'search search search';
+  display: flex;
   align-items: center;
-  column-gap: 12px;
-  row-gap: 22px;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.home-logo {
+  font-size: 34px;
+}
+
+.home-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
 }
 
 .home-avatar {
-  grid-area: avatar;
   display: flex;
   text-decoration: none;
+  border-radius: 999px;
 }
 
-.home-greeting {
-  grid-area: greeting;
+/* Largeur du titre seulement : l'étoile reste accrochée au titre sur grand écran */
+.home-hello {
+  position: relative;
+  align-self: flex-start;
+  padding-right: 34px;
+}
+
+/* Le pseudo garde son initiale manuscrite, comme un prénom */
+.home-name {
+  display: inline-block;
+}
+
+.home-name::first-letter {
+  text-transform: uppercase;
+}
+
+.home-star {
+  position: absolute;
+  top: -6px;
+  right: 0;
+}
+
+.home-tagline {
+  max-width: 260px;
+  margin-top: 8px;
+  font-size: 14px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+/* Carte « look du jour » : fleur à gauche, texte et bouton à droite */
+.look-card {
+  max-width: 640px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px;
+  border-radius: 28px;
+}
+
+.look-card-visual {
+  position: relative;
+  flex: none;
+  width: 118px;
+  height: 118px;
+  color: var(--wine);
+}
+
+.look-card-icon {
+  position: absolute;
+  top: 31px;
+  left: 31px;
+}
+
+.look-card-star {
+  position: absolute;
+  right: 0;
+  bottom: 6px;
+}
+
+.look-card-text {
   display: flex;
   flex-direction: column;
+  gap: 8px;
+  min-width: 0;
+}
+
+.look-card-desc {
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+.look-card .btn {
+  align-self: flex-start;
+  height: 36px;
+  padding: 0 16px;
   font-size: 13px;
 }
 
-.home-name {
-  font-size: 22px;
-  line-height: 1.1;
+/* Bouton ou lien pas encore disponible (lot 2) */
+[aria-disabled='true'].btn {
+  opacity: 0.55;
+  cursor: not-allowed;
 }
 
-.home-search {
-  grid-area: search;
+.home-rooms-title {
+  font-size: 26px;
 }
 
-.home-header .icon-btn--badge {
-  grid-area: bell;
+.home .section-head {
+  align-items: baseline;
 }
 
+.home-rooms-links {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+}
+
+/* Bouton sans apparence (« Maison ▾ ») */
+.link-reset {
+  padding: 0;
+  font-family: inherit;
+  text-decoration: underline;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+/* Carte de pièce : zone image festonnée colorée, puce de visibilité, nom et compteurs */
 .room-tile {
   display: flex;
   flex-direction: column;
-  justify-content: space-between;
-  gap: 10px;
-  min-height: 128px;
-  padding: 16px;
+  overflow: hidden;
+  padding: 0;
+  font: inherit;
+  text-align: left;
   color: var(--ink);
   text-decoration: none;
-  background: var(--white);
-  border: 1px solid var(--line);
-  border-radius: var(--radius);
-  box-shadow: var(--shadow);
+  cursor: pointer;
 }
 
-.room-tile--featured {
-  color: var(--white);
-  background: var(--wine);
-  border-color: var(--wine);
-  box-shadow: none;
-}
-
-.room-tile-icon {
+.room-tile-media {
+  position: relative;
   display: flex;
-  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: 40px;
-  height: 40px;
+  height: 104px;
   color: var(--wine);
-  background: var(--rose-soft);
-  border-radius: 14px;
 }
 
-.room-tile--featured .room-tile-icon {
-  color: var(--white);
-  background: rgba(255, 255, 255, 0.16);
+.room-tile-chip {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 3px 9px;
+  font-weight: 700;
 }
 
 .room-tile-text {
   display: flex;
   flex-direction: column;
   gap: 2px;
+  padding: 8px 12px 12px;
 }
 
 .room-tile-name {
   font-family: var(--font-display);
-  font-size: 18px;
-  line-height: 1.05;
+  font-size: 17px;
   font-weight: 400;
-  letter-spacing: 0.01em;
+  line-height: 1.05;
+  text-transform: lowercase;
 }
 
 .room-tile-meta {
   font-size: 12px;
-  opacity: 0.7;
+  color: var(--muted);
 }
 
+/* Ajouter une pièce : même carte, zone image sur le fond de la page */
+.room-tile--add .room-tile-media {
+  background: var(--bg);
+}
+
+/* Rangement (page pièce) : ligne d'ajout en pointillés roses */
 .add-tile {
   display: flex;
-  flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 6px;
-  height: 128px;
+  gap: 8px;
+  padding: 14px;
   font-size: 14px;
   font-weight: 700;
   color: var(--wine);
-  background: transparent;
-  border: 2px dashed var(--glaucous);
+  background: var(--white);
+  border: 1.5px dashed var(--rose);
   border-radius: var(--radius);
   cursor: pointer;
 }
 
-.add-tile--row {
-  flex-direction: row;
-  height: 72px;
+/* ============================================================
+   Page pièce (maquette v2 : Piece.png)
+   ============================================================ */
+
+/* Marge du bas : place pour le bouton « Ajouter un objet » au-dessus de la barre */
+.room {
+  gap: 16px;
+  padding-top: calc(24px + var(--safe-top));
 }
 
-/* ============================================================
-   Page pièce : rangements dépliables
-   ============================================================ */
+.screen.room {
+  padding-bottom: 190px;
+}
+
+/* Retour, fil d'Ariane, réglages */
+.room-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.room-settings {
+  margin-left: auto;
+}
+
+.breadcrumb {
+  min-width: 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.breadcrumb a {
+  color: var(--muted);
+}
+
+.breadcrumb [aria-current='page'] {
+  font-weight: 700;
+  color: var(--ink);
+}
+
+.room .page-title {
+  font-size: 46px;
+}
+
+.room-summary {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--muted);
+}
 
 .storage-list {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 22px;
 }
 
 .storage {
-  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
+/* En-tête du rangement : nom, compteurs, visibilité et chevron */
 .storage-head {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   width: 100%;
-  padding: 12px;
-  color: var(--ink);
+  padding: 0;
+  font: inherit;
   text-align: left;
-  background: var(--white);
+  color: var(--ink);
+  background: none;
   border: 0;
   cursor: pointer;
 }
 
-.storage-icon {
-  display: flex;
-  flex-shrink: 0;
-  align-items: center;
-  justify-content: center;
-  width: 48px;
-  height: 48px;
-  color: var(--wine);
-  border-radius: 16px;
-}
-
 .storage-text {
   display: flex;
+  flex: 1;
   flex-direction: column;
-  flex-grow: 1;
-  gap: 3px;
+  gap: 2px;
   min-width: 0;
 }
 
 .storage-name {
-  font-size: 15px;
-  font-weight: 700;
-}
-
-.storage-chips {
-  margin-top: 2px;
+  font-family: var(--font-display);
+  font-size: 22px;
+  line-height: 1;
+  text-transform: lowercase;
 }
 
 .chevron {
   display: flex;
   color: var(--wine);
-  transition: transform 0.2s;
+  transition: transform 0.2s ease;
 }
 
 .chevron--open {
@@ -751,260 +956,384 @@ textarea::placeholder {
 }
 
 .storage-body {
-  margin: 0 12px 12px 35px;
-  padding-left: 13px;
-  border-left: 2px dashed rgba(113, 16, 60, 0.18);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.category {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .category-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 8px;
-  padding: 10px 0 2px;
+  gap: 10px;
   font-size: 12px;
-  font-weight: 700;
+  font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  color: var(--glaucous);
+  color: var(--muted);
 }
 
 .category-actions {
   display: flex;
-  gap: 10px;
+  gap: 14px;
   text-transform: none;
   letter-spacing: 0;
 }
 
-.item-row {
-  display: flex;
-  align-items: center;
+/* Objets : cartes festonnées en 2 colonnes, le premier objet du rangement en grande carte */
+.item-cards {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
   gap: 12px;
-  padding: 10px 0;
+}
+
+.item-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
   color: var(--ink);
   text-decoration: none;
-  border-bottom: 1px solid var(--line);
+  background: var(--white);
+  border: 1.5px solid var(--rose);
+  border-radius: var(--radius);
 }
 
-.item-row:last-child {
-  border-bottom: 0;
-}
-
-@media (hover: hover) {
-  .item-row:hover .item-row-name {
-    color: var(--wine);
-  }
-}
-
-.item-row-mini {
+.item-card-media {
+  position: relative;
   display: flex;
-  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: 44px;
-  height: 44px;
-  overflow: hidden;
+  height: 110px;
   color: var(--wine);
-  border-radius: 14px;
 }
 
-.item-row-mini img {
+.item-card-media img {
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-.item-row-text {
-  display: flex;
-  flex-direction: column;
-  flex-grow: 1;
-  gap: 1px;
-  min-width: 0;
+.item-card-chip {
+  position: absolute;
+  top: 9px;
+  left: 9px;
+  padding: 3px 9px;
 }
 
-.item-row-name {
-  font-size: 14px;
-  font-weight: 700;
+.item-card-text {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 12px 12px;
 }
 
-.item-row-chevron {
-  display: flex;
+.item-card-name {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 15px;
+  line-height: 1.05;
+  text-transform: lowercase;
+}
+
+.item-card-meta {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
   color: var(--muted);
+}
+
+/* Grande carte : pleine largeur, sans cadre, image arrondie en haut */
+.item-card--featured {
+  grid-column: span 2;
+  background: none;
+  border: 0;
+  border-radius: 0;
+}
+
+.item-card--featured .item-card-media {
+  height: 196px;
+  border-radius: 28px 28px 0 0;
+}
+
+.item-card--featured .item-card-text {
+  padding: 10px 2px 0;
+}
+
+.item-card--featured .item-card-name {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.item-card-see {
+  flex: none;
+  padding: 7px 14px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--white);
+  background: var(--wine);
+  border-radius: 999px;
 }
 
 .storage-actions {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
-  padding-top: 10px;
 }
 
 .empty-note {
-  padding: 10px 0;
+  padding: 4px 0;
   font-size: 13px;
   color: var(--muted);
 }
 
 /* ============================================================
-   Fiche objet
+   Fiche objet (maquette v2 : Objet.png)
    ============================================================ */
 
-.item-visual {
-  position: relative;
+.item-page {
   display: flex;
-  align-items: center;
-  justify-content: center;
-  height: 380px;
+  flex-direction: column;
+  gap: 16px;
+  padding: calc(24px + var(--safe-top)) 20px calc(130px + var(--safe-bottom));
 }
 
-.item-visual-bar {
-  position: absolute;
-  top: calc(52px + var(--safe-top));
-  left: 16px;
-  right: 16px;
+.item-hero {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+/* Retour à gauche, modifier à droite */
+.item-bar {
   display: flex;
   justify-content: space-between;
 }
 
-.item-visual-art {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 220px;
-  height: 230px;
-  margin-top: 20px;
-  overflow: hidden;
-  color: var(--wine);
-  border-radius: 24px;
+/* Grande forme fleur : la photo y est découpée, sinon fleur violet pâle et pictogramme */
+.item-flower {
+  position: relative;
+  align-self: center;
+  width: 250px;
+  height: 250px;
 }
 
-.item-visual-art img {
+.item-flower-photo {
+  display: block;
   width: 100%;
   height: 100%;
   object-fit: cover;
 }
 
-/* Boutons photo sous le visuel de l'objet */
-.item-photo-actions {
+.item-flower-icon {
   position: absolute;
-  bottom: 44px;
-  left: 0;
-  right: 0;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--wine);
+}
+
+.item-star {
+  position: absolute;
+}
+
+.item-star--big {
+  top: 14px;
+  right: -14px;
+}
+
+.item-star--small {
+  top: 44px;
+  right: 2px;
+}
+
+.item-photo-actions {
   display: flex;
   justify-content: center;
   gap: 8px;
 }
 
-.chip--photo {
-  height: 32px;
-  padding: 0 14px;
-  font: inherit;
-  font-size: 13px;
-  font-weight: 700;
-  border: 0;
-  cursor: pointer;
-  box-shadow: 0 4px 14px rgba(42, 10, 24, 0.12);
-}
-
-.chip--photo:disabled {
-  opacity: 0.6;
-  cursor: wait;
-}
-
 .item-photo-error {
-  position: absolute;
-  bottom: 84px;
-  left: 16px;
-  right: 16px;
-  margin: 0;
-  padding: 8px 12px;
-  font-size: 13px;
   text-align: center;
-  color: var(--white);
-  background: var(--wine);
-  border-radius: 12px;
 }
 
 .item-details {
-  position: relative;
   display: flex;
   flex-direction: column;
   gap: 16px;
-  margin-top: -26px;
-  padding: 20px 18px 40px;
-  background: var(--bg);
-  border-radius: 30px 30px 0 0;
 }
 
-.item-heading {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.item-title {
-  font-size: 30px;
-  line-height: 1.02;
-}
-
-.item-subtitle {
-  font-size: 14px;
-}
-
-.visibility-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: 10px;
-  padding: 0 4px;
-}
-
-.visibility-row-label {
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.visibility-help {
-  margin-top: -8px;
-  padding: 0 4px;
-}
-
-.breadcrumb-line {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 4px;
+/* Emplacement : Maison › Dressing › Penderie */
+.item-place {
   font-size: 12px;
-  font-weight: 700;
   color: var(--muted);
 }
 
-.breadcrumb-line a {
-  color: inherit;
+.item-place a {
+  color: var(--muted);
   text-decoration: none;
 }
 
-.breadcrumb-line a:hover {
+.item-place a:hover {
   text-decoration: underline;
+}
+
+.item-title {
+  margin-top: 4px;
+  font-size: 42px;
+}
+
+.item-chips {
+  margin-top: 10px;
+}
+
+.item-chip {
+  padding: 5px 11px;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.item-description {
+  margin-top: 10px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* État de l'objet : 5 statuts sur 2 lignes (3 + 2), tous visibles sans défilement */
+.segmented--wrap {
+  flex-wrap: wrap;
+  gap: 4px;
+  border-radius: 24px;
+}
+
+.segmented.segmented--wrap button {
+  flex: 1 0 30%;
+  height: 36px;
+  padding: 0 10px;
+  white-space: nowrap;
+}
+
+/* Infos en grille de 2 colonnes, séparées par un trait rose pâle */
+.item-infos {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  column-gap: 16px;
+  margin: 0;
+  padding: 4px 16px;
+  font-size: 13px;
+}
+
+.item-info {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--rose-soft);
+}
+
+.item-info:nth-last-child(-n + 2):nth-child(odd),
+.item-info:last-child {
+  border-bottom: 0;
+}
+
+.item-info dt {
+  color: var(--muted);
+}
+
+.item-info dd {
+  margin: 2px 0 0;
+  font-weight: 700;
+  overflow-wrap: anywhere;
+}
+
+/* Barre d'action en bas : prêter (principal) et vendre (secondaire) */
+.item-actions {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 4;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 10px;
+  padding: 10px 20px calc(22px + var(--safe-bottom));
+  background: var(--bg);
+  border-top: 1px solid var(--rose-soft);
+}
+
+.item-actions .btn {
+  flex: 1;
+  padding: 0 12px;
+  white-space: nowrap;
+}
+
+.item-actions-soon {
+  flex-basis: 100%;
+  font-size: 12px;
+  font-weight: 600;
+  text-align: center;
+  color: var(--muted);
 }
 
 /* ============================================================
    Profil
    ============================================================ */
 
+/* Bandeau rose pâle festonné (mon profil, profil public), étoiles et bouton blanc */
 .profile-band {
+  position: relative;
   height: 150px;
+  background: var(--rose-soft);
 }
 
-.profile-band-inner {
-  flex-direction: row;
-  justify-content: flex-end;
+.profile-band-btn {
+  position: absolute;
+  top: calc(22px + var(--safe-top));
+  right: 20px;
+  border-color: transparent;
+}
+
+.profile-band-btn--start {
+  right: auto;
+  left: 20px;
+}
+
+.profile-star {
+  position: absolute;
+}
+
+.profile-star--white {
+  top: 22px;
+  left: 110px;
+}
+
+.profile-star--wine {
+  top: 92px;
+  right: 60px;
+}
+
+/* Contenu : l'avatar chevauche le bandeau */
+.profile-content {
+  position: relative;
+  margin-top: -58px;
+  padding: 0 20px 130px;
+}
+
+.profile-public {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 .profile-layout {
-  position: relative;
-  margin-top: -62px;
-  padding-top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 .profile-aside,
@@ -1028,12 +1357,96 @@ textarea::placeholder {
   gap: 3px;
 }
 
+/* Pseudo : en minuscules, donc en capitales grasses bordeaux */
 .profile-name {
-  font-size: 30px;
+  font-size: 38px;
+  line-height: 0.95;
+  color: var(--wine);
+  text-transform: lowercase;
 }
 
 .profile-bio {
+  margin-top: 6px;
   font-size: 14px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+/* Bandeau « demande en attente » : cyan, compteur bordeaux */
+.notice--request {
+  padding: 12px 14px;
+  font-size: 13px;
+  background: var(--cyan);
+  border-radius: 20px;
+}
+
+.notice--request .notice-text {
+  font-size: 13px;
+}
+
+.notice-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  margin-right: 6px;
+  padding: 0 6px;
+  font-size: 12px;
+  color: var(--white);
+  background: var(--wine);
+  border-radius: 999px;
+}
+
+/* Titre de page avec sous-titre et étoile (Amis, comptes bloqués) */
+.page-intro {
+  position: relative;
+  align-self: flex-start;
+  padding-right: 34px;
+}
+
+.page-intro-star {
+  position: absolute;
+  top: -4px;
+  right: 0;
+}
+
+.page-intro-text {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* Demande reçue : carte avec avatar fleur, phrase, type, et deux grands boutons */
+.request-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 26px;
+}
+
+.request-card-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.request-verb {
+  color: var(--ink);
+}
+
+.request-card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.request-card-actions .btn {
+  flex: 1;
+}
+
+.avatar-initial--flower {
+  border-radius: 0;
 }
 
 .notice {
@@ -1071,21 +1484,21 @@ textarea::placeholder {
 .person-list {
   display: flex;
   flex-direction: column;
+  gap: 8px;
   margin: 0;
   padding: 0;
   list-style: none;
 }
 
+/* Ligne de personne : carte blanche bordée de rose */
 .person-row {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--line);
-}
-
-.person-row:last-child {
-  border-bottom: 0;
+  padding: 10px 12px;
+  background: var(--white);
+  border: 1.5px solid var(--rose);
+  border-radius: 22px;
 }
 
 .person-row-text {
@@ -1096,11 +1509,14 @@ textarea::placeholder {
   min-width: 0;
 }
 
+/* Pseudo : en minuscules, donc en capitales grasses avec Mono Scribble */
 .person-row-name {
   overflow: hidden;
-  font-size: 15px;
-  font-weight: 700;
+  font-family: var(--font-display);
+  font-size: 18px;
+  font-weight: 400;
   text-overflow: ellipsis;
+  text-transform: lowercase;
   white-space: nowrap;
 }
 
@@ -1131,10 +1547,6 @@ textarea::placeholder {
 }
 
 /* Profil public d'un autre compte */
-.profile-band-inner--start {
-  justify-content: flex-start;
-}
-
 .profile-actions {
   display: flex;
   flex-wrap: wrap;
@@ -1192,8 +1604,9 @@ textarea::placeholder {
 }
 
 .auth-title {
-  font-size: 38px;
-  line-height: 0.98;
+  margin: 0;
+  line-height: 1;
+  font-size: 64px;
 }
 
 
@@ -1250,16 +1663,15 @@ textarea::placeholder {
 
 .input {
   width: 100%;
-  height: 52px;
+  height: 48px;
   padding: 0 16px;
   font: inherit;
   font-size: 15px;
   color: var(--ink);
   background: var(--white);
-  border: 0;
-  border-radius: 16px;
+  border: 1.5px solid var(--rose);
+  border-radius: 999px;
   outline: none;
-  box-shadow: var(--shadow);
   appearance: none;
 }
 
@@ -1276,7 +1688,8 @@ textarea::placeholder {
 }
 
 .input:focus-visible {
-  box-shadow: var(--shadow), 0 0 0 3px var(--glaucous);
+  border-color: var(--violet);
+  box-shadow: 0 0 0 3px var(--glaucous-soft);
 }
 
 select.input {
@@ -1295,8 +1708,8 @@ select.input {
   font-size: 14px;
   font-weight: 600;
   background: var(--white);
-  border-radius: 16px;
-  box-shadow: var(--shadow);
+  border: 1.5px solid var(--rose);
+  border-radius: 20px;
   cursor: pointer;
 }
 
@@ -1308,32 +1721,35 @@ select.input {
 
 .segmented {
   display: flex;
+  gap: 6px;
   padding: 4px;
-  background: var(--glaucous-soft);
+  background: var(--white);
+  border: 1.5px solid var(--rose);
   border-radius: 999px;
 }
 
 .segmented button {
-  flex-grow: 1;
-  height: 40px;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--muted);
+  flex: 1;
+  height: 38px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--ink);
   background: transparent;
   border: 0;
   border-radius: 999px;
   cursor: pointer;
 }
 
-.segmented button[aria-selected='true'] {
-  color: var(--wine);
-  background: var(--white);
-  box-shadow: 0 2px 10px rgba(113, 16, 60, 0.14);
+.segmented button[aria-selected='true'],
+.segmented button[aria-pressed='true'] {
+  font-weight: 700;
+  color: var(--white);
+  background: var(--violet);
 }
 
 .segmented--large button {
-  height: 44px;
-  font-size: 15px;
+  height: 42px;
+  font-size: 14px;
 }
 
 /* ============================================================
@@ -1348,54 +1764,60 @@ select.input {
   display: grid;
   grid-template-columns: repeat(5, minmax(0, 1fr));
   align-items: center;
-  justify-items: center;
-  width: min(448px, calc(100% - 28px));
-  height: 74px;
-  padding: 0 8px;
-  background: var(--wine);
+  width: min(452px, calc(100% - 28px));
+  height: 70px;
+  background: var(--white);
+  border: 1.5px solid var(--rose);
   border-radius: 999px;
-  box-shadow: var(--shadow-strong);
+  box-shadow: 0 10px 30px rgba(113, 16, 60, 0.12);
   transform: translateX(-50%);
 }
 
 .nav-link {
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  width: 62px;
-  height: 62px;
-  color: var(--white);
+  gap: 2px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--muted);
   text-decoration: none;
-  border-radius: 999px;
 }
 
-/* Page courante : pastille claire, picto bordeaux */
+/* Page courante : bordeaux, 800 */
 .nav-link[aria-current='page'] {
+  font-weight: 800;
   color: var(--wine);
-  background: var(--white);
 }
 
+/* Entrée pas encore disponible (Looks, lot 2) */
 .nav-link[aria-disabled='true'] {
-  opacity: 0.4;
+  opacity: 0.45;
   cursor: not-allowed;
 }
 
 @media (hover: hover) {
   a.nav-link:not([aria-current='page']):hover {
-    background: rgba(255, 255, 255, 0.12);
+    color: var(--wine);
   }
 }
 
-/* Bouton Scanner : fleur rose qui dépasse de la barre */
+/* Bouton Scanner : fleur rose et viseur bordeaux, centrée et surélevée au-dessus de la pilule */
 .nav-scan {
+  justify-self: center;
   display: flex;
   align-items: center;
   justify-content: center;
-  width: 84px;
-  height: 84px;
-  margin-top: -12px;
-  filter: drop-shadow(0 6px 10px rgba(58, 20, 38, 0.25));
+  width: 76px;
+  height: 76px;
+  margin-top: -30px;
+  filter: drop-shadow(0 6px 10px rgba(113, 16, 60, 0.25));
   transition: transform 0.15s ease;
+}
+
+.nav-scan svg {
+  width: 100%;
+  height: 100%;
 }
 
 .nav-scan-flower {
@@ -1412,21 +1834,25 @@ select.input {
   }
 }
 
+/* Bouton flottant « Ajouter un objet » : pilule bordeaux au-dessus de la barre de navigation */
 .fab {
   position: fixed;
-  right: max(18px, calc(50% - 240px + 18px));
-  bottom: calc(108px + var(--safe-bottom));
+  right: max(20px, calc(50% - 240px + 20px));
+  bottom: calc(104px + var(--safe-bottom));
   z-index: 4;
   display: flex;
   align-items: center;
-  justify-content: center;
-  width: 60px;
-  height: 60px;
-  color: var(--wine);
-  background: var(--rose);
+  gap: 8px;
+  height: 48px;
+  padding: 0 20px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--white);
+  background: var(--wine);
   border: 0;
   border-radius: 999px;
-  box-shadow: 0 10px 24px rgba(58, 20, 38, 0.25);
+  box-shadow: 0 8px 20px rgba(113, 16, 60, 0.3);
   cursor: pointer;
 }
 
@@ -1541,7 +1967,8 @@ select.input {
   padding: 28px 20px;
   text-align: center;
   color: var(--muted);
-  border: 2px dashed rgba(113, 16, 60, 0.2);
+  background: var(--white);
+  border: 1.5px dashed var(--rose);
   border-radius: var(--radius);
 }
 
@@ -1576,13 +2003,13 @@ select.input {
     gap: 16px;
   }
 
-  .hero {
-    padding: calc(40px + var(--safe-top)) 32px 32px;
+  .profile-content {
+    max-width: calc(var(--page-max) + 64px);
+    margin: -58px auto 0;
+    padding: 0 32px 130px;
   }
 
-  .hero-title {
-    font-size: 52px;
-  }
+
 
   .page-title {
     font-size: 44px;
@@ -1592,35 +2019,22 @@ select.input {
     font-size: 18px;
   }
 
-  /* Accueil : la recherche rejoint la ligne de l'en-tête */
-  .home-header {
-    grid-template-columns: auto auto minmax(0, 1fr) auto;
-    grid-template-areas: 'avatar greeting search bell';
-    column-gap: 16px;
-  }
-
-  .home-search {
-    justify-self: end;
-    width: min(100%, 460px);
-  }
-
   .tile-grid {
     grid-template-columns: repeat(auto-fill, minmax(210px, 1fr));
     gap: 16px;
   }
 
-  .room-tile,
-  .tile-grid .add-tile {
-    height: 150px;
+  .room-tile-media {
+    height: 130px;
+  }
+
+  .item-cards {
+    grid-template-columns: repeat(auto-fill, minmax(170px, 1fr));
   }
 
   .item-grid {
     grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
     gap: 16px;
-  }
-
-  .item-grid .thumb {
-    height: 150px;
   }
 
   .thumb-grid {
@@ -1660,43 +2074,46 @@ select.input {
    ============================================================ */
 
 @media (min-width: 900px) {
+  /* Fiche objet : fleur à gauche (fixe au défilement), détails à droite */
   .item-page {
     display: grid;
     grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
     align-items: start;
-    gap: 48px;
+    column-gap: 48px;
     max-width: calc(var(--page-max) + 64px);
     margin: 0 auto;
-    padding: 40px 32px 64px;
+    padding: 40px 32px 140px;
   }
 
-  .item-visual {
+  .item-hero {
     position: sticky;
     top: 32px;
-    height: min(560px, calc(100vh - 80px));
-    border-radius: 32px;
   }
 
-  .item-visual-bar {
-    top: 16px;
-  }
-
-  .item-visual-art {
-    width: 300px;
-    height: 320px;
-    margin-top: 0;
-  }
-
-  .item-details {
-    margin-top: 0;
-    padding: 24px 0 0;
-    background: transparent;
-    border-radius: 0;
-    gap: 20px;
+  .item-flower {
+    width: 340px;
+    height: 340px;
+    margin-top: 16px;
   }
 
   .item-title {
-    font-size: 44px;
+    font-size: 52px;
+  }
+
+  .item-actions {
+    justify-content: flex-end;
+    padding-right: 32px;
+  }
+
+  .item-actions-soon {
+    flex-basis: auto;
+    align-self: center;
+    margin-right: 8px;
+  }
+
+  .item-actions .btn {
+    flex: none;
+    min-width: 220px;
   }
 
   .auth {
@@ -1713,13 +2130,13 @@ select.input {
     justify-content: center;
     gap: 28px;
     padding: 64px clamp(48px, 6vw, 96px);
-    background: var(--wine);
+    /* Fond cyan : le logo garde ses couleurs (rose et bordeaux), sans bloc derrière */
+    background: var(--cyan);
     border-radius: 0 48px 48px 0;
   }
 
   .auth-title {
-    font-size: clamp(52px, 5.5vw, 76px);
-    color: var(--white);
+    font-size: clamp(64px, 7vw, 104px);
   }
 
 
@@ -1749,15 +2166,20 @@ select.input {
     left: 20px;
     grid-template-columns: 1fr;
     grid-auto-rows: auto;
-    row-gap: 12px;
-    width: 78px;
+    row-gap: 18px;
+    width: 82px;
     height: auto;
-    padding: 12px 0;
+    padding: 18px 0;
+    border-radius: 41px;
     transform: translateY(-50%);
   }
 
+  /* Scanner en tête de la barre verticale, un peu plus petit pour tenir dans sa largeur */
   .nav-scan {
-    margin: 0 -6px;
+    order: -1;
+    width: 66px;
+    height: 66px;
+    margin: 0;
   }
 
   .screen,
@@ -1765,23 +2187,14 @@ select.input {
     padding-bottom: 64px;
   }
 
-  /* En-tête bordeaux : bloc arrondi détaché des bords */
-  .hero {
-    margin: 20px 24px 0 0;
-    border-radius: 32px;
+  .screen.room {
+    padding-bottom: 120px;
   }
+
 
   .fab {
     right: 40px;
     bottom: 40px;
-  }
-
-  /* Page pièce : rangements sur deux colonnes */
-  .storage-list {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-    align-items: start;
-    gap: 16px;
   }
 
   /* Profil : identité à gauche, objets à droite */
@@ -1888,8 +2301,8 @@ select.input {
 }
 
 .scan-modes button[aria-selected='true'] {
-  color: var(--wine);
-  background: var(--white);
+  color: var(--white);
+  background: var(--violet);
 }
 
 .scan-modes button:disabled {
@@ -2021,6 +2434,7 @@ select.input {
   margin: 0 10px calc(10px + var(--safe-bottom));
   padding: 10px 16px 18px;
   background: var(--bg);
+  border: 1.5px solid var(--rose);
   border-radius: 32px;
 }
 
@@ -2045,8 +2459,8 @@ select.input {
   overflow: hidden;
   color: var(--wine);
   background: var(--white);
+  border: 1.5px solid var(--rose);
   border-radius: 18px;
-  box-shadow: var(--shadow);
 }
 
 .scan-thumb img {
@@ -2066,6 +2480,7 @@ select.input {
 .scan-summary-title {
   font-size: 20px;
   line-height: 1.1;
+  text-transform: lowercase;
 }
 
 .scan-fields-row {
@@ -2076,6 +2491,7 @@ select.input {
 
 .input--area {
   height: auto;
+  border-radius: 20px;
   min-height: 72px;
   padding-top: 14px;
   padding-bottom: 14px;

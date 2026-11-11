@@ -20,7 +20,7 @@ export const ITEM_STATUS_OPTIONS = [
   { value: 'in_laundry', label: 'Au sale' },
   { value: 'reserved', label: 'Réservé' },
   { value: 'lent', label: 'Prêté' },
-  { value: 'for_sale', label: 'À la vente' },
+  { value: 'for_sale', label: 'En vente' },
 ]
 
 export function optionLabel(options, value) {
@@ -121,9 +121,18 @@ export function roomIcon(name = '') {
 }
 
 // Couleurs de fond alternées des vignettes
-const TONES = ['tone-glaucous', 'tone-peach', 'tone-orange']
+// Fonds des vignettes sans photo, en alternance (maquette v2)
+const TONES = ['tone-sky', 'tone-glaucous', 'tone-peach']
 export function toneFor(index) {
   return TONES[index % TONES.length]
+}
+
+// Couleur de la puce de statut d'un objet : « Au sale » rose pâle, « Prêté » cyan, « En vente » violet pâle.
+// Sur un fond de la même couleur, la puce passe en blanc pour rester visible.
+const STATUS_CHIPS = { in_laundry: 'chip--peach', lent: 'chip--sky', for_sale: 'chip--glaucous', reserved: 'chip--white' }
+export function statusChip(status, tone) {
+  const chip = STATUS_CHIPS[status] ?? 'chip--white'
+  return chip.replace('chip--', 'tone-') === tone ? 'chip--white' : chip
 }
 
 export function plural(count, singular, pluralForm = `${singular}s`) {

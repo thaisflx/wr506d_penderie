@@ -2,7 +2,7 @@
 import { RouterLink } from 'vue-router'
 import NavIcon from './NavIcon.vue'
 
-// Barre de navigation principale
+// Barre de navigation principale : pilule blanche flottante, Scanner au centre
 defineProps({
   current: { type: String, default: null },
 })
@@ -10,20 +10,25 @@ defineProps({
 
 <template>
   <nav class="bottom-nav" aria-label="Navigation principale">
-    <RouterLink to="/" class="nav-link" data-cy="nav-home" aria-label="Accueil" title="Accueil" :aria-current="current === 'home' ? 'page' : undefined">
-      <NavIcon name="home" :size="29" />
+    <RouterLink to="/" class="nav-link" data-cy="nav-home" :aria-current="current === 'home' ? 'page' : undefined">
+      <NavIcon name="home" />
+      <span>Accueil</span>
     </RouterLink>
-    <RouterLink to="/friends" class="nav-link" data-cy="nav-friends" aria-label="Amis" title="Amis" :aria-current="current === 'friends' ? 'page' : undefined">
-      <NavIcon name="friends" :size="33" />
+    <!-- Fil des looks du jour : arrive avec le lot 2 du volet social (route /feed) -->
+    <span class="nav-link" role="link" aria-disabled="true" title="Bientôt disponible" data-cy="nav-looks">
+      <NavIcon name="looks" />
+      <span>Looks</span>
+    </span>
+    <RouterLink to="/scan" class="nav-scan" aria-label="Scanner un objet" title="Scanner un objet">
+      <NavIcon name="scan" :size="76" />
     </RouterLink>
-    <RouterLink to="/scan" class="nav-scan" aria-label="Scanner" title="Scanner">
-      <NavIcon name="scan" :size="84" />
+    <RouterLink to="/friends" class="nav-link" data-cy="nav-friends" :aria-current="current === 'friends' ? 'page' : undefined">
+      <NavIcon name="friends" />
+      <span>Amis</span>
     </RouterLink>
-    <RouterLink to="/dressing" class="nav-link" aria-label="Dressing" title="Dressing" :aria-current="current === 'dressing' ? 'page' : undefined">
-      <NavIcon name="dressing" :size="31" />
-    </RouterLink>
-    <RouterLink to="/profile" class="nav-link" data-cy="nav-profile" aria-label="Profil" title="Profil" :aria-current="current === 'profile' ? 'page' : undefined">
-      <NavIcon name="profile" :size="29" />
+    <RouterLink to="/profile" class="nav-link" data-cy="nav-profile" :aria-current="current === 'profile' ? 'page' : undefined">
+      <NavIcon name="profile" />
+      <span>Profil</span>
     </RouterLink>
   </nav>
 </template>

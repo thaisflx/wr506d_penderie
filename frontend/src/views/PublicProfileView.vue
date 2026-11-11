@@ -4,6 +4,7 @@ import { RouterLink, useRouter } from 'vue-router'
 import { api } from '../api/client'
 import AppIcon from '../components/AppIcon.vue'
 import BottomSheet from '../components/BottomSheet.vue'
+import DecoStar from '../components/DecoStar.vue'
 import UserAvatar from '../components/UserAvatar.vue'
 
 // Profil public d'un autre compte : pseudo, avatar, bio, et mon lien avec lui (suivre, ami proche, bloquer)
@@ -100,16 +101,17 @@ function openBlock() {
 </script>
 
 <template>
-  <div class="screen--flush">
-    <div class="hero profile-band">
-      <div class="hero-inner profile-band-inner profile-band-inner--start">
-        <button type="button" class="icon-btn icon-btn--on-dark" aria-label="Retour" @click="router.back()">
-          <AppIcon name="back" :stroke="2.6" />
-        </button>
-      </div>
+  <div class="screen--flush profile-page">
+    <!-- Même bandeau rose pâle festonné que mon profil -->
+    <div class="profile-band scallop">
+      <DecoStar class="profile-star profile-star--white" :size="18" color="var(--white)" />
+      <DecoStar class="profile-star profile-star--wine" :size="22" color="var(--wine)" />
+      <button type="button" class="icon-btn profile-band-btn profile-band-btn--start" aria-label="Retour" @click="router.back()">
+        <AppIcon name="back" :stroke="2.4" />
+      </button>
     </div>
 
-    <main class="screen-body profile-layout">
+    <main class="profile-content profile-public">
       <p v-if="loading" class="loading">Chargement…</p>
 
       <div v-else-if="notFound" class="empty-state" data-cy="profile-not-found">
