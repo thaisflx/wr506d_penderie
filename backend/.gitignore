@@ -14,7 +14,9 @@
 ###< lexik/jwt-authentication-bundle ###
 
 ###> uploads ###
-/public/uploads/
+# Photos envoyées par les utilisateurs ; seule la photo de démo des fixtures (groupe dev) est suivie
+/public/uploads/*
+!/public/uploads/demo/
 ###< uploads ###
 
 ###> phpunit/phpunit ###

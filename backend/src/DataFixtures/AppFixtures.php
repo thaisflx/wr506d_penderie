@@ -112,6 +112,27 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
 
         $tshirt = $this->createItem($manager, $alice, 'T-shirt blanc', $wardrobeTops);
         $jeans = $this->createItem($manager, $alice, 'Jean brut', $wardrobeBottoms);
+        // Démo de la fiche objet : attributs comme après un scan, et une photo d'exemple.
+        // Photo générée pour le projet (illustration dessinée par script, sans image source), hors de
+        // /uploads/items/ : supprimer la photo depuis l'application ne peut donc pas effacer le fichier.
+        $tshirt
+            ->setPhoto('/uploads/demo/t-shirt-blanc.jpg')
+            ->setAttributes([
+                'type' => 'T-shirt',
+                'brand' => 'Atelier Coton',
+                'color' => 'Blanc cassé',
+                'size' => 'M',
+                'composition' => '100 % coton bio',
+                'description' => 'T-shirt col rond en jersey épais, coupe droite.',
+            ]);
+        $jeans->setAttributes([
+            'type' => 'Jean',
+            'brand' => 'Maison Indigo',
+            'color' => 'Bleu brut',
+            'size' => '38',
+            'composition' => '98 % coton, 2 % élasthanne',
+            'description' => 'Jean droit taille haute, toile brute non délavée.',
+        ]);
         $sneakers = $this->createItem($manager, $alice, 'Baskets montantes', $wardrobeShoes);
         $diary = $this->createItem($manager, $alice, 'Carnet intime', $wardrobeMisc, isPersonal: true);
         $this->createItem($manager, $alice, 'Bijoux de famille', $drawerMisc);
