@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
+import AppLogo from '../components/AppLogo.vue'
 import { useAuthStore } from '../stores/auth'
 
 const auth = useAuthStore()
@@ -32,7 +33,7 @@ async function submit() {
 <template>
   <main class="auth">
     <section class="auth-brand">
-      <h1 class="display auth-title">Lendly</h1>
+      <h1 class="auth-title"><AppLogo /></h1>
     </section>
 
     <section class="auth-panel">

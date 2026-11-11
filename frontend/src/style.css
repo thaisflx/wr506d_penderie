@@ -1,8 +1,8 @@
-/* Charte graphique Penderie (d'après les maquettes mobiles), adaptée tablette et ordinateur.
+/* Charte graphique Lendly (maquette v2, docs/maquette-v2), mobile d'abord, adaptée tablette et ordinateur.
    Paliers : mobile par défaut, tablette à partir de 700px, ordinateur à partir de 1024px. */
 :root {
-  /* Palette : fond blanc, cyan clair, rose coton, bordeaux, glauque */
-  --bg: #ffffff;
+  /* Palette (maquette v2) */
+  --bg: #fff8f6;
   --white: #ffffff;
   --cyan: #d5f5fa;
   --rose: #eeb4b3;
@@ -10,9 +10,12 @@
   --wine: #71103c;
   --glaucous: #7180b9;
   --glaucous-soft: #dadff1;
+  /* Violet foncé : filtre ou onglet actif, texte blanc (contraste 5:1) */
+  --violet: #5e6ca8;
   --ink: #2a0a18;
   --muted: #66566a;
-  --placeholder: #a397a6;
+  /* Texte indicatif des champs : contraste 4.5:1 sur blanc */
+  --placeholder: #7d6f80;
   --line: #ebe6ee;
   --wine-soft: rgba(113, 16, 60, 0.07);
   --danger: #b3261e;
@@ -27,8 +30,9 @@
   --safe-bottom: env(safe-area-inset-bottom, 0px);
 
   --font-body: 'Figtree', system-ui, sans-serif;
-  /* Titres : Defante (police locale, un seul style) */
-  --font-display: 'Defante', 'Figtree', system-ui, sans-serif;
+  /* Titres : Mono Scribble. Une MAJUSCULE donne une lettre manuscrite, une minuscule une capitale grasse.
+     La démo n'a pas de chiffres : ils tombent sur Bricolage Grotesque grâce à unicode-range. */
+  --font-display: 'Mono Scribble', 'Bricolage Grotesque', sans-serif;
 
   font: 15px/1.45 var(--font-body);
   color: var(--ink);
@@ -38,9 +42,12 @@
 }
 
 @font-face {
-  font-family: 'Defante';
-  src: url('./assets/fonts/defante.otf') format('opentype');
-  font-display: swap;
+  font-family: 'Mono Scribble';
+  src: url('./assets/fonts/MonoScribble.ttf') format('truetype');
+  /* Sans les chiffres (U+0030-0039) : la démo affiche un logo à leur place */
+  unicode-range: U+0020-002F, U+003A-007E, U+00A0-017F;
+  /* block : évite d'afficher un instant les minuscules de la police de secours */
+  font-display: block;
 }
 
 *,
@@ -139,6 +146,24 @@ textarea::placeholder {
   font-weight: 400;
   letter-spacing: 0.01em;
   line-height: 1.05;
+}
+
+/* Logo Lendly en texte (AppLogo) */
+.app-logo {
+  display: inline-block;
+  font-family: var(--font-display);
+  font-weight: 400;
+  line-height: 1;
+  letter-spacing: 0.5px;
+  white-space: nowrap;
+}
+
+.app-logo-rose {
+  color: var(--rose);
+}
+
+.app-logo-wine {
+  color: var(--wine);
 }
 
 /* Avatar sans photo : initiale sur une pastille de couleur */
@@ -1192,8 +1217,9 @@ textarea::placeholder {
 }
 
 .auth-title {
-  font-size: 38px;
-  line-height: 0.98;
+  margin: 0;
+  line-height: 1;
+  font-size: 64px;
 }
 
 
@@ -1713,13 +1739,13 @@ select.input {
     justify-content: center;
     gap: 28px;
     padding: 64px clamp(48px, 6vw, 96px);
-    background: var(--wine);
+    /* Fond cyan : le logo garde ses couleurs (rose et bordeaux), sans bloc derrière */
+    background: var(--cyan);
     border-radius: 0 48px 48px 0;
   }
 
   .auth-title {
-    font-size: clamp(52px, 5.5vw, 76px);
-    color: var(--white);
+    font-size: clamp(64px, 7vw, 104px);
   }
 
 

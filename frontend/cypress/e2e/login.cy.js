@@ -5,6 +5,13 @@ describe('Connexion', () => {
     cy.visit('/login')
   })
 
+  it('affiche le nom et le logo de l\'application Lendly', () => {
+    cy.title().should('eq', 'Lendly')
+    cy.getCy('app-logo').should('be.visible').and('have.attr', 'role', 'img').and('have.attr', 'aria-label', 'Lendly')
+    // La police des titres est bien chargée (sinon le logo s'afficherait en police de secours)
+    cy.document().its('fonts').invoke('check', '64px "Mono Scribble"').should('eq', true)
+  })
+
   function submit(email, password) {
     cy.getCy('login-email').type(email)
     cy.getCy('login-password').type(password, { log: false })

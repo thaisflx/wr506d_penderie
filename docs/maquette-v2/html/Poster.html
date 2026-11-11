@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Lendly · Poster un look du jour</title>
+</head>
+<body>
+
+
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&amp;family=Bricolage+Grotesque:opsz,wght@12..96,800&amp;display=swap">
+<style>
+@font-face{font-family:'Mono Scribble';src:url(../../../frontend/src/assets/fonts/MonoScribble.ttf) format('truetype');unicode-range:U+0020-002F,U+003A-007E,U+00A0-017F;font-display:block}
+body{margin:0}
+a{color:#71103C}a:hover{color:#4F0A2A}
+.ms{font-family:'Mono Scribble','Bricolage Grotesque',sans-serif;font-weight:400}
+.scallop{-webkit-mask:radial-gradient(circle 7px at 50% 50%,#000 97%,#0000 100%) 0 100%/14px 14px repeat-x,linear-gradient(#000 0 0) 0 0/100% calc(100% - 7px) no-repeat;mask:radial-gradient(circle 7px at 50% 50%,#000 97%,#0000 100%) 0 100%/14px 14px repeat-x,linear-gradient(#000 0 0) 0 0/100% calc(100% - 7px) no-repeat}
+</style>
+
+<div style="width: 390px; height: 844px; position: relative; overflow: hidden; background: #FFF8F6; color: #2A0A18; font-family: Figtree, system-ui, sans-serif; box-sizing: border-box;">
+
+  <div style="position: relative; padding: 24px 20px 110px; display: flex; flex-direction: column; gap: 14px;">
+    <div style="display: flex; align-items: center; justify-content: space-between;">
+      <a href="Fil.html" aria-label="Fermer" style="width: 44px; height: 44px; border-radius: 999px; background: #FFFFFF; border: 1.5px solid #EEB4B3; display: flex; align-items: center; justify-content: center; color: #2A0A18; box-sizing: border-box;"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"></path></svg></a>
+      <span style="padding: 6px 12px; border-radius: 999px; background: #D5F5FA; font-size: 12px; font-weight: 700;">Aujourd'hui · 11 nov.</span>
+    </div>
+
+    <h1 class="ms" style="margin: 0; font-size: 40px; line-height: 0.95; color: #71103C;">Mon look du jour</h1>
+
+    <button type="button" style="position: relative; width: 210px; height: 210px; align-self: center; border: 0; padding: 0; background: none; cursor: pointer;">
+      <svg viewBox="0 0 100 100" aria-hidden="true" style="position: absolute; inset: 0; width: 100%; height: 100%;"><g fill="#F6D6D5"><circle cx="50" cy="50" r="34"></circle><circle cx="50" cy="18" r="16"></circle><circle cx="72.6" cy="27.4" r="16"></circle><circle cx="82" cy="50" r="16"></circle><circle cx="72.6" cy="72.6" r="16"></circle><circle cx="50" cy="82" r="16"></circle><circle cx="27.4" cy="72.6" r="16"></circle><circle cx="18" cy="50" r="16"></circle><circle cx="27.4" cy="27.4" r="16"></circle></g></svg>
+      <span style="position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 6px; color: #71103C; font: 700 13px Figtree, sans-serif;"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true"><path d="M4 8h3l2-3h6l2 3h3v11H4z"></path><circle cx="12" cy="13" r="3.5"></circle></svg>Prendre une photo</span>
+      <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" style="position: absolute; right: 2px; top: 10px;"><path d="M12 0c1 7 5 11 12 12-7 1-11 5-12 12-1-7-5-11-12-12 7-1 11-5 12-12z" fill="#7180B9"></path></svg>
+    </button>
+
+    <div>
+      <label for="caption" class="ms" style="display: block; font-size: 16px; margin-bottom: 6px;">légende</label>
+      <textarea id="caption" rows="2" placeholder="Un mot sur ta tenue…" style="width: 100%; box-sizing: border-box; border-radius: 20px; border: 1.5px solid #EEB4B3; background: #FFFFFF; padding: 12px 14px; font: 500 14px Figtree, sans-serif; color: #2A0A18; resize: none;"></textarea>
+    </div>
+
+    <div style="display: flex; flex-direction: column; gap: 8px;">
+      <div style="display: flex; align-items: baseline; justify-content: space-between;">
+        <h2 class="ms" style="margin: 0; font-size: 20px;">ce que je porte</h2>
+        <span style="font-size: 12px; font-weight: 700; color: #71103C;">2 choisis</span>
+      </div>
+      <p style="margin: 0; font-size: 12px; line-height: 1.4; color: #66566A;">Seuls les objets que tes amis peuvent voir sont proposés : rien de privé ni de perso.</p>
+      <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px;">
+        <button type="button" aria-pressed="true" style="position: relative; padding: 0 0 8px; border-radius: 18px; border: 2px solid #71103C; background: #FFFFFF; overflow: hidden; font: 700 11px Figtree, sans-serif; color: #2A0A18; text-align: left;"><span class="scallop" style="display: block; height: 70px; background: #DADFF1;"></span><span style="display: block; padding: 4px 8px 0;">Pull rayé</span><span aria-hidden="true" style="position: absolute; top: 6px; right: 6px; width: 22px; height: 22px; border-radius: 999px; background: #71103C; display: flex; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span></button>
+        <button type="button" aria-pressed="true" style="position: relative; padding: 0 0 8px; border-radius: 18px; border: 2px solid #71103C; background: #FFFFFF; overflow: hidden; font: 700 11px Figtree, sans-serif; color: #2A0A18; text-align: left;"><span class="scallop" style="display: block; height: 70px; background: #D5F5FA;"></span><span style="display: block; padding: 4px 8px 0;">Jean droit</span><span aria-hidden="true" style="position: absolute; top: 6px; right: 6px; width: 22px; height: 22px; border-radius: 999px; background: #71103C; display: flex; align-items: center; justify-content: center;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"></path></svg></span></button>
+        <button type="button" aria-pressed="false" style="position: relative; padding: 0 0 8px; border-radius: 18px; border: 1.5px solid #EEB4B3; background: #FFFFFF; overflow: hidden; font: 700 11px Figtree, sans-serif; color: #2A0A18; text-align: left;"><span class="scallop" style="display: block; height: 70px; background: #F6D6D5;"></span><span style="display: block; padding: 4px 8px 0;">Baskets</span></button>
+        <button type="button" aria-pressed="false" style="position: relative; padding: 0 0 8px; border-radius: 18px; border: 1.5px solid #EEB4B3; background: #FFFFFF; overflow: hidden; font: 700 11px Figtree, sans-serif; color: #2A0A18; text-align: left;"><span class="scallop" style="display: block; height: 70px; background: #D5F5FA;"></span><span style="display: block; padding: 4px 8px 0;">T-shirt blanc</span></button>
+        <button type="button" aria-pressed="false" style="position: relative; padding: 0 0 8px; border-radius: 18px; border: 1.5px solid #EEB4B3; background: #FFFFFF; overflow: hidden; font: 700 11px Figtree, sans-serif; color: #2A0A18; text-align: left;"><span class="scallop" style="display: block; height: 70px; background: #DADFF1;"></span><span style="display: block; padding: 4px 8px 0;">Manteau long</span></button>
+        <button type="button" aria-pressed="false" style="position: relative; padding: 0 0 8px; border-radius: 18px; border: 1.5px dashed #EEB4B3; background: transparent; font: 700 11px Figtree, sans-serif; color: #71103C; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 4px;"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="M20 20l-3.5-3.5"></path></svg>Chercher</button>
+      </div>
+    </div>
+  </div>
+
+  <div style="position: absolute; left: 0; right: 0; bottom: 0; padding: 14px 20px 26px; background: #FFF8F6; border-top: 1px solid #F6D6D5; display: flex; gap: 10px;">
+    <button type="button" style="flex: 1; height: 50px; border-radius: 999px; border: 1.5px solid #71103C; background: #FFFFFF; color: #71103C; font: 700 14px Figtree, sans-serif;">Brouillon</button>
+    <a href="Fil.html" style="flex: 2; height: 50px; border-radius: 999px; background: #71103C; color: #FFFFFF; font: 700 14px Figtree, sans-serif; display: flex; align-items: center; justify-content: center; text-decoration: none;">Publier mon look</a>
+  </div>
+</div>
+
+
+</body>
+</html>
+

@@ -71,3 +71,17 @@ Justification : le commentaire est réservé au cercle proche. Un abonné peut r
 |---|---|
 | L'application s'appelle **Lendly** : titre de l'onglet, meta description, logo de l'écran de connexion, titre de l'API (`Lendly API`), en-tête envoyé au service d'IA, nom du paquet Composer (`thaisflx/lendly-backend`). | C'est le nom de marque, celui que voit l'utilisateur. Il correspond au logo dessiné pour l'application. |
 | **PENDERIE** reste le nom du projet scolaire (module WR506D) : dépôt, dossiers, documentation, README. Les noms techniques ne changent pas : base `penderie_db`, clé `penderie_token` du navigateur, en-tête `X-Penderie-Env`, comptes de démo `@penderie.test`. | Le nom du projet et celui du produit sont deux choses distinctes. Renommer les noms techniques n'apporterait rien à l'utilisateur et casserait les sessions, les bases et la configuration existantes. |
+
+## 2026-11-11 · Refonte visuelle (maquette v2)
+
+Référence : [`docs/maquette-v2/`](maquette-v2/README.md), validée (mobile 390 px).
+
+| Décision | Justification |
+|---|---|
+| Titres en **Mono Scribble** (démo), avec Bricolage Grotesque 800 en secours ; texte courant en Figtree. Une majuscule donne une lettre manuscrite, une minuscule une capitale grasse : les grands titres de page prennent une majuscule initiale, les titres de section et noms de cartes s'écrivent en minuscules. | C'est l'identité de la maquette. La règle d'écriture évite qu'un titre soit entièrement manuscrit, donc illisible. |
+| `unicode-range` exclut les chiffres (U+0030-0039) de Mono Scribble. | La démo n'a pas de chiffres : elle affiche un logo à leur place. Les chiffres passent en Bricolage Grotesque. |
+| Logo en texte (`AppLogo.vue`) : `len` et `l` roses, `D` et `Y.` bordeaux, `role="img"` et `aria-label="Lendly"`. | Pas d'image à charger ; la même police que les titres. Le rose (1,7:1 sur le fond) est accepté car un logo est exempté du critère de contraste (WCAG 1.4.3) et le nom est donné par `aria-label`. |
+| Favicon : le « Y. » manuscrit bordeaux sur un carré arrondi rose pâle, en tracés extraits du `.ttf` avec fontTools (1,2 Ko). | Un SVG qui chargerait la police ne s'afficherait pas comme favicon ; les tracés ne dépendent de rien. |
+| Violet foncé `#5E6CA8` pour l'élément actif (texte blanc, 5:1) ; texte indicatif des champs en `#7D6F80` (4,7:1 sur blanc). | Tous les textes respectent 4.5:1. |
+| Pas de ligne décorative violette, seulement des étoiles, avec parcimonie. | Choix visuel : les lignes de la maquette alourdissent les écrans. |
+| Les polices testées (`fonts/` à la racine, `defante.otf`) sortent du dépôt ; `/fonts/` est ignoré. Les HTML de la maquette pointent vers `frontend/src/assets/fonts/MonoScribble.ttf`. | Une seule copie de la police dans le dépôt, celle qu'utilise l'application. |
