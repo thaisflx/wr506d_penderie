@@ -121,7 +121,8 @@ export function roomIcon(name = '') {
 }
 
 // Couleurs de fond alternées des vignettes
-const TONES = ['tone-glaucous', 'tone-peach', 'tone-orange']
+// Fonds des vignettes sans photo, en alternance (maquette v2)
+const TONES = ['tone-sky', 'tone-glaucous', 'tone-peach']
 export function toneFor(index) {
   return TONES[index % TONES.length]
 }

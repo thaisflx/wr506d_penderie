@@ -4,6 +4,7 @@ import { RouterLink } from 'vue-router'
 import { api } from '../api/client'
 import AppIcon from '../components/AppIcon.vue'
 import BottomSheet from '../components/BottomSheet.vue'
+import DecoStar from '../components/DecoStar.vue'
 import UserAvatar from '../components/UserAvatar.vue'
 import { useAuthStore } from '../stores/auth'
 
@@ -21,6 +22,8 @@ const busyId = ref(null)
 const confirm = ref(null)
 
 const TYPE_LABELS = { follower: 'Abonnement', close_friend: 'Ami proche' }
+// Phrase de la carte de demande : « veut s'abonner à toi », « veut devenir ton ami proche »
+const REQUEST_TEXTS = { follower: ["s'abonner", ' à toi'], close_friend: ['devenir ton ami proche', ''] }
 
 // Recherche : lancée 300 ms après la dernière frappe, à partir de 2 caractères (comme l'API)
 const search = ref('')
@@ -118,12 +121,16 @@ function statusLabel(r, mine) {
 </script>
 
 <template>
-  <main class="screen">
-    <h1 class="display page-title">Amis</h1>
+  <main class="screen friends">
+    <div class="page-intro">
+      <h1 class="display page-title">Mes amis</h1>
+      <DecoStar class="page-intro-star" :size="22" />
+      <p class="page-intro-text">Ceux qui voient ton dressing, et ceux que tu suis.</p>
+    </div>
 
     <div class="segmented" role="tablist" aria-label="Amis">
       <button type="button" role="tab" data-cy="friends-tab-requests" :aria-selected="tab === 'requests'" @click="tab = 'requests'">
-        Demandes<template v-if="requests.length"> ({{ requests.length }})</template>
+        Demandes<template v-if="requests.length"> · {{ requests.length }}</template>
       </button>
       <button type="button" role="tab" data-cy="friends-tab-relations" :aria-selected="tab === 'relations'" @click="tab = 'relations'">
         Mes relations
@@ -173,24 +180,25 @@ function statusLabel(r, mine) {
     <!-- Demandes reçues en attente -->
     <section v-else-if="tab === 'requests'" class="stack" aria-label="Demandes reçues">
       <ul v-if="requests.length" class="person-list">
-        <li v-for="r in requests" :key="r.id" class="person-row" data-cy="request-row">
-          <UserAvatar :name="r.requester.username" :src="r.requester.avatar" :size="44" />
-          <span class="person-row-text">
-            <RouterLink :to="`/users/${r.requester.id}`" class="person-row-name person-row-name--link" data-cy="request-name">{{ r.requester.username }}</RouterLink>
-            <span class="chips">
-              <span class="chip" :class="r.type === 'close_friend' ? 'chip--wine' : 'chip--glaucous'" data-cy="request-type">
-                {{ TYPE_LABELS[r.type] }}
-              </span>
+        <li v-for="r in requests" :key="r.id" class="card request-card" data-cy="request-row">
+          <div class="request-card-head">
+            <UserAvatar :name="r.requester.username" :src="r.requester.avatar" :size="52" flower />
+            <span class="person-row-text">
+              <RouterLink :to="`/users/${r.requester.id}`" class="person-row-name person-row-name--link" data-cy="request-name">{{ r.requester.username }}</RouterLink>
+              <span class="small muted">veut <strong class="request-verb">{{ REQUEST_TEXTS[r.type][0] }}</strong>{{ REQUEST_TEXTS[r.type][1] }}</span>
             </span>
-          </span>
-          <span class="person-row-actions">
-            <button type="button" class="btn btn--primary btn--small" data-cy="request-accept" :disabled="busyId === r.id" @click="accept(r)">
+            <span class="chip" :class="r.type === 'close_friend' ? 'chip--peach' : 'chip--glaucous'" data-cy="request-type">
+              {{ TYPE_LABELS[r.type] }}
+            </span>
+          </div>
+          <div class="request-card-actions">
+            <button type="button" class="btn btn--primary" data-cy="request-accept" :disabled="busyId === r.id" @click="accept(r)">
               Accepter
             </button>
-            <button type="button" class="btn btn--soft btn--small" data-cy="request-refuse" :disabled="busyId === r.id" @click="refuse(r)">
+            <button type="button" class="btn" data-cy="request-refuse" :disabled="busyId === r.id" @click="refuse(r)">
               Refuser
             </button>
-          </span>
+          </div>
         </li>
       </ul>
       <div v-else class="empty-state" data-cy="requests-empty">
@@ -210,7 +218,7 @@ function statusLabel(r, mine) {
               <span v-if="statusLabel(r, section.key === 'sent')" class="small muted">{{ statusLabel(r, section.key === 'sent') }}</span>
             </span>
             <span class="person-row-actions">
-              <button type="button" class="link-btn" data-cy="relation-remove" :disabled="busyId === r.id" @click="askRemove(r, user)">
+              <button type="button" class="btn btn--soft btn--small" data-cy="relation-remove" :disabled="busyId === r.id" @click="askRemove(r, user)">
                 {{ section.key === 'sent' ? (r.status === 'pending' ? 'Annuler' : 'Ne plus suivre') : 'Retirer' }}
               </button>
             </span>

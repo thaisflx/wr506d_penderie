@@ -4,6 +4,7 @@ import { RouterLink, useRouter } from 'vue-router'
 import { api } from '../api/client'
 import AppIcon from '../components/AppIcon.vue'
 import BottomSheet from '../components/BottomSheet.vue'
+import DecoStar from '../components/DecoStar.vue'
 import ItemTile from '../components/ItemTile.vue'
 import UserAvatar from '../components/UserAvatar.vue'
 import { toneFor } from '../hierarchy'
@@ -37,16 +38,17 @@ function logout() {
 </script>
 
 <template>
-  <div class="screen--flush">
-    <div class="hero profile-band">
-      <div class="hero-inner profile-band-inner">
-        <button type="button" class="icon-btn icon-btn--on-dark" aria-label="Paramètres" data-cy="profile-settings" @click="settingsOpen = true">
-          <AppIcon name="settings" />
-        </button>
-      </div>
+  <div class="screen--flush profile-page">
+    <!-- Bandeau rose pâle festonné -->
+    <div class="profile-band scallop">
+      <DecoStar class="profile-star profile-star--white" :size="18" color="var(--white)" />
+      <DecoStar class="profile-star profile-star--wine" :size="22" color="var(--wine)" />
+      <button type="button" class="icon-btn profile-band-btn" aria-label="Paramètres" data-cy="profile-settings" @click="settingsOpen = true">
+        <AppIcon name="settings" />
+      </button>
     </div>
 
-    <div v-if="user" class="screen-body profile-layout">
+    <div v-if="user" class="profile-content profile-layout">
       <aside class="profile-aside">
         <span class="profile-avatar">
           <UserAvatar :name="user.username" :src="user.avatar" :size="96" />
@@ -54,37 +56,35 @@ function logout() {
 
         <div class="profile-identity">
           <h1 class="display profile-name">{{ user.username }}</h1>
-          <span class="muted profile-bio">
-            {{ user.email }}<template v-if="user.bio"> · {{ user.bio }}</template>
-          </span>
+          <p v-if="user.bio" class="profile-bio">{{ user.bio }}</p>
+          <p class="small muted">{{ user.email }}</p>
         </div>
 
         <div class="stat-grid">
           <div class="card stat">
             <span class="display stat-number">{{ user.itemCount ?? 0 }}</span>
-            <span class="stat-label">objets</span>
+            <span class="stat-label">{{ (user.itemCount ?? 0) > 1 ? 'objets' : 'objet' }}</span>
           </div>
           <div class="card stat">
             <span class="display stat-number">{{ user.followerCount ?? 0 }}</span>
-            <span class="stat-label">abonnés</span>
+            <span class="stat-label">{{ (user.followerCount ?? 0) > 1 ? 'abonnés' : 'abonné' }}</span>
           </div>
           <div class="card stat">
             <span class="display stat-number">{{ user.closeFriendCount ?? 0 }}</span>
-            <span class="stat-label">amis proches</span>
+            <span class="stat-label">{{ (user.closeFriendCount ?? 0) > 1 ? 'amis proches' : 'ami proche' }}</span>
           </div>
         </div>
 
         <!-- Bandeau des demandes reçues : ouvre la page Amis -->
-        <RouterLink v-if="user.pendingRequestCount" to="/friends" class="notice notice--link tone-orange" data-cy="profile-requests-notice">
-          <span class="notice-icon"><AppIcon name="friends" /></span>
+        <RouterLink v-if="user.pendingRequestCount" to="/friends" class="notice notice--link notice--request" data-cy="profile-requests-notice">
           <span class="notice-text">
-            {{ user.pendingRequestCount }} demande{{ user.pendingRequestCount > 1 ? 's' : '' }} en attente
+            <span class="notice-count">{{ user.pendingRequestCount }}</span> demande{{ user.pendingRequestCount > 1 ? 's' : '' }} en attente
           </span>
-          <AppIcon name="next" :size="16" :stroke="2.2" />
+          <AppIcon name="next" :size="18" :stroke="2.2" />
         </RouterLink>
 
         <section v-if="user.children?.length" class="stack stack--tight">
-          <h2 class="section-title">Comptes rattachés</h2>
+          <h2 class="section-title">comptes rattachés</h2>
           <ul class="children-list">
             <li v-for="child in user.children" :key="child.id" class="child">
               <UserAvatar :name="child.username" :src="child.avatar" :size="56" />
@@ -96,9 +96,9 @@ function logout() {
       </aside>
 
       <section class="profile-main">
-        <div class="segmented" role="tablist" aria-label="Mes objets">
-          <button type="button" role="tab" :aria-selected="tab === 'dressing'" @click="tab = 'dressing'">Dressing</button>
-          <button type="button" role="tab" :aria-selected="tab === 'sale'" @click="tab = 'sale'">En vente</button>
+        <div class="pills profile-tabs" role="tablist" aria-label="Mes objets">
+          <button type="button" class="pill" role="tab" :aria-selected="tab === 'dressing'" :aria-pressed="tab === 'dressing'" @click="tab = 'dressing'">Dressing</button>
+          <button type="button" class="pill" role="tab" :aria-selected="tab === 'sale'" :aria-pressed="tab === 'sale'" @click="tab = 'sale'">En vente</button>
         </div>
 
         <p v-if="loading" class="loading">Chargement…</p>

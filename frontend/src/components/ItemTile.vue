@@ -12,8 +12,9 @@ defineProps({
 </script>
 
 <template>
-  <RouterLink v-if="compact" :to="`/items/${item.id}`" class="thumb" :class="tone" :aria-label="item.name">
-    <ItemVisual :item="item" :category-type="item.categoryType" />
+  <RouterLink v-if="compact" :to="`/items/${item.id}`" class="thumb-card">
+    <span class="thumb scallop" :class="tone"><ItemVisual :item="item" :category-type="item.categoryType" /></span>
+    <span class="thumb-card-name">{{ item.name }}</span>
   </RouterLink>
   <RouterLink v-else :to="`/items/${item.id}`" class="card item-tile">
     <span class="thumb" :class="tone"><ItemVisual :item="item" :category-type="item.categoryType" /></span>

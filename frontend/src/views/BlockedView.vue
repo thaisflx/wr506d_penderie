@@ -41,10 +41,13 @@ async function unblock() {
 <template>
   <main class="screen">
     <div class="page-head">
-      <button type="button" class="icon-btn icon-btn--solid" aria-label="Retour" @click="router.back()">
-        <AppIcon name="back" :stroke="2.6" />
+      <button type="button" class="icon-btn" aria-label="Retour" @click="router.back()">
+        <AppIcon name="back" :stroke="2.4" />
       </button>
+    </div>
+    <div class="page-intro">
       <h1 class="display page-title">Comptes bloqués</h1>
+      <p class="page-intro-text">Ils ne te voient plus et ne peuvent plus te trouver.</p>
     </div>
 
     <p v-if="error" class="error" role="alert">{{ error }}</p>

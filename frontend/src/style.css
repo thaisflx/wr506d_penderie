@@ -234,64 +234,6 @@ textarea::placeholder {
 }
 
 /* ============================================================
-   En-tête bordeaux
-   ============================================================ */
-
-.hero {
-  position: relative;
-  padding: calc(52px + var(--safe-top)) 18px 20px;
-  background: var(--wine);
-  color: var(--white);
-  border-radius: 0 0 32px 32px;
-}
-
-.hero-inner {
-  display: flex;
-  flex-direction: column;
-  gap: 14px;
-  width: 100%;
-  max-width: var(--page-max);
-  margin: 0 auto;
-}
-
-.hero-bar {
-  display: flex;
-  justify-content: space-between;
-  gap: 8px;
-}
-
-.hero-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.hero-heading {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.hero-eyebrow {
-  font-size: 13px;
-  color: var(--white);
-  opacity: 0.8;
-}
-
-.hero-title {
-  font-size: 40px;
-  color: var(--white);
-  text-transform: lowercase;
-}
-
-.hero-title::first-letter {
-  text-transform: uppercase;
-}
-
-.hero-chips {
-  margin-top: 6px;
-}
-
-/* ============================================================
    Boutons
    ============================================================ */
 
@@ -594,7 +536,10 @@ textarea::placeholder {
 }
 
 .stat-number {
-  font-size: 22px;
+  font-family: var(--font-display);
+  font-size: 26px;
+  font-weight: 400;
+  line-height: 1;
 }
 
 .stat-label {
@@ -655,6 +600,29 @@ textarea::placeholder {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+/* Vignette compacte (profil) : image festonnée et nom dessous */
+.thumb-card {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.thumb-card .thumb {
+  height: 132px;
+  border-radius: 18px 18px 0 0;
+}
+
+.thumb-card-name {
+  margin-top: 6px;
+  overflow: hidden;
+  font-size: 11px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .item-tile {
@@ -1336,19 +1304,56 @@ textarea::placeholder {
    Profil
    ============================================================ */
 
+/* Bandeau rose pâle festonné (mon profil, profil public), étoiles et bouton blanc */
 .profile-band {
+  position: relative;
   height: 150px;
+  background: var(--rose-soft);
 }
 
-.profile-band-inner {
-  flex-direction: row;
-  justify-content: flex-end;
+.profile-band-btn {
+  position: absolute;
+  top: calc(22px + var(--safe-top));
+  right: 20px;
+  border-color: transparent;
+}
+
+.profile-band-btn--start {
+  right: auto;
+  left: 20px;
+}
+
+.profile-star {
+  position: absolute;
+}
+
+.profile-star--white {
+  top: 22px;
+  left: 110px;
+}
+
+.profile-star--wine {
+  top: 92px;
+  right: 60px;
+}
+
+/* Contenu : l'avatar chevauche le bandeau */
+.profile-content {
+  position: relative;
+  margin-top: -58px;
+  padding: 0 20px 130px;
+}
+
+.profile-public {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 .profile-layout {
-  position: relative;
-  margin-top: -62px;
-  padding-top: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
 
 .profile-aside,
@@ -1372,12 +1377,96 @@ textarea::placeholder {
   gap: 3px;
 }
 
+/* Pseudo : en minuscules, donc en capitales grasses bordeaux */
 .profile-name {
-  font-size: 30px;
+  font-size: 38px;
+  line-height: 0.95;
+  color: var(--wine);
+  text-transform: lowercase;
 }
 
 .profile-bio {
+  margin-top: 6px;
   font-size: 14px;
+  line-height: 1.4;
+  color: var(--muted);
+}
+
+/* Bandeau « demande en attente » : cyan, compteur bordeaux */
+.notice--request {
+  padding: 12px 14px;
+  font-size: 13px;
+  background: var(--cyan);
+  border-radius: 20px;
+}
+
+.notice--request .notice-text {
+  font-size: 13px;
+}
+
+.notice-count {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 24px;
+  height: 24px;
+  margin-right: 6px;
+  padding: 0 6px;
+  font-size: 12px;
+  color: var(--white);
+  background: var(--wine);
+  border-radius: 999px;
+}
+
+/* Titre de page avec sous-titre et étoile (Amis, comptes bloqués) */
+.page-intro {
+  position: relative;
+  align-self: flex-start;
+  padding-right: 34px;
+}
+
+.page-intro-star {
+  position: absolute;
+  top: -4px;
+  right: 0;
+}
+
+.page-intro-text {
+  margin-top: 6px;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+/* Demande reçue : carte avec avatar fleur, phrase, type, et deux grands boutons */
+.request-card {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  padding: 14px;
+  border-radius: 26px;
+}
+
+.request-card-head {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.request-verb {
+  color: var(--ink);
+}
+
+.request-card-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.request-card-actions .btn {
+  flex: 1;
+}
+
+.avatar-initial--flower {
+  border-radius: 0;
 }
 
 .notice {
@@ -1478,10 +1567,6 @@ textarea::placeholder {
 }
 
 /* Profil public d'un autre compte */
-.profile-band-inner--start {
-  justify-content: flex-start;
-}
-
 .profile-actions {
   display: flex;
   flex-wrap: wrap;
@@ -1938,13 +2023,13 @@ select.input {
     gap: 16px;
   }
 
-  .hero {
-    padding: calc(40px + var(--safe-top)) 32px 32px;
+  .profile-content {
+    max-width: calc(var(--page-max) + 64px);
+    margin: -58px auto 0;
+    padding: 0 32px 130px;
   }
 
-  .hero-title {
-    font-size: 52px;
-  }
+
 
   .page-title {
     font-size: 44px;
@@ -2130,11 +2215,6 @@ select.input {
     padding-bottom: 120px;
   }
 
-  /* En-tête bordeaux : bloc arrondi détaché des bords */
-  .hero {
-    margin: 20px 24px 0 0;
-    border-radius: 32px;
-  }
 
   .fab {
     right: 40px;
