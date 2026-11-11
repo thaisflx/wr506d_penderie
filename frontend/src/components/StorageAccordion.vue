@@ -11,7 +11,6 @@ import NodeForm from './NodeForm.vue'
 // Rangement dépliable : ses catégories et leurs objets sont chargés à la première ouverture
 const props = defineProps({
   storage: { type: Object, required: true },
-  tone: { type: String, default: 'tone-orange' },
   open: { type: Boolean, default: false },
   // Incrémenté par le parent pour forcer un rechargement (ex. objet ajouté)
   refreshKey: { type: Number, default: 0 },
@@ -29,6 +28,22 @@ const error = ref('')
 const sheet = ref(null)
 const saving = ref(false)
 const formError = ref(null)
+
+// Fonds des cartes d'objet sans photo, en alternance (maquette v2)
+const TONES = ['tone-glaucous', 'tone-sky', 'tone-peach']
+
+// Couleur de la puce de statut : « Au sale » rose pâle, « Prêté » cyan, « En vente » violet pâle.
+// Sur un fond de la même couleur, la puce passe en blanc pour rester visible.
+const STATUS_CHIPS = { in_laundry: 'chip--peach', lent: 'chip--sky', for_sale: 'chip--glaucous', reserved: 'chip--white' }
+function statusChip(status, tone) {
+  const chip = STATUS_CHIPS[status] ?? 'chip--white'
+  return chip.replace('chip--', 'tone-') === tone ? 'chip--white' : chip
+}
+
+// Objets du rangement à plat, pour l'alternance des fonds et la grande carte (le premier objet)
+const flatItems = computed(() => categories.value.flatMap((category) => itemsByCategory.value[category.id] ?? []))
+const toneOf = (item) => TONES[flatItems.value.indexOf(item) % TONES.length]
+const featuredId = computed(() => flatItems.value[0]?.id)
 
 const subtitle = computed(() =>
   [plural(props.storage.itemCount ?? 0, 'objet'), plural(props.storage.categoryCount ?? 0, 'catégorie')].join(' · '),
@@ -55,6 +70,13 @@ watch(
     if (isOpen && !loaded.value) load()
   },
   { immediate: true },
+)
+// Choisir le rangement par sa pilule le déplie
+watch(
+  () => props.open,
+  (isOpen) => {
+    if (isOpen) expanded.value = true
+  },
 )
 watch(
   () => props.refreshKey,
@@ -113,17 +135,14 @@ const deleteCategory = () =>
 </script>
 
 <template>
-  <article class="card storage" data-cy="storage">
+  <article class="storage" data-cy="storage">
     <button type="button" class="storage-head" data-cy="storage-toggle" :aria-expanded="expanded" @click="expanded = !expanded">
-      <span class="storage-icon" :class="tone"><AppIcon name="box" :size="22" /></span>
       <span class="storage-text">
         <span class="storage-name" data-cy="storage-name">{{ storage.name }}</span>
         <span class="small muted">{{ subtitle }}</span>
-        <span v-if="storage.isPersonal || storage.visibility !== 'private'" class="chips storage-chips">
-          <span v-if="storage.isPersonal" class="chip chip--wine"><AppIcon name="lock" :size="12" :stroke="2.2" /> Perso</span>
-          <span v-else class="chip chip--glaucous"><AppIcon name="eye" :size="12" :stroke="2.2" /> {{ optionLabel(VISIBILITY_OPTIONS, storage.visibility) }}</span>
-        </span>
       </span>
+      <span v-if="storage.isPersonal" class="chip chip--wine"><AppIcon name="lock" :size="12" :stroke="2.2" /> Perso</span>
+      <span v-else class="chip"><AppIcon :name="storage.visibility === 'private' ? 'lock' : 'eye'" :size="12" :stroke="2.2" /> {{ optionLabel(VISIBILITY_OPTIONS, storage.visibility) }}</span>
       <span class="chevron" :class="{ 'chevron--open': expanded }"><AppIcon name="down" :size="18" :stroke="2.4" /></span>
     </button>
 
@@ -133,7 +152,7 @@ const deleteCategory = () =>
       <template v-else>
         <p v-if="!categories.length" class="empty-note">Aucune catégorie : ajoute-en une pour y ranger des objets.</p>
 
-        <section v-for="category in categories" :key="category.id" data-cy="category">
+        <section v-for="category in categories" :key="category.id" class="category" data-cy="category">
           <div class="category-head">
             <span data-cy="category-name">{{ category.name }}</span>
             <span class="category-actions">
@@ -144,17 +163,30 @@ const deleteCategory = () =>
             </span>
           </div>
           <p v-if="!itemsByCategory[category.id]?.length" class="empty-note">Aucun objet.</p>
-          <RouterLink v-for="item in itemsByCategory[category.id]" :key="item.id" :to="`/items/${item.id}`" class="item-row" data-cy="item-row">
-            <span class="item-row-mini" :class="category.type === 'media' ? '' : 'tone-peach'">
-              <ItemVisual :item="item" :category-type="category.type" :size="category.type === 'media' ? 44 : 30" />
-            </span>
-            <span class="item-row-text">
-              <span class="item-row-name" data-cy="item-name">{{ item.name }}</span>
-              <span class="small muted">{{ category.name }}<template v-if="item.isPersonal"> · Perso</template></span>
-            </span>
-            <span v-if="item.status !== 'available'" class="chip chip--glaucous">{{ optionLabel(ITEM_STATUS_OPTIONS, item.status) }}</span>
-            <span class="item-row-chevron"><AppIcon name="next" :size="16" :stroke="2.2" /></span>
-          </RouterLink>
+          <div v-else class="item-cards">
+            <RouterLink
+              v-for="item in itemsByCategory[category.id]"
+              :key="item.id"
+              :to="`/items/${item.id}`"
+              class="item-card"
+              :class="{ 'item-card--featured': item.id === featuredId }"
+              data-cy="item-row"
+            >
+              <span class="item-card-media scallop" :class="item.photo ? '' : toneOf(item)">
+                <span v-if="item.status !== 'available'" class="chip item-card-chip" :class="statusChip(item.status, toneOf(item))">
+                  {{ optionLabel(ITEM_STATUS_OPTIONS, item.status) }}
+                </span>
+                <ItemVisual :item="item" :category-type="category.type" :size="item.id === featuredId ? 96 : 52" />
+              </span>
+              <span class="item-card-text">
+                <span>
+                  <span class="item-card-name" data-cy="item-name">{{ item.name }}</span>
+                  <span class="item-card-meta">{{ storage.name }} · {{ category.name }}<template v-if="item.isPersonal"> · Perso</template></span>
+                </span>
+                <span v-if="item.id === featuredId" class="item-card-see" aria-hidden="true">Voir</span>
+              </span>
+            </RouterLink>
+          </div>
         </section>
 
         <div class="storage-actions">

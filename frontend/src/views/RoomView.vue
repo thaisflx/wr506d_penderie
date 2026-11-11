@@ -6,7 +6,7 @@ import AppIcon from '../components/AppIcon.vue'
 import BottomSheet from '../components/BottomSheet.vue'
 import NodeForm from '../components/NodeForm.vue'
 import StorageAccordion from '../components/StorageAccordion.vue'
-import { LEVELS, VISIBILITY_OPTIONS, idFromIri, iri, optionLabel, plural } from '../hierarchy'
+import { LEVELS, idFromIri, iri, plural } from '../hierarchy'
 
 const props = defineProps({
   id: { type: String, required: true },
@@ -29,7 +29,11 @@ const categoryOptions = ref([])
 const preselectedCategory = ref(null)
 const refreshKeys = ref({})
 
-const TONES = ['tone-orange', 'tone-glaucous', 'tone-peach']
+// Rangement affiché seul (pilule), ou null pour « Tout »
+const selectedStorage = ref(null)
+const shownStorages = computed(() =>
+  selectedStorage.value ? storages.value.filter((storage) => storage.id === selectedStorage.value) : storages.value,
+)
 
 async function load() {
   error.value = ''
@@ -57,11 +61,16 @@ watch(
   { immediate: true },
 )
 
-const visibilityChip = computed(() => {
-  if (!room.value) return null
-  if (room.value.isPersonal) return { icon: 'lock', label: 'Perso' }
-  if (room.value.visibility === 'private') return { icon: 'lock', label: 'Privée' }
-  return { icon: 'eye', label: optionLabel(VISIBILITY_OPTIONS, room.value.visibility) }
+// « 5 objets · visible par tes abonnés »
+const VISIBILITY_TEXT = {
+  private: 'privée',
+  close_friends: 'visible par tes amis proches',
+  followers: 'visible par tes abonnés',
+}
+const summary = computed(() => {
+  if (!room.value) return ''
+  const visibility = room.value.isPersonal ? 'perso, visible par toi seul' : VISIBILITY_TEXT[room.value.visibility]
+  return [plural(room.value.itemCount ?? 0, 'objet'), plural(room.value.storageCount ?? 0, 'rangement'), visibility].join(' · ')
 })
 
 // Formulaire d'objet : les champs de l'objet + le choix de la catégorie
@@ -135,64 +144,66 @@ const createItem = (payload) =>
   })
 
 function onStorageDeleted(storage) {
+  if (selectedStorage.value === storage.id) selectedStorage.value = null
   storages.value = storages.value.filter((existing) => existing.id !== storage.id)
   load()
 }
 </script>
 
 <template>
-  <div class="screen--flush">
-    <header class="hero">
-      <div class="hero-inner">
-        <div class="hero-bar">
-          <RouterLink to="/" class="icon-btn icon-btn--on-dark" aria-label="Retour à l'accueil">
-            <AppIcon name="back" :stroke="2.6" />
-          </RouterLink>
-          <div class="hero-actions">
-            <button v-if="room" type="button" class="icon-btn icon-btn--on-dark" aria-label="Réglages de la pièce" @click="openSheet('room-edit')">
-              <AppIcon name="settings" :size="19" />
-            </button>
-          </div>
-        </div>
-        <div v-if="room" class="hero-heading">
-          <span class="hero-eyebrow" data-cy="room-place">{{ place?.name }}<template v-if="place?.city"> · {{ place.city }}</template></span>
-          <h1 class="display hero-title" data-cy="room-name">{{ room.name }}</h1>
-          <div class="chips hero-chips">
-            <span class="chip chip--glass">{{ plural(room.storageCount ?? 0, 'rangement') }}</span>
-            <span class="chip chip--glass">{{ plural(room.itemCount ?? 0, 'objet') }}</span>
-            <span class="chip chip--cream"><AppIcon :name="visibilityChip.icon" :size="12" :stroke="2.2" /> {{ visibilityChip.label }}</span>
-          </div>
-        </div>
+  <div class="screen room">
+    <div class="room-bar">
+      <RouterLink to="/" class="icon-btn" aria-label="Retour à l'accueil">
+        <AppIcon name="back" :stroke="2.4" />
+      </RouterLink>
+      <nav v-if="room" class="breadcrumb" aria-label="Fil d'Ariane" data-cy="room-place">
+        <RouterLink to="/">{{ place?.name }}</RouterLink> / <span aria-current="page">{{ room.name }}</span>
+      </nav>
+      <button v-if="room" type="button" class="icon-btn room-settings" aria-label="Réglages de la pièce" @click="openSheet('room-edit')">
+        <AppIcon name="settings" :size="19" />
+      </button>
+    </div>
+
+    <p v-if="loading" class="loading">Chargement…</p>
+    <p v-else-if="error" class="error" role="alert">{{ error }}</p>
+    <template v-else>
+      <div>
+        <h1 class="display page-title" data-cy="room-name">{{ room.name }}</h1>
+        <p class="room-summary">{{ summary }}</p>
       </div>
-    </header>
 
-    <main class="screen-body">
-      <p v-if="loading" class="loading">Chargement…</p>
-      <p v-else-if="error" class="error" role="alert">{{ error }}</p>
-      <template v-else>
-        <div class="section-head">
-          <h2 class="section-title">Rangements</h2>
-        </div>
+      <!-- Pilules : « Tout » affiche chaque rangement dépliable, une pilule n'affiche que ce rangement -->
+      <div v-if="storages.length > 1" class="pills" role="group" aria-label="Rangements">
+        <button type="button" class="pill" :aria-pressed="selectedStorage === null" @click="selectedStorage = null">Tout</button>
+        <button
+          v-for="storage in storages"
+          :key="storage.id"
+          type="button"
+          class="pill"
+          :aria-pressed="selectedStorage === storage.id"
+          @click="selectedStorage = storage.id"
+        >
+          {{ storage.name }}<template v-if="storage.isPersonal"> · perso</template>
+        </button>
+      </div>
 
-        <div class="storage-list">
-          <StorageAccordion
-            v-for="(storage, index) in storages"
-            :key="storage.id"
-            :storage="storage"
-            :tone="TONES[index % TONES.length]"
-            :open="index === 0"
-            :refresh-key="refreshKeys[storage.id] ?? 0"
-            @changed="load"
-            @deleted="onStorageDeleted"
-            @add-item="openItemSheet"
-          />
+      <div class="storage-list">
+        <StorageAccordion
+          v-for="(storage, index) in shownStorages"
+          :key="storage.id"
+          :storage="storage"
+          :open="selectedStorage !== null || index === 0"
+          :refresh-key="refreshKeys[storage.id] ?? 0"
+          @changed="load"
+          @deleted="onStorageDeleted"
+          @add-item="openItemSheet"
+        />
 
-          <button type="button" class="add-tile add-tile--row" @click="openSheet('storage-create')">
-            <AppIcon name="plus" :stroke="2.4" /> Ajouter un rangement
-          </button>
-        </div>
-      </template>
-    </main>
+        <button type="button" class="add-tile add-tile--row" @click="openSheet('storage-create')">
+          <AppIcon name="plus" :stroke="2.4" /> Ajouter un rangement
+        </button>
+      </div>
+    </template>
 
     <button
       v-if="room && storages.length"
@@ -202,9 +213,8 @@ function onStorageDeleted(storage) {
       :aria-label="`Ajouter un objet dans ${room.name}`"
       @click="openItemSheet()"
     >
-      <AppIcon name="plus" :size="26" :stroke="2.6" />
+      <AppIcon name="plus" :size="20" :stroke="2.4" /> Ajouter un objet
     </button>
-
     <BottomSheet v-if="sheet === 'room-edit'" title="Réglages de la pièce" @close="sheet = null">
       <NodeForm
         :fields="LEVELS.room.fields"

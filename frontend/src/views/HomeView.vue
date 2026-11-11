@@ -3,10 +3,13 @@ import { computed, ref, watch } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { api } from '../api/client'
 import AppIcon from '../components/AppIcon.vue'
+import AppLogo from '../components/AppLogo.vue'
 import BottomSheet from '../components/BottomSheet.vue'
+import DecoStar from '../components/DecoStar.vue'
+import FlowerShape from '../components/FlowerShape.vue'
 import NodeForm from '../components/NodeForm.vue'
 import UserAvatar from '../components/UserAvatar.vue'
-import { LEVELS, iri, plural, roomIcon } from '../hierarchy'
+import { LEVELS, VISIBILITY_OPTIONS, iri, optionLabel, plural, roomIcon } from '../hierarchy'
 import { useAuthStore } from '../stores/auth'
 import { usePlacesStore } from '../stores/places'
 
@@ -25,6 +28,12 @@ const saving = ref(false)
 const formError = ref(null)
 
 const place = computed(() => placesStore.current)
+
+// Fonds des cartes de pièce, en alternance (maquette v2)
+const TONES = ['tone-sky', 'tone-glaucous', 'tone-peach']
+
+// Puce de visibilité d'une pièce : Perso l'emporte sur la visibilité choisie
+const visibilityLabel = (room) => (room.isPersonal ? 'Perso' : optionLabel(VISIBILITY_OPTIONS, room.visibility))
 
 async function loadPlaces() {
   loading.value = true
@@ -108,40 +117,62 @@ const createRoom = (payload) =>
 </script>
 
 <template>
-  <main class="screen">
-    <!-- Titre de la page pour les lecteurs d'écran (le design n'affiche pas de titre principal) -->
-    <h1 class="visually-hidden">Accueil</h1>
+  <main class="screen home">
     <header class="home-header">
-      <RouterLink to="/profile" aria-label="Mon profil" class="home-avatar">
-        <UserAvatar :name="auth.user?.username ?? ''" :src="auth.user?.avatar" :size="48" />
-      </RouterLink>
-      <div class="home-greeting">
-        <span class="muted">Bonjour</span>
-        <span class="display home-name" data-cy="home-username">{{ auth.user?.username }}</span>
+      <AppLogo class="home-logo" />
+      <div class="home-header-actions">
+        <RouterLink
+          to="/friends"
+          class="icon-btn icon-btn--badge"
+          data-cy="home-bell"
+          :aria-label="auth.user?.pendingRequestCount ? `Demandes en attente : ${auth.user.pendingRequestCount}` : 'Notifications'"
+        >
+          <AppIcon name="bell" :size="22" />
+          <span v-if="auth.user?.pendingRequestCount" class="badge-count" data-cy="home-bell-count">{{ auth.user.pendingRequestCount }}</span>
+        </RouterLink>
+        <RouterLink to="/profile" aria-label="Mon profil" class="home-avatar">
+          <UserAvatar :name="auth.user?.username ?? ''" :src="auth.user?.avatar" :size="44" />
+        </RouterLink>
       </div>
-      <form role="search" class="home-search" @submit.prevent="searchItems">
-        <label for="home-search" class="visually-hidden">Rechercher un objet</label>
-        <span class="input-wrap">
-          <span class="input-icon input-icon--search"><AppIcon name="search" :stroke="2.2" /></span>
-          <input
-            id="home-search"
-            v-model.trim="search"
-            class="input input--pill input--search"
-            type="search"
-            placeholder="Où est mon pull bleu ?"
-          />
-        </span>
-      </form>
-      <RouterLink
-        to="/friends"
-        class="icon-btn icon-btn--solid icon-btn--badge"
-        data-cy="home-bell"
-        :aria-label="auth.user?.pendingRequestCount ? `Demandes en attente : ${auth.user.pendingRequestCount}` : 'Notifications'"
-      >
-        <AppIcon name="bell" />
-        <span v-if="auth.user?.pendingRequestCount" class="badge-count" data-cy="home-bell-count">{{ auth.user.pendingRequestCount }}</span>
-      </RouterLink>
     </header>
+
+    <div class="home-hello">
+      <h1 class="display page-title">Bonjour <span class="home-name" data-cy="home-username">{{ auth.user?.username }}</span></h1>
+      <DecoStar class="home-star" :size="22" />
+      <p class="home-tagline">Tout ce que tu possèdes, rangé et à portée de main.</p>
+    </div>
+
+    <form role="search" @submit.prevent="searchItems">
+      <label for="home-search" class="visually-hidden">Rechercher un objet</label>
+      <span class="input-wrap">
+        <span class="input-icon"><AppIcon name="search" :size="18" :stroke="2.2" /></span>
+        <input
+          id="home-search"
+          v-model.trim="search"
+          class="input input--search"
+          type="search"
+          placeholder="Un pull, un vinyle, la perceuse…"
+        />
+      </span>
+    </form>
+
+    <!-- Look du jour : l'écran pour poster arrive avec le lot 2 du volet social -->
+    <section class="card look-card" aria-labelledby="look-title">
+      <div class="look-card-visual">
+        <FlowerShape fill="var(--cyan)" />
+        <svg class="look-card-icon" width="56" height="56" viewBox="0 0 48 48" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" aria-hidden="true">
+          <path d="M17 7l-9 5 3 8 4-2v22h18V18l4 2 3-8-9-5c-1 3-4 5-7 5s-6-2-7-5z" />
+        </svg>
+        <DecoStar class="look-card-star" :size="16" color="var(--glaucous)" />
+      </div>
+      <div class="look-card-text">
+        <h2 id="look-title" class="section-title">look du jour</h2>
+        <p class="look-card-desc">Montre ta tenue à tes amis et retrouve les pièces portées.</p>
+        <span class="btn btn--primary btn--small" role="link" aria-disabled="true" title="Bientôt disponible" data-cy="home-post-look">
+          <AppIcon name="plus" :size="16" :stroke="2.4" /> Poster mon look
+        </span>
+      </div>
+    </section>
 
     <p v-if="error" class="error" role="alert">{{ error }}</p>
 
@@ -152,39 +183,43 @@ const createRoom = (payload) =>
       </button>
     </section>
 
-    <section v-else-if="place" class="stack">
+    <section v-else-if="place" class="stack" aria-labelledby="rooms-title">
       <div class="section-head">
-        <h2 class="section-title" data-cy="place-name">{{ place.name }}</h2>
-        <!-- Le dressing n'a plus d'entrée dans la barre de navigation (remplacée par Looks) -->
-        <RouterLink to="/dressing" class="text-link" data-cy="home-dressing">Mon dressing</RouterLink>
-        <button type="button" class="btn btn--soft btn--small" @click="openSheet('switch')">
-          Changer <AppIcon name="down" :size="14" :stroke="2.4" />
-        </button>
+        <h2 id="rooms-title" class="section-title home-rooms-title">mes pièces</h2>
+        <span class="home-rooms-links">
+          <!-- Le dressing n'a plus d'entrée dans la barre de navigation (remplacée par Looks) -->
+          <RouterLink to="/dressing" class="text-link" data-cy="home-dressing">Mon dressing</RouterLink>
+          <button type="button" class="text-link link-reset" :aria-label="`Changer de logement (actuel : ${place.name})`" @click="openSheet('switch')">
+            <span data-cy="place-name">{{ place.name }}</span><span aria-hidden="true"> ▾</span>
+          </button>
+        </span>
       </div>
 
       <p v-if="loading" class="loading">Chargement…</p>
       <div v-else class="tile-grid">
-        <RouterLink
-          v-for="(room, index) in rooms"
-          :key="room.id"
-          :to="`/rooms/${room.id}`"
-          class="room-tile"
-          data-cy="room-tile"
-          :class="{ 'room-tile--featured': index === 0 }"
-        >
-          <span class="room-tile-icon"><AppIcon :name="roomIcon(room.name)" /></span>
+        <RouterLink v-for="(room, index) in rooms" :key="room.id" :to="`/rooms/${room.id}`" class="card room-tile" data-cy="room-tile">
+          <span class="room-tile-media scallop" :class="TONES[index % TONES.length]">
+            <span class="chip chip--white room-tile-chip">{{ visibilityLabel(room) }}</span>
+            <AppIcon :name="roomIcon(room.name)" :size="44" :stroke="1.6" />
+          </span>
           <span class="room-tile-text">
             <span class="room-tile-name">{{ room.name }}</span>
-            <span class="room-tile-meta">{{ plural(room.itemCount ?? 0, 'objet') }}</span>
+            <span class="room-tile-meta">
+              {{ plural(room.itemCount ?? 0, 'objet') }} · {{ plural(room.storageCount ?? 0, 'rangement') }}
+            </span>
           </span>
         </RouterLink>
-        <button type="button" class="add-tile" @click="openSheet('room-create')">
-          <AppIcon name="plus" :size="22" :stroke="2.4" />
-          Ajouter une pièce
+        <button type="button" class="card room-tile room-tile--add" @click="openSheet('room-create')">
+          <span class="room-tile-media scallop">
+            <AppIcon name="plus" :size="32" :stroke="2" />
+          </span>
+          <span class="room-tile-text">
+            <span class="room-tile-name">ajouter une pièce</span>
+            <span class="room-tile-meta">Cuisine, cave, grenier…</span>
+          </span>
         </button>
       </div>
     </section>
-
     <BottomSheet v-if="sheet === 'switch'" title="Mes logements" @close="sheet = null">
       <ul class="sheet-list">
         <li v-for="item in placesStore.places" :key="item.id">
