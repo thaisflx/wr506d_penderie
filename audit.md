@@ -7,7 +7,7 @@
 | Code PHP | PHPStan niveau 6 | ❌ 34 erreurs | ✅ 0 erreur |
 | Config Symfony | `lint:container`, `lint:yaml`, `lint:twig` | ✅ | ✅ |
 | `composer.json` | `composer validate` | ⚠️ 2 avertissements | ✅ |
-| Dépendances PHP / JS | `composer audit` / `npm audit` | ✅ / ❌ 1 faille haute | ✅ / ✅ |
+| Dépendances PHP / JS | `composer audit` / `npm audit` | ✅ / ❌ 1 faille haute, puis ❌ 18 avis Symfony (11/2026) | ✅ 0 avis / ✅ |
 | Dépendances (Snyk) | Snyk Open Source | ✅ 0 faille | ✅ |
 | Image Docker | Snyk Container | ❌ 3 C · 23 H · 8 M · 236 L | ✅ 0 C · 1 H · 1 M · 20 L (270 → 22) |
 | Code source | Snyk Code | ⚠️ 1 H · 1 L | ✅ 2 faux positifs, justifiés |
@@ -82,7 +82,7 @@ strict errors that make it unable to be published as a package
 
 | Outil | Périmètre | Résultat initial | Résultat final |
 |---|---|---|---|
-| `composer audit` | dépendances PHP | ✅ aucune faille | ✅ (CVE-2026-109449, publiée ensuite, corrigée) |
+| `composer audit` | dépendances PHP | ✅ aucune faille | ✅ 0 avis (CVE-2026-109449, puis 18 avis Symfony de novembre 2026, publiés ensuite et corrigés) |
 | `npm audit` | dépendances JS | ❌ 1 faille haute (`source-map-js`) | ✅ corrigé |
 | Snyk Open Source | `composer.lock`, `package.json` | ✅ 0 faille | ✅ |
 | Snyk Container | `docker/php/Dockerfile` | ❌ 3 critiques, 23 hautes, 8 moyennes, 236 basses | ✅ 0 critique, 1 haute, 1 moyenne, 20 basses (270 → 22) |
@@ -90,6 +90,32 @@ strict errors that make it unable to be published as a package
 
 **Analyse :**
 - **Back :** un nouvel avis, publié le 14/10/2026, touche `symfony/expression-language` 7.4.18 : CVE-2026-109449, une expression imbriquée sans limite peut faire planter le processus. Risque faible : les expressions du projet (`securityPostDenormalize`) sont écrites dans le code, jamais fournies par l'utilisateur. Corrigée avec `composer update symfony/expression-language` (7.4.21) : `composer audit` est de nouveau ✅.
+- **Back, novembre 2026 : 18 avis Symfony.** `composer audit` signalait 18 avis sur 11 paquets Symfony 7.4, tous corrigés en **7.4.23**. La base d'avis ne publie pas de score de gravité (`severity` vide) : la colonne « Exposition » donne notre analyse pour ce projet.
+
+  | Paquet | Installé | Corrigé | Avis | Exposition du projet |
+  |---|---|---|---|---|
+  | `symfony/config` | 7.4.17 | 7.4.23 | CVE-2026-123824 : XXE (lecture de fichier local) dans `XmlUtils::parse()` | Faible : aucune configuration XML |
+  | `symfony/filesystem` | 7.4.18 | 7.4.23 | PKSA-g499-cm4q-v35y : un préfixe avant `://` fait sortir un chemin de son dossier | Faible : chemins construits par le code (`ItemPhotoStorage`) |
+  | `symfony/framework-bundle` | 7.4.19 | 7.4.23 | PKSA-jvt1-tggb-8w72 : raccourci `private_ranges` des proxys de confiance trop large | Nulle : pas de `trusted_proxies` |
+  | `symfony/http-client` | 7.4.20 | 7.4.23 | CVE-2026-121971 : `ScopingHttpClient` envoie ses identifiants à d'autres origines | Faible : client simple vers OpenRouter |
+  | `symfony/http-client` | 7.4.20 | 7.4.23 | CVE-2026-123119 : `NoPrivateNetworkHttpClient`, DNS rebinding (correctif incomplet de CVE-2024-50342) | Nulle : non utilisé |
+  | `symfony/http-foundation` | 7.4.19 | 7.4.23 | CVE-2026-118514 : requêtes `HEAD` qui contournent l'option `methods` d'`access_control` | Moyenne : règles `access_control` présentes |
+  | `symfony/http-foundation` | 7.4.19 | 7.4.23 | PKSA-pr6q-2w5s-kzzf : règles de chemin placées avant PHP contournables | Faible : nginx transmet tout à `index.php` |
+  | `symfony/http-foundation` | 7.4.19 | 7.4.23 | PKSA-nxjs-s6hn-vb6m : même problème `private_ranges` | Nulle |
+  | `symfony/http-foundation` | 7.4.19 | 7.4.23 | PKSA-b2gg-vk1g-6d5q : URL générées vers un hôte choisi par le client | Faible : peu d'URL absolues générées |
+  | `symfony/http-kernel` | 7.4.19 | 7.4.23 | CVE-2026-123339 : fragments inline et en-têtes `Forwarded` non fiables | Nulle : pas de fragments |
+  | `symfony/routing` | 7.4.18 | 7.4.23 | CVE-2026-118516 : un paramètre d'hôte peut avaler le début du chemin | Nulle : pas de route à hôte variable |
+  | `symfony/security-http` | 7.4.20 | 7.4.23 | CVE-2026-118513 : `X509Authenticator`, lecture des DN (correctif incomplet) | Nulle : authentification JWT |
+  | `symfony/security-http` | 7.4.20 | 7.4.23 | CVE-2026-123746 : les connexions programmatiques sautent `checkPostAuth()` | Faible : pas de connexion programmatique |
+  | `symfony/serializer` | 7.4.20 | 7.4.23 | CVE-2026-121623 : `DataUriNormalizer` ouvre une data URI à schéma non minuscule comme fichier local | Moyenne : le serializer d'API Platform traite les données des clients |
+  | `symfony/serializer` | 7.4.20 | 7.4.23 | CVE-2026-122053 : chemin de propriété pointé qui contourne `#[Ignore]` | Moyenne : même raison |
+  | `symfony/serializer` | 7.4.20 | 7.4.23 | CVE-2026-118515 : `UploadedFile` construit à partir des données de la requête | Moyenne : même raison |
+  | `symfony/validator` | 7.4.19 | 7.4.23 | CVE-2026-123125 : contrainte `Ip` public/privé contournable (IPv6 mappée) | Nulle : contrainte non utilisée |
+  | `symfony/yaml` | 7.4.18 | 7.4.23 | CVE-2026-123792 : temps d'analyse exponentiel du parseur YAML | Faible : seuls nos fichiers de configuration sont lus |
+
+  **Correction :** `composer update "symfony/*" --with-dependencies`, sans changer de version majeure ni de mineure (contraintes `7.4.*` et `extra.symfony.require` inchangées). 52 paquets mis à jour en version corrective : les composants Symfony en 7.4.21 à 7.4.23, les contrats et polyfills Symfony, et 5 dépendances (`doctrine/deprecations`, `doctrine/inflector`, `doctrine/lexer`, `doctrine/persistence`, `masterminds/html5`). Composer avait resserré la contrainte de `symfony/flex` (`^2` → `^2.12`) : remise à `^2`, `composer.json` est inchangé.
+
+  **Résultat :** `composer audit` → 0 avis ; `composer validate`, `make lint`, `make phpstan` (0 erreur), `make test` (253 tests) et `make e2e` (24 tests) passent.
 - **Front :** `source-map-js` 1.2.1 présentait une faille de déni de service ([GHSA-68fv-2mgg-jv7q](https://github.com/advisories/GHSA-68fv-2mgg-jv7q)). Dépendance **indirecte** des outils de build (`vite > postcss`, compilateur Vue), pas du code envoyé au navigateur : risque faible, corrigée avec `npm audit fix` (1.2.2).
 - **Snyk** confirme `composer audit` et `npm audit` : aucune faille dans les dépendances du projet. Il analyse aussi deux choses que ces outils ne voient pas :
   - **l'image Docker** : les 270 failles venaient des paquets système de l'image `php:8.3-fpm` (Debian), pas du code du projet. Elles touchent l'environnement d'exécution, donc elles restent à prendre au sérieux. Correction : passage à `php:8.3-fpm-alpine`, une image minimale avec beaucoup moins de paquets, et version de Composer fixée (`composer:2` au lieu de `latest`). **Résultat : 270 → 22 failles, 0 critique.**
