@@ -2,6 +2,8 @@
 import { computed } from 'vue'
 
 // Avatar : la photo si elle existe, sinon l'initiale sur une couleur de la palette, stable selon le pseudo.
+// --avatar-override et --avatar-override-font (posés par un parent en CSS) agrandissent l'avatar sans changer
+// la prop, ex. profil sur ordinateur.
 // L'initiale est en minuscule : Mono Scribble l'affiche en capitale grasse (règle de casse de la maquette)
 const props = defineProps({
   name: { type: String, default: '' },
@@ -34,7 +36,7 @@ const initial = computed(() => (props.name.trim()[0] ?? '?').toLowerCase())
     :width="size"
     :height="size"
     :class="{ 'flower-mask': flower }"
-    :style="{ borderRadius: flower ? 0 : '999px', objectFit: 'cover' }"
+    :style="{ width: `var(--avatar-override, ${size}px)`, height: `var(--avatar-override, ${size}px)`, borderRadius: flower ? 0 : '999px', objectFit: 'cover' }"
   />
   <span
     v-else
@@ -42,7 +44,7 @@ const initial = computed(() => (props.name.trim()[0] ?? '?').toLowerCase())
     :class="{ 'avatar-initial--flower flower-mask': flower }"
     role="img"
     :aria-label="name"
-    :style="{ width: `${size}px`, height: `${size}px`, fontSize: `${Math.round(size * 0.46)}px`, ...colors }"
+    :style="{ width: `var(--avatar-override, ${size}px)`, height: `var(--avatar-override, ${size}px)`, fontSize: `var(--avatar-override-font, ${Math.round(size * 0.46)}px)`, ...colors }"
   >
     <span aria-hidden="true">{{ initial }}</span>
   </span>
