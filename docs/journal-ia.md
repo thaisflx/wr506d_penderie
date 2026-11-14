@@ -119,3 +119,29 @@ L'IA m'a fait gagner du temps sur l'analyse du code et la structuration des règ
 - **Constat de l'IA :** l'audit avait relevé une incohérence de nom (la meta description affichait « Lendly », le reste « Penderie »). L'IA avait alors tout harmonisé en « Penderie ». En intégrant mon logo, elle a vu qu'il écrivait « LENDLY » et s'est arrêtée pour me demander quoi faire, au lieu de l'intégrer.
 - **Mon choix :** l'application s'appelle **Lendly**. PENDERIE reste le nom du projet scolaire (dépôt, documentation, README).
 - **Pourquoi :** Lendly est le nom de marque, celui de mon logo. Le nom du projet sert au cadre scolaire, pas à l'utilisateur. Les noms techniques (base, clés, en-têtes) gardent « penderie » pour ne rien casser.
+
+---
+
+## 14/11/2026 : lot 2, le look du jour (OOTD)
+
+**Outil :** Claude Code
+
+### 1. Où placer le fil des looks du jour
+- **Options proposées par l'IA :** A. l'accueil devient le fil, et l'ancien accueil devient « Mon dressing » · B. garder l'accueil et renommer une entrée en « Looks » · C. une barre à 6 entrées.
+- **Mon choix :** A. Barre : Accueil · Mon dressing · Scanner (au centre) · Amis · Profil.
+- **Pourquoi :** comme sur les réseaux sociaux, on arrive sur ce que publient ses proches. Cinq entrées, avec le Scanner au centre.
+- **Argument de l'IA retenu :** une barre à 6 entrées serait trop serrée sur mobile et le Scanner ne serait plus centré.
+
+### 2. Plan technique du lot 2 (Claude Code)
+- **Proposition :** routes, entité `Ootd` et migration, endpoints, extension de visibilité et `OotdVoter`, groupes de sérialisation, fixtures, matrice de tests (Sacha, Lou, Sophie, Théo, Nina, Marc bloqué, Zoé), écrans et 9 commits.
+- **Mon choix :** validé.
+- **Questions de Claude Code, et mes réponses :**
+  1. La retouche de l'affichage ordinateur, non commitée, est d'abord commitée sur sa propre branche et fusionnée, avant de créer `feature/ootd`.
+  2. Clic sur un objet d'un look : ma fiche complète pour mes objets, un panneau en lecture seule pour ceux des autres, **sans l'emplacement**.
+  3. Photo obligatoire pour publier, brouillon possible sans photo, pas de retour en brouillon : on supprime.
+  4. Dans le fil, seulement mes looks publiés.
+  5. Date du look : aujourd'hui par défaut, passé possible, futur refusé.
+  6. Les looks d'un profil public sont dans ce lot, avec la même règle de visibilité.
+  7. Une seule cloche, dans l'en-tête du fil.
+  8. 10 looks par page, avec « Voir plus ».
+- **Pourquoi :** des règles simples, faciles à tester, et la confidentialité d'abord : un look ne montre jamais où sont rangés les objets.
