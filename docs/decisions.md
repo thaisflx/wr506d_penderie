@@ -109,6 +109,9 @@ Complète les règles de la section « Volet social » (2026-11-08), qui restent
 | `CurrentOwnerExtension` ne s'applique pas à `Ootd`. | Le fil montre aussi les looks des autres. |
 | Les objets d'un OOTD sont exposés avec le groupe `ootd:item` : identifiant, nom, photo, catégorie, marque. Jamais le rangement, la pièce ni le logement. Un objet devenu privé ou perso après la publication est retiré de l'affichage pour les autres (pas pour le propriétaire). | Montrer le vêtement, pas l'intérieur de la maison. |
 | Photo d'OOTD : même logique que les objets (JPEG en base64, taille maximale, nom aléatoire), dans `uploads/ootds/`. Le fichier est supprimé avec l'OOTD. | Un seul service de stockage des photos pour les deux. |
+| Clés d'attributs en anglais, alignées sur le scanner : `brand`, `size`, `color`, `composition`, `type`, `description` (et `artist`, `year` pour les vinyles). Les fixtures test ont été alignées. | Une seule convention pour le scanner, les fixtures et l'API : la marque d'un objet se lit toujours dans `brand`. |
+| Un objet qui ne m'appartient pas, ajouté à un look, répond **400 « introuvable »** et non 422. | `CurrentOwnerExtension` rend les objets des autres introuvables avant même la validation : l'API ne révèle pas qu'ils existent. La contrainte `ShareableItems` garde le contrôle en défense. |
+| Les objets d'un look sont affichés dans un ordre stable (ordre de création des objets). | Sans ordre explicite, la base peut les renvoyer dans n'importe quel ordre. |
 
 ### Réponses aux questions du plan
 

@@ -43,7 +43,7 @@ class TestItemFixtures extends Fixture implements DependentFixtureInterface, Fix
 
         // Visibles par les abonnés (pièce et rangement ouverts)
         $this->item($manager, $owner, self::TSHIRT, 'T-shirt blanc', TestPlaceFixtures::CAT_DRESSING_TOPS,
-            barcode: '3614273046215', attributes: ['marque' => 'Petit Bateau', 'taille' => 'M', 'couleur' => 'blanc', 'matiere' => '100 % coton']);
+            barcode: '3614273046215', attributes: ['brand' => 'Petit Bateau', 'size' => 'M', 'color' => 'blanc', 'composition' => '100 % coton']);
         $this->item($manager, $owner, self::JEANS, 'Jean brut', TestPlaceFixtures::CAT_DRESSING_TOPS, ItemStatus::InLaundry);
         $this->item($manager, $owner, self::SNEAKERS, 'Baskets montantes', TestPlaceFixtures::CAT_DRESSING_SHOES, ItemStatus::Reserved);
         // Objet perso dans un rangement ouvert : invisible pour tous sauf Camille
@@ -51,7 +51,7 @@ class TestItemFixtures extends Fixture implements DependentFixtureInterface, Fix
 
         // Grenier > carton des vinyles
         $this->item($manager, $owner, self::ABBEY_ROAD, 'Abbey Road', TestPlaceFixtures::CAT_VINYLS_ROCK,
-            attributes: ['artiste' => 'The Beatles', 'annee' => 1969]);
+            attributes: ['artist' => 'The Beatles', 'year' => 1969]);
         $this->item($manager, $owner, null, 'Led Zeppelin IV', TestPlaceFixtures::CAT_VINYLS_ROCK);
         $this->item($manager, $owner, self::THRILLER, 'Thriller', TestPlaceFixtures::CAT_VINYLS_POP, ItemStatus::ForSale);
         $this->item($manager, $owner, null, 'Guirlande lumineuse', TestPlaceFixtures::CAT_CHRISTMAS);

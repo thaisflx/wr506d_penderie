@@ -43,6 +43,8 @@
             <directory>src/Doctrine</directory>
             <directory>src/EventListener</directory>
             <directory>src/Controller</directory>
+            <directory>src/Validator</directory>
+            <directory>src/Serializer</directory>
             <file>src/Repository/RelationshipRepository.php</file>
             <file>src/Repository/BlockRepository.php</file>
         </include>

@@ -47,17 +47,17 @@ class Item
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
-    #[Groups(['item:read'])]
+    #[Groups(['item:read', 'ootd:item'])]
     private ?int $id = null;
 
     #[ORM\Column(length: 255)]
     #[Assert\NotBlank]
-    #[Groups(['item:read', 'item:write'])]
+    #[Groups(['item:read', 'item:write', 'ootd:item'])]
     private ?string $name = null;
 
     // Envoyée via /api/items/{id}/photo (ItemPhotoController), pas modifiable directement
     #[ORM\Column(length: 255, nullable: true)]
-    #[Groups(['item:read'])]
+    #[Groups(['item:read', 'ootd:item'])]
     private ?string $photo = null;
 
     #[ORM\Column(length: 255, nullable: true)]
@@ -234,10 +234,19 @@ class Item
     }
 
     // Nom et type de la catégorie, pour afficher les listes sans requête supplémentaire
-    #[Groups(['item:read'])]
+    #[Groups(['item:read', 'ootd:item'])]
     public function getCategoryName(): ?string
     {
         return $this->category?->getName();
+    }
+
+    // Marque (scan ou saisie), montrée dans un look du jour sans l'emplacement de l'objet (groupe ootd:item)
+    #[Groups(['ootd:item'])]
+    public function getBrand(): ?string
+    {
+        $brand = $this->attributes['brand'] ?? null;
+
+        return \is_string($brand) && '' !== $brand ? $brand : null;
     }
 
     #[Groups(['item:read'])]
