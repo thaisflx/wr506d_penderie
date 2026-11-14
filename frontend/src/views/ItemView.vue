@@ -99,7 +99,7 @@ async function setStatus(status) {
   }
 }
 
-const backLink = computed(() => (room.value ? `/rooms/${room.value.id}` : '/'))
+const backLink = computed(() => (room.value ? `/rooms/${room.value.id}` : '/dressing'))
 
 async function save(payload) {
   saving.value = true
@@ -204,7 +204,7 @@ async function remove() {
       <template v-else-if="item">
         <div>
           <nav class="item-place" aria-label="Emplacement">
-            <RouterLink to="/">{{ place.name }}</RouterLink> ›
+            <RouterLink to="/dressing">{{ place.name }}</RouterLink> ›
             <RouterLink :to="`/rooms/${room.id}`">{{ room.name }}</RouterLink> ›
             <span>{{ storage.name }}</span>
           </nav>

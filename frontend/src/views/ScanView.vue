@@ -340,7 +340,7 @@ async function save() {
           </select>
           <span v-else class="empty-state">
             Il faut d'abord une catégorie dans un rangement.
-            <RouterLink to="/" class="btn btn--soft btn--small">Aller à mes pièces</RouterLink>
+            <RouterLink to="/dressing" class="btn btn--soft btn--small">Aller à mes pièces</RouterLink>
           </span>
         </label>
 

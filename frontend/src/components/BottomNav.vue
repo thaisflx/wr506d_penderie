@@ -2,7 +2,8 @@
 import { RouterLink } from 'vue-router'
 import NavIcon from './NavIcon.vue'
 
-// Barre de navigation principale : pilule blanche flottante, Scanner au centre
+// Barre de navigation principale : pilule blanche flottante, Scanner au centre.
+// Accueil = fil des looks du jour ; Mon dressing = logement, pièces et objets (docs/decisions.md, lot 2)
 defineProps({
   current: { type: String, default: null },
 })
@@ -14,11 +15,11 @@ defineProps({
       <NavIcon name="home" />
       <span>Accueil</span>
     </RouterLink>
-    <!-- Fil des looks du jour : arrive avec le lot 2 du volet social (route /feed) -->
-    <span class="nav-link" role="link" aria-disabled="true" title="Bientôt disponible" data-cy="nav-looks">
-      <NavIcon name="looks" />
-      <span>Looks</span>
-    </span>
+    <!-- Libellé court pour laisser de la place au Scanner ; le nom complet reste lu par les lecteurs d'écran -->
+    <RouterLink to="/dressing" class="nav-link" data-cy="nav-dressing" aria-label="Mon dressing" :aria-current="current === 'dressing' ? 'page' : undefined">
+      <NavIcon name="dressing" />
+      <span>Dressing</span>
+    </RouterLink>
     <RouterLink to="/scan" class="nav-scan" aria-label="Scanner un objet" title="Scanner un objet">
       <NavIcon name="scan" :size="76" />
     </RouterLink>

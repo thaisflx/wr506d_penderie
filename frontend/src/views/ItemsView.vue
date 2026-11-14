@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
-import { useRoute, useRouter } from 'vue-router'
+import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { api } from '../api/client'
 import AppIcon from '../components/AppIcon.vue'
 import ItemTile from '../components/ItemTile.vue'
@@ -47,7 +47,12 @@ const visibleItems = computed(() => {
 
 <template>
   <main class="screen">
-    <h1 class="display page-title">Mon dressing</h1>
+    <div class="page-head">
+      <RouterLink to="/dressing" class="icon-btn" aria-label="Retour à Mon dressing" data-cy="items-back">
+        <AppIcon name="back" :stroke="2.4" />
+      </RouterLink>
+    </div>
+    <h1 class="display page-title">Tous mes objets</h1>
 
     <div role="search">
       <label for="dressing-search" class="visually-hidden">Rechercher un objet</label>

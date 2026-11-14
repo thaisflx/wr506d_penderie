@@ -1,7 +1,7 @@
 describe('Déconnexion', () => {
   beforeEach(() => {
     cy.loginAs('camille@test.local')
-    cy.getCy('home-username').should('have.text', 'camille')
+    cy.getCy('feed-title').should('be.visible')
   })
 
   it('déconnecte depuis les paramètres du profil', () => {

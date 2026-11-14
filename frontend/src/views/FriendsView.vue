@@ -1,6 +1,6 @@
 <script setup>
 import { computed, ref, watch } from 'vue'
-import { RouterLink } from 'vue-router'
+import { RouterLink, useRoute } from 'vue-router'
 import { api } from '../api/client'
 import AppIcon from '../components/AppIcon.vue'
 import BottomSheet from '../components/BottomSheet.vue'
@@ -15,7 +15,10 @@ const auth = useAuthStore()
 const relationships = ref([])
 const loading = ref(true)
 const error = ref('')
-const tab = ref('requests')
+// Onglet ouvert : ?tab=search depuis le lien « Trouver des amis » du fil
+const TABS = ['requests', 'relations', 'search']
+const route = useRoute()
+const tab = ref(TABS.includes(route.query.tab) ? route.query.tab : 'requests')
 // Relation en cours de traitement : ses boutons sont désactivés
 const busyId = ref(null)
 // Suppression à confirmer : { relationship, title, text, action }

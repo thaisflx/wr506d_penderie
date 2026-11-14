@@ -653,9 +653,30 @@ textarea::placeholder {
    Accueil (maquette v2 : Accueil.png)
    ============================================================ */
 
-.home {
+.home,
+.feed,
+.post-look {
   gap: 18px;
   padding-top: calc(24px + var(--safe-top));
+}
+
+/* Fil des looks du jour (accueil) : titre et bouton « Poster » sur la même ligne */
+.feed-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.feed-head .btn {
+  flex: none;
+}
+
+.feed-empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
 }
 
 /* Logo à gauche, cloche et avatar à droite */
