@@ -160,3 +160,25 @@ L'IA m'a fait gagner du temps sur l'analyse du code et la structuration des règ
 - **Vérification demandée :** `GET /api/me/ootds` n'est pas paginé (`paginationEnabled: false`) : avec 15 looks, l'API les renvoie tous, sans lien `next`. Le profil reçoit donc tout et le compteur « Brouillons · n » est juste ; rien à changer.
 - **Ajout demandé :** supprimer un look publié depuis mes looks (fil, profil), avec confirmation. `delete-look.cy.js` (5 tests) ; 3 mutations détectées (bouton sur le look d'une autre personne dans le fil, bouton sur un profil public, carte non retirée après suppression).
 - **Limite relevée par l'IA :** dans le fil, supprimer un look déjà chargé décale la pagination : la page suivante (« Voir plus ») peut sauter un look. Le look sauté réapparaît au rechargement.
+
+---
+
+## 15/11/2026 : internationalisation (fr, en, de)
+
+**Outil :** Claude Code
+
+### 1. Plan i18n, back office et « Mon espace »
+- **Proposition de Claude Code :** un plan en deux parties (i18n, puis back office et « Mon espace »), avec dix questions. Il avait constaté que le brief n'était pas dans le dépôt, que `User` n'avait ni langue, ni dernière connexion, ni route de modification, et que l'onglet « Inscription » ne marchait pas.
+- **Mes réponses :**
+  1. Le brief est ajouté dans `docs/brief.md` ; il sert de référence avec la consigne et `decisions.md`.
+  2. Le scanner IA répond dans la langue de l'utilisateur.
+  3. Catégories des fixtures : option A, un champ `labelKey` (options proposées : A. clé de traduction, B. ne rien traduire, C. table de traductions). Pièces et rangements restent du contenu utilisateur.
+  4. Pas d'ESLint : un script Node suffit pour vérifier les clés.
+  5. Sélecteur de langue sur l'écran de connexion : le brief veut qu'on puisse regarder sans compte, la langue des visiteurs compte aussi.
+  6. Ajout de `lastLoginAt` pour mesurer les utilisateurs actifs.
+  7. Admin : suspension seulement, pas de suppression de compte, pas de notification.
+  8. Admin : seuls les objets visibles dans un look publié, des agrégats pour le reste (« le dressing doit être privé »).
+  9. « Jamais portés » : looks publiés seulement.
+  10. Export RGPD : JSON avec les URL des photos, sans ZIP.
+- **Pourquoi l'allemand :** pas d'écriture de droite à gauche comme l'arabe, et je parle allemand (B1), donc je peux relire les traductions.
+- **Inscription :** le brief la demande (« créer un compte »). Elle fera l'objet d'une branche à part, après l'i18n et avant le back office.
