@@ -145,3 +145,10 @@ L'IA m'a fait gagner du temps sur l'analyse du code et la structuration des règ
   7. Une seule cloche, dans l'en-tête du fil.
   8. 10 looks par page, avec « Voir plus ».
 - **Pourquoi :** des règles simples, faciles à tester, et la confidentialité d'abord : un look ne montre jamais où sont rangés les objets.
+
+### 3. Poster un look : la règle « partageable » lue par le front
+- **Proposition de Claude Code :** déplacer la règle de `ItemExposure` dans `Item::isShareable()` et l'exposer dans `GET /api/items` (champ `shareable`), pour que le formulaire ne propose que les objets qu'un look peut montrer. `ShareableItems` revérifie toujours côté back.
+- **Mon choix :** validé, et la décision est notée dans `decisions.md`.
+- **Constat de l'IA en vérifiant :** `src/Entity` est hors du périmètre de couverture, donc le « 100 % » ne mesure plus la règle elle-même. Elle reste testée par la matrice de `ItemExposureTest` et par `OotdApiTest`, et des mutations (objet perso, logement privé) le confirment.
+- **Autre constat :** aucun test e2e ne couvrait le Scanner, dont la caméra est maintenant partagée avec « Poster un look » (composable `useCamera`). Ajout de `scan.cy.js` : photo par la caméra, photo importée, caméra coupée en quittant l'écran. La réponse de l'IA est simulée.
+- **Bug trouvé par une mutation :** en neutralisant la vérification « photo obligatoire » du front, les tests passaient encore, car le back renvoie le même message. Mais un brouillon était créé en douce. En creusant, l'IA a trouvé qu'une publication qui échoue après la création (envoi de la photo raté, par exemple) créait un brouillon de plus à chaque nouvel essai. Corrigé : l'écran retient l'identifiant du look créé et le met à jour ensuite. Deux tests e2e le vérifient (aucun envoi sans photo ; un seul look après deux essais).

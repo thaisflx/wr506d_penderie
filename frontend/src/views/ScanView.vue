@@ -5,7 +5,8 @@ import { api } from '../api/client'
 import AppIcon from '../components/AppIcon.vue'
 import ItemVisual from '../components/ItemVisual.vue'
 import { CATEGORY_TYPE_OPTIONS, iri, optionLabel } from '../hierarchy'
-import { fileToJpegDataUrl, toJpegDataUrl } from '../utils/image'
+import { useCamera } from '../composables/useCamera'
+import { fileToJpegDataUrl } from '../utils/image'
 
 // Scanner : photo -> redimension 1024 px -> JPEG -> base64 -> analyse IA (OpenRouter, via l'API) -> fiche pré-remplie
 const router = useRouter()
@@ -17,14 +18,9 @@ const MODES = [
 const mode = ref('photo')
 const hint = computed(() => MODES.find((m) => m.value === mode.value).hint)
 
-// Caméra
-const video = ref(null)
+// Caméra (composable partagé avec « Poster un look »)
+const { video, ready: cameraReady, error: cameraError, torchAvailable, torchOn, start: startCamera, stop: stopCamera, toggleTorch, capture: captureFrame } = useCamera()
 const fileInput = ref(null)
-const cameraReady = ref(false)
-const cameraError = ref('')
-const torchAvailable = ref(false)
-const torchOn = ref(false)
-let stream = null
 
 // Étapes : 'aim' (viser), 'analyzing', 'result', 'manual'
 const step = ref('aim')
@@ -38,39 +34,6 @@ const categories = ref([])
 const categoryIri = ref('')
 const saving = ref(false)
 const saveError = ref('')
-
-async function startCamera() {
-  if (!navigator.mediaDevices?.getUserMedia) {
-    cameraError.value = "La caméra n'est pas disponible ici : importe une photo."
-    return
-  }
-  try {
-    stream = await navigator.mediaDevices.getUserMedia({
-      video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 }, height: { ideal: 1080 } },
-      audio: false,
-    })
-    video.value.srcObject = stream
-    await video.value.play()
-    cameraReady.value = true
-    const track = stream.getVideoTracks()[0]
-    torchAvailable.value = !!track.getCapabilities?.().torch
-  } catch {
-    cameraError.value = "Accès à la caméra refusé ou impossible : importe une photo."
-  }
-}
-
-function stopCamera() {
-  stream?.getTracks().forEach((track) => track.stop())
-  stream = null
-  cameraReady.value = false
-}
-
-async function toggleTorch() {
-  const track = stream?.getVideoTracks()[0]
-  if (!track) return
-  torchOn.value = !torchOn.value
-  await track.applyConstraints({ advanced: [{ torch: torchOn.value }] }).catch(() => (torchOn.value = false))
-}
 
 async function loadCategories() {
   try {
@@ -89,8 +52,8 @@ onMounted(() => {
 onBeforeUnmount(stopCamera)
 
 function capture() {
-  if (!cameraReady.value) return
-  analyze(toJpegDataUrl(video.value))
+  const dataUrl = captureFrame()
+  if (dataUrl) analyze(dataUrl)
 }
 
 async function onFileChosen(event) {

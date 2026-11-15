@@ -803,6 +803,166 @@ textarea::placeholder {
   margin-top: 12px;
 }
 
+/* Poster un look (maquette v2 : Poster.png) */
+.screen.post-look {
+  padding-bottom: calc(120px + var(--safe-bottom));
+}
+
+.post-look-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Puce de date : le champ date natif est posé dessus, invisible, pour ouvrir le calendrier du téléphone */
+.post-look-date {
+  position: relative;
+  padding: 8px 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.post-look-date-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.post-look-date:focus-within {
+  outline: 3px solid var(--glaucous);
+  outline-offset: 2px;
+}
+
+.post-look-photo {
+  position: relative;
+  align-self: center;
+  width: 260px;
+  height: 260px;
+}
+
+.post-look-photo-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.post-look-photo-empty {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  font: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.post-look-photo-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--wine);
+}
+
+.post-look-star {
+  position: absolute;
+  top: 10px;
+  right: -6px;
+}
+
+.post-look-photo-actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.post-look-label {
+  font-size: 18px;
+}
+
+.post-look-count {
+  text-decoration: none;
+}
+
+/* Choix des objets portés : vignettes festonnées sur 3 colonnes, bord bordeaux et coche quand choisies */
+.pick-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.pick-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+  font: inherit;
+  text-align: left;
+  color: var(--ink);
+  background: var(--white);
+  border: 1.5px solid var(--rose);
+  border-radius: 18px;
+  cursor: pointer;
+}
+
+.pick-card[aria-pressed='true'] {
+  border: 2.5px solid var(--wine);
+}
+
+.pick-card-media {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 76px;
+  color: var(--wine);
+}
+
+.pick-card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pick-card-check {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: var(--white);
+  background: var(--wine);
+  border-radius: 999px;
+}
+
+.pick-card-name {
+  overflow: hidden;
+  padding: 6px 10px 9px;
+  font-size: 12px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Caméra plein écran au-dessus de l'écran « Poster un look » */
+.camera-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+}
+
 /* Fil des looks du jour (accueil) : titre et bouton « Poster » sur la même ligne */
 .feed-head {
   display: flex;
