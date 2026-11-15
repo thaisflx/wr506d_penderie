@@ -8,7 +8,8 @@ defineProps({
 
 const ICONS = {
   home: { stroke: 2.2, paths: ['M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z'] },
-  looks: { stroke: 2, rects: [[3, 3, 18, 18, 5]], circles: [[12, 12, 4]] },
+  // Cintre au trait, même épaisseur que les autres pictos
+  dressing: { stroke: 2, paths: ['M10 6.5a2 2 0 1 1 2.8 1.8c-.5.3-.8.7-.8 1.3v1', 'M12 10.6 21 17a1 1 0 0 1-.6 1.8H3.6A1 1 0 0 1 3 17z'] },
   friends: {
     stroke: 2,
     circles: [[9, 8, 3.5]],

@@ -17,8 +17,7 @@ use Symfony\Component\Routing\Attribute\Route;
  */
 final class ItemPhotoController extends AbstractController
 {
-    // Même limite que pour le scan : une image 1024 px en JPEG pèse quelques centaines de Ko
-    private const MAX_IMAGE_LENGTH = 3_000_000;
+    use PhotoRequestTrait;
 
     public function __construct(
         private readonly ItemPhotoStorage $storage,
@@ -31,22 +30,18 @@ final class ItemPhotoController extends AbstractController
     {
         $item = $this->findOwnItem($id);
         if (null === $item) {
-            return $this->error('Cet objet est introuvable.', Response::HTTP_NOT_FOUND);
+            return $this->photoError('Cet objet est introuvable.', Response::HTTP_NOT_FOUND);
         }
 
-        $payload = json_decode($request->getContent(), true);
-        $image = \is_array($payload) ? ($payload['image'] ?? null) : null;
-        if (!\is_string($image)) {
-            return $this->error('Envoie une image JPEG encodée en base64 (data:image/jpeg;base64,...).', Response::HTTP_BAD_REQUEST);
-        }
-        if (\strlen($image) > self::MAX_IMAGE_LENGTH) {
-            return $this->error('Image trop lourde : redimensionne-la à 1024 px avant l\'envoi.', Response::HTTP_REQUEST_ENTITY_TOO_LARGE);
+        $image = $this->photoFromRequest($request);
+        if ($image instanceof JsonResponse) {
+            return $image;
         }
 
         try {
             $photo = $this->storage->store($item, $image);
         } catch (\InvalidArgumentException $e) {
-            return $this->error($e->getMessage(), Response::HTTP_BAD_REQUEST);
+            return $this->photoError($e->getMessage(), Response::HTTP_BAD_REQUEST);
         }
         $this->entityManager->flush();
 
@@ -58,7 +53,7 @@ final class ItemPhotoController extends AbstractController
     {
         $item = $this->findOwnItem($id);
         if (null === $item) {
-            return $this->error('Cet objet est introuvable.', Response::HTTP_NOT_FOUND);
+            return $this->photoError('Cet objet est introuvable.', Response::HTTP_NOT_FOUND);
         }
 
         $this->storage->remove($item);
@@ -73,10 +68,5 @@ final class ItemPhotoController extends AbstractController
         $item = $this->entityManager->getRepository(Item::class)->find($id);
 
         return null !== $item && $item->getOwner() === $this->getUser() ? $item : null;
-    }
-
-    private function error(string $message, int $status): JsonResponse
-    {
-        return $this->json(['message' => $message], $status);
     }
 }

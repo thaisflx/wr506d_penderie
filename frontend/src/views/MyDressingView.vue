@@ -3,12 +3,11 @@ import { computed, ref, watch } from 'vue'
 import { RouterLink, useRouter } from 'vue-router'
 import { api } from '../api/client'
 import AppIcon from '../components/AppIcon.vue'
-import AppLogo from '../components/AppLogo.vue'
+import AppHeader from '../components/AppHeader.vue'
 import BottomSheet from '../components/BottomSheet.vue'
 import DecoStar from '../components/DecoStar.vue'
 import FlowerShape from '../components/FlowerShape.vue'
 import NodeForm from '../components/NodeForm.vue'
-import UserAvatar from '../components/UserAvatar.vue'
 import { LEVELS, VISIBILITY_OPTIONS, iri, optionLabel, plural, roomIcon } from '../hierarchy'
 import { useAuthStore } from '../stores/auth'
 import { usePlacesStore } from '../stores/places'
@@ -76,7 +75,7 @@ function openSheet(name) {
 }
 
 function searchItems() {
-  router.push({ path: '/dressing', query: search.value ? { q: search.value } : {} })
+  router.push({ path: '/dressing/objets', query: search.value ? { q: search.value } : {} })
 }
 
 // Enregistre via l'API puis ferme le panneau, en gardant l'erreur affichée en cas d'échec
@@ -118,23 +117,8 @@ const createRoom = (payload) =>
 
 <template>
   <main class="screen home">
-    <header class="home-header">
-      <AppLogo class="home-logo" />
-      <div class="home-header-actions">
-        <RouterLink
-          to="/friends"
-          class="icon-btn icon-btn--badge"
-          data-cy="home-bell"
-          :aria-label="auth.user?.pendingRequestCount ? `Demandes en attente : ${auth.user.pendingRequestCount}` : 'Notifications'"
-        >
-          <AppIcon name="bell" :size="22" />
-          <span v-if="auth.user?.pendingRequestCount" class="badge-count" data-cy="home-bell-count">{{ auth.user.pendingRequestCount }}</span>
-        </RouterLink>
-        <RouterLink to="/profile" aria-label="Mon profil" class="home-avatar">
-          <UserAvatar :name="auth.user?.username ?? ''" :src="auth.user?.avatar" :size="44" />
-        </RouterLink>
-      </div>
-    </header>
+    <!-- La cloche des demandes d'amis est dans l'en-tête du fil (accueil) -->
+    <AppHeader />
 
     <div class="home-hello">
       <h1 class="display page-title">Bonjour <span class="home-name" data-cy="home-username">{{ auth.user?.username }}</span></h1>
@@ -156,7 +140,7 @@ const createRoom = (payload) =>
       </span>
     </form>
 
-    <!-- Look du jour : l'écran pour poster arrive avec le lot 2 du volet social -->
+    <!-- Look du jour : ouvre l'écran « Poster un look » (/looks/nouveau) -->
     <section class="card look-card" aria-labelledby="look-title">
       <div class="look-card-visual">
         <FlowerShape fill="var(--cyan)" />
@@ -168,9 +152,9 @@ const createRoom = (payload) =>
       <div class="look-card-text">
         <h2 id="look-title" class="section-title">look du jour</h2>
         <p class="look-card-desc">Montre ta tenue à tes amis et retrouve les pièces portées.</p>
-        <span class="btn btn--primary btn--small" role="link" aria-disabled="true" title="Bientôt disponible" data-cy="home-post-look">
+        <RouterLink to="/looks/nouveau" class="btn btn--primary btn--small" data-cy="home-post-look">
           <AppIcon name="plus" :size="16" :stroke="2.4" /> Poster mon look
-        </span>
+        </RouterLink>
       </div>
     </section>
 
@@ -187,8 +171,7 @@ const createRoom = (payload) =>
       <div class="section-head">
         <h2 id="rooms-title" class="section-title home-rooms-title">mes pièces</h2>
         <span class="home-rooms-links">
-          <!-- Le dressing n'a plus d'entrée dans la barre de navigation (remplacée par Looks) -->
-          <RouterLink to="/dressing" class="text-link" data-cy="home-dressing">Mon dressing</RouterLink>
+          <RouterLink to="/dressing/objets" class="text-link" data-cy="dressing-all-items">Tous mes objets</RouterLink>
           <button type="button" class="text-link link-reset" :aria-label="`Changer de logement (actuel : ${place.name})`" @click="openSheet('switch')">
             <span data-cy="place-name">{{ place.name }}</span><span aria-hidden="true"> ▾</span>
           </button>

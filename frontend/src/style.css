@@ -565,13 +565,6 @@ textarea::placeholder {
   gap: 10px;
 }
 
-/* Vignettes compactes du profil : 3 colonnes sur mobile */
-.thumb-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-}
-
 .tone-sky {
   background: var(--cyan);
 }
@@ -592,59 +585,16 @@ textarea::placeholder {
   background: var(--rose);
 }
 
-/* Vignette d'objet (photo ou illustration) */
-.thumb {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  width: 100%;
-  height: 110px;
-  overflow: hidden;
-  color: var(--wine);
-  border-radius: 18px;
-}
-
-.thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* Vignette compacte (profil) : image festonnée et nom dessous */
-.thumb-card {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  color: var(--ink);
-  text-decoration: none;
-}
-
-.thumb-card .thumb {
-  height: 132px;
-  border-radius: 18px 18px 0 0;
-}
-
-.thumb-card-name {
-  margin-top: 6px;
-  overflow: hidden;
-  font-size: 11px;
-  font-weight: 700;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 @media (hover: hover) {
   .item-card,
   .room-tile,
-  .thumb-card {
+  .draft-card {
     transition: transform 0.15s ease;
   }
 
   .item-card:hover,
   .room-tile:hover,
-  .thumb-card:hover {
+  .draft-card:hover {
     transform: translateY(-2px);
   }
 }
@@ -653,9 +603,414 @@ textarea::placeholder {
    Accueil (maquette v2 : Accueil.png)
    ============================================================ */
 
-.home {
+.home,
+.feed,
+.post-look {
   gap: 18px;
   padding-top: calc(24px + var(--safe-top));
+}
+
+/* Carte d'un look du jour (maquette v2 : Fil.png) */
+.ootd-list {
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  /* Largeur d'une colonne de fil, même sur grand écran : la photo garde son format portrait */
+  width: 100%;
+  max-width: 600px;
+}
+
+.ootd-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ootd-card-author {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.ootd-card-avatar {
+  display: flex;
+  border-radius: 999px;
+  text-decoration: none;
+}
+
+.ootd-card-who {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.ootd-card-name {
+  font-family: var(--font-display);
+  font-size: 17px;
+  line-height: 1.1;
+  color: var(--ink);
+  text-decoration: none;
+  text-transform: lowercase;
+}
+
+.ootd-card-when {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* Profil : date et suppression sur une ligne (pas d'en-tête d'auteur) */
+.ootd-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+/* Supprimer mon look : bouton discret, sans bordure */
+.ootd-card-delete {
+  width: 36px;
+  height: 36px;
+  color: var(--muted);
+  background: transparent;
+  border-color: transparent;
+}
+
+/* Photo festonnée, arrondie en haut ; format portrait */
+.ootd-card-photo {
+  position: relative;
+  overflow: hidden;
+  aspect-ratio: 4 / 5;
+  max-height: 520px;
+  border-radius: 30px 30px 0 0;
+}
+
+.ootd-card-photo img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ootd-card-star {
+  position: absolute;
+  top: 40px;
+  right: 50px;
+}
+
+.ootd-card-caption {
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.ootd-card-items-title {
+  margin-bottom: 8px;
+  font-size: 16px;
+}
+
+/* Pilule d'objet porté : vignette ronde et nom */
+.worn-pill {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px 6px 6px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--ink);
+  text-decoration: none;
+  background: var(--white);
+  border: 1.5px solid var(--rose);
+  border-radius: 999px;
+  cursor: pointer;
+}
+
+.worn-pill-thumb {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  overflow: hidden;
+  color: var(--wine);
+  border-radius: 999px;
+}
+
+.worn-pill-thumb img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+/* Objet d'une autre personne, en lecture seule */
+.item-preview {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.item-preview-visual {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 180px;
+  overflow: hidden;
+  color: var(--wine);
+  border-radius: 24px 24px 0 0;
+}
+
+.item-preview-visual img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-looks {
+  margin-top: 12px;
+}
+
+/* Brouillons du profil : vignette festonnée (photo ou appareil photo), légende et date dessous */
+.draft-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.draft-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.draft-card-media {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 150px;
+  color: var(--wine);
+}
+
+.draft-card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.draft-card-chip {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 3px 9px;
+  font-weight: 700;
+}
+
+.draft-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px 12px;
+}
+
+.draft-card-caption {
+  overflow: hidden;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (min-width: 900px) {
+  .draft-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .draft-card-media {
+    height: 200px;
+  }
+}
+
+/* Poster un look (maquette v2 : Poster.png) */
+.screen.post-look {
+  padding-bottom: calc(120px + var(--safe-bottom));
+}
+
+.post-look-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Puce de date : le champ date natif est posé dessus, invisible, pour ouvrir le calendrier du téléphone */
+.post-look-date {
+  position: relative;
+  padding: 8px 14px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.post-look-date-input {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.post-look-date:focus-within {
+  outline: 3px solid var(--glaucous);
+  outline-offset: 2px;
+}
+
+.post-look-photo {
+  position: relative;
+  align-self: center;
+  width: 260px;
+  height: 260px;
+}
+
+.post-look-photo-img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.post-look-photo-empty {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  font: inherit;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.post-look-photo-label {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--wine);
+}
+
+.post-look-star {
+  position: absolute;
+  top: 10px;
+  right: -6px;
+}
+
+.post-look-photo-actions {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+}
+
+.post-look-label {
+  font-size: 18px;
+}
+
+.post-look-count {
+  text-decoration: none;
+}
+
+/* Choix des objets portés : vignettes festonnées sur 3 colonnes, bord bordeaux et coche quand choisies */
+.pick-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.pick-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+  font: inherit;
+  text-align: left;
+  color: var(--ink);
+  background: var(--white);
+  border: 1.5px solid var(--rose);
+  border-radius: 18px;
+  cursor: pointer;
+}
+
+.pick-card[aria-pressed='true'] {
+  border: 2.5px solid var(--wine);
+}
+
+.pick-card-media {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 76px;
+  color: var(--wine);
+}
+
+.pick-card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.pick-card-check {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  color: var(--white);
+  background: var(--wine);
+  border-radius: 999px;
+}
+
+.pick-card-name {
+  overflow: hidden;
+  padding: 6px 10px 9px;
+  font-size: 12px;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Caméra plein écran au-dessus de l'écran « Poster un look » */
+.camera-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+}
+
+/* Fil des looks du jour (accueil) : titre et bouton « Poster » sur la même ligne */
+.feed-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.feed-head .btn {
+  flex: none;
+}
+
+.feed-empty-actions {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
 }
 
 /* Logo à gauche, cloche et avatar à droite */
@@ -2043,15 +2398,6 @@ select.input {
     gap: 16px;
   }
 
-  .thumb-grid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 12px;
-  }
-
-  .thumb-grid .thumb {
-    height: 140px;
-  }
-
   .fab {
     right: 32px;
   }
@@ -2304,19 +2650,6 @@ select.input {
 
   .item-card--featured .item-card-name {
     font-size: 26px;
-  }
-
-  .thumb-grid {
-    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-    gap: 16px;
-  }
-
-  .thumb-card .thumb {
-    height: 190px;
-  }
-
-  .thumb-card-name {
-    font-size: 14px;
   }
 
   /* Profil : bannière haute et grand avatar qui chevauche le bas festonné */

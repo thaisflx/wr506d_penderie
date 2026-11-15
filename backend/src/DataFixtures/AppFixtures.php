@@ -9,6 +9,7 @@ use App\Entity\Place;
 use App\Entity\Item;
 use App\Entity\Look;
 use App\Entity\LookItem;
+use App\Entity\Ootd;
 use App\Entity\Relationship;
 use App\Entity\Reservation;
 use App\Entity\Room;
@@ -73,6 +74,8 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
         // En attente : dan est traité comme un random
         $this->createRelationship($manager, $dan, $alice, RelationshipType::Follower, RelationshipStatus::Pending);
         $this->createRelationship($manager, $alice, $bob, RelationshipType::CloseFriend, RelationshipStatus::Accepted);
+        // alice suit carla : ses looks du jour arrivent dans le fil d'alice
+        $this->createRelationship($manager, $alice, $carla, RelationshipType::Follower, RelationshipStatus::Accepted);
         // alice a bloqué eve : aucune relation entre elles, dans un sens comme dans l'autre
         $manager->persist((new Block())->setBlocker($alice)->setBlocked($eve));
 
@@ -183,7 +186,71 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
         $alice->addShareLink($selectionLink);
         $manager->persist($selectionLink);
 
+        // --- Looks du jour (OOTD, lot 2) ---
+        // Photos de tenues dessinées par script pour le projet (aucune image source), dans uploads/demo :
+        // supprimer un look ou sa photo depuis l'application ne touche qu'à uploads/ootds, jamais à ces fichiers.
+        // Seuls des objets partageables y figurent : ni perso, ni dans un rangement, une pièce ou un logement privé.
+
+        // Vêtements de bob (logement ouvert à ses abonnés)
+        $bobWardrobe = $this->createCategory($manager, $this->createStorage($manager, $this->createRoom($manager, $this->createPlace($manager, $bob, 'Maison Annecy', 'Annecy'), 'Chambre', Visibility::Followers), 'Penderie', Visibility::Followers), 'Vêtements', CategoryType::Top);
+        $linenShirt = $this->createDemoItem($manager, $bob, 'Chemise en lin', $bobWardrobe, ['type' => 'Chemise', 'brand' => 'Atelier Lin', 'color' => 'Beige', 'size' => 'L', 'composition' => '100 % lin']);
+        $navyTrousers = $this->createDemoItem($manager, $bob, 'Pantalon marine', $bobWardrobe, ['type' => 'Pantalon', 'brand' => 'Maison Indigo', 'color' => 'Marine', 'size' => '42', 'composition' => '97 % coton, 3 % élasthanne']);
+        $loafers = $this->createDemoItem($manager, $bob, 'Mocassins cognac', $bobWardrobe, ['type' => 'Mocassins', 'brand' => 'Cordonnerie Savoie', 'color' => 'Cognac', 'size' => '43', 'composition' => 'Cuir']);
+        $greenTee = $this->createDemoItem($manager, $bob, 'T-shirt kaki', $bobWardrobe, ['type' => 'T-shirt', 'brand' => 'Atelier Coton', 'color' => 'Kaki', 'size' => 'L', 'composition' => '100 % coton bio']);
+        $chinos = $this->createDemoItem($manager, $bob, 'Chino sable', $bobWardrobe, ['type' => 'Pantalon', 'brand' => 'Maison Indigo', 'color' => 'Sable', 'size' => '42', 'composition' => '100 % coton']);
+
+        // Vêtements de carla (logement ouvert à ses abonnés)
+        $carlaRack = $this->createCategory($manager, $this->createStorage($manager, $this->createRoom($manager, $this->createPlace($manager, $carla, 'Appartement Paris', 'Paris'), 'Dressing', Visibility::Followers), 'Portant', Visibility::Followers), 'Vêtements', CategoryType::Top);
+        $floralDress = $this->createDemoItem($manager, $carla, 'Robe fleurie', $carlaRack, ['type' => 'Robe', 'brand' => 'Jardin d\'Été', 'color' => 'Rose poudré', 'size' => 'S', 'composition' => '100 % viscose']);
+        $denimJacket = $this->createDemoItem($manager, $carla, 'Veste en jean', $carlaRack, ['type' => 'Veste', 'brand' => 'Maison Indigo', 'color' => 'Bleu délavé', 'size' => 'S', 'composition' => '100 % coton']);
+        $blackSkirt = $this->createDemoItem($manager, $carla, 'Jupe noire', $carlaRack, ['type' => 'Jupe', 'brand' => 'Atelier Lin', 'color' => 'Noir', 'size' => '36', 'composition' => '55 % lin, 45 % viscose']);
+
+        $this->createOotd($manager, $bob, 'Chemise en lin pour le marché du samedi', 'bob-chemise-lin', 'today', '-1 hour', [$linenShirt, $navyTrousers, $loafers]);
+        $this->createOotd($manager, $carla, 'Robe fleurie, premier jour de soleil', 'carla-robe-fleurie', '-1 day', '-1 day', [$floralDress]);
+        $this->createOotd($manager, $alice, 'Le combo de toujours : t-shirt blanc et jean brut', 'alice-tshirt-jean', '-2 days', '-2 days', [$tshirt, $jeans, $sneakers]);
+        $this->createOotd($manager, $carla, 'Veste en jean et jupe noire pour le bureau', 'carla-veste-jean', '-3 days', '-3 days', [$denimJacket, $blackSkirt]);
+        $this->createOotd($manager, $bob, 'Dimanche tranquille', 'bob-sweat-chino', '-5 days', '-5 days', [$greenTee, $chinos]);
+        $this->createOotd($manager, $alice, 'Marinière du week-end', 'alice-mariniere', '-6 days', '-6 days', [$jeans, $sneakers]);
+        // Brouillon d'alice : visible par elle seule, dans l'onglet « Brouillons » de son profil
+        $this->createOotd($manager, $alice, 'Idée pour samedi soir', null, 'today', null, [$jeans]);
+
         $manager->flush();
+    }
+
+    private function createPlace(ObjectManager $manager, User $owner, string $name, string $city): Place
+    {
+        $place = (new Place())->setName($name)->setCity($city)->setVisibility(Visibility::Followers);
+        $owner->addPlace($place);
+        $manager->persist($place);
+
+        return $place;
+    }
+
+    /**
+     * Objet avec des attributs comme après un scan (brand, size, color, composition).
+     *
+     * @param array<string, string> $attributes
+     */
+    private function createDemoItem(ObjectManager $manager, User $owner, string $name, Category $category, array $attributes): Item
+    {
+        return $this->createItem($manager, $owner, $name, $category)->setAttributes($attributes);
+    }
+
+    /**
+     * @param list<Item> $items
+     */
+    private function createOotd(ObjectManager $manager, User $owner, string $caption, ?string $photo, string $wornOn, ?string $publishedAt, array $items): void
+    {
+        $ootd = (new Ootd())
+            ->setOwner($owner)
+            ->setCaption($caption)
+            ->setPhoto(null !== $photo ? '/uploads/demo/'.$photo.'.jpg' : null)
+            ->setWornOn(new \DateTimeImmutable($wornOn))
+            ->setPublishedAt(null !== $publishedAt ? new \DateTimeImmutable($publishedAt) : null);
+        foreach ($items as $item) {
+            $ootd->addItem($item);
+        }
+        $manager->persist($ootd);
     }
 
     /**

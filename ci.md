@@ -11,12 +11,12 @@ Les commandes PHP s'exécutent dans le conteneur `penderie_backend`. Les tests C
 | Commande | Rôle |
 |---|---|
 | `make test-db` | (Re)crée la base de test `penderie_db_test` : suppression, création, migrations, fixtures du groupe `test` |
-| `make test` | Lance les 253 tests PHPUnit (unit, integration, functional) |
-| `make test-unit` | Tests unitaires, sans base de données (68 tests) |
-| `make test-integration` | Tests d'intégration sur la base de test (51 tests) |
-| `make test-functional` | Tests fonctionnels de l'API (134 tests) |
+| `make test` | Lance les 373 tests PHPUnit (unit, integration, functional) |
+| `make test-unit` | Tests unitaires, sans base de données (91 tests) |
+| `make test-integration` | Tests d'intégration sur la base de test (92 tests) |
+| `make test-functional` | Tests fonctionnels de l'API (190 tests) |
 | `make coverage` | Tests PHPUnit avec la couverture du code métier, en texte et en HTML dans `backend/var/coverage/` |
-| `make e2e` | Tests Cypress en ligne de commande (22 tests) |
+| `make e2e` | Tests Cypress en ligne de commande (58 tests, 11 specs) |
 | `make e2e-open` | Interface Cypress, pour suivre les tests pas à pas |
 | `make phpstan` | Analyse statique PHPStan, niveau 6 |
 | `make quality` | Linters Symfony (`lint`), PHPStan et audit des dépendances Composer et npm (`audit`) |

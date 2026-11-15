@@ -4,7 +4,7 @@ const statusButton = (label) => cy.contains('[aria-label="État de l\'objet"] bu
 
 describe('Fiche objet', () => {
   beforeEach(() => {
-    cy.loginAs('camille@test.local')
+    cy.loginAs('camille@test.local', '/dressing')
     cy.getCy('room-tile').contains('Dressing').click()
     cy.contains('[data-cy="item-row"]', 'Jean brut').click()
   })

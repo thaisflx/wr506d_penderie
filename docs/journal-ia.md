@@ -119,3 +119,44 @@ L'IA m'a fait gagner du temps sur l'analyse du code et la structuration des règ
 - **Constat de l'IA :** l'audit avait relevé une incohérence de nom (la meta description affichait « Lendly », le reste « Penderie »). L'IA avait alors tout harmonisé en « Penderie ». En intégrant mon logo, elle a vu qu'il écrivait « LENDLY » et s'est arrêtée pour me demander quoi faire, au lieu de l'intégrer.
 - **Mon choix :** l'application s'appelle **Lendly**. PENDERIE reste le nom du projet scolaire (dépôt, documentation, README).
 - **Pourquoi :** Lendly est le nom de marque, celui de mon logo. Le nom du projet sert au cadre scolaire, pas à l'utilisateur. Les noms techniques (base, clés, en-têtes) gardent « penderie » pour ne rien casser.
+
+---
+
+## 14/11/2026 : lot 2, le look du jour (OOTD)
+
+**Outil :** Claude Code
+
+### 1. Où placer le fil des looks du jour
+- **Options proposées par l'IA :** A. l'accueil devient le fil, et l'ancien accueil devient « Mon dressing » · B. garder l'accueil et renommer une entrée en « Looks » · C. une barre à 6 entrées.
+- **Mon choix :** A. Barre : Accueil · Mon dressing · Scanner (au centre) · Amis · Profil.
+- **Pourquoi :** comme sur les réseaux sociaux, on arrive sur ce que publient ses proches. Cinq entrées, avec le Scanner au centre.
+- **Argument de l'IA retenu :** une barre à 6 entrées serait trop serrée sur mobile et le Scanner ne serait plus centré.
+
+### 2. Plan technique du lot 2 (Claude Code)
+- **Proposition :** routes, entité `Ootd` et migration, endpoints, extension de visibilité et `OotdVoter`, groupes de sérialisation, fixtures, matrice de tests (Sacha, Lou, Sophie, Théo, Nina, Marc bloqué, Zoé), écrans et 9 commits.
+- **Mon choix :** validé.
+- **Questions de Claude Code, et mes réponses :**
+  1. La retouche de l'affichage ordinateur, non commitée, est d'abord commitée sur sa propre branche et fusionnée, avant de créer `feature/ootd`.
+  2. Clic sur un objet d'un look : ma fiche complète pour mes objets, un panneau en lecture seule pour ceux des autres, **sans l'emplacement**.
+  3. Photo obligatoire pour publier, brouillon possible sans photo, pas de retour en brouillon : on supprime.
+  4. Dans le fil, seulement mes looks publiés.
+  5. Date du look : aujourd'hui par défaut, passé possible, futur refusé.
+  6. Les looks d'un profil public sont dans ce lot, avec la même règle de visibilité.
+  7. Une seule cloche, dans l'en-tête du fil.
+  8. 10 looks par page, avec « Voir plus ».
+- **Pourquoi :** des règles simples, faciles à tester, et la confidentialité d'abord : un look ne montre jamais où sont rangés les objets.
+
+### 3. Poster un look : la règle « partageable » lue par le front
+- **Proposition de Claude Code :** déplacer la règle de `ItemExposure` dans `Item::isShareable()` et l'exposer dans `GET /api/items` (champ `shareable`), pour que le formulaire ne propose que les objets qu'un look peut montrer. `ShareableItems` revérifie toujours côté back.
+- **Mon choix :** validé, et la décision est notée dans `decisions.md`.
+- **Constat de l'IA en vérifiant :** `src/Entity` est hors du périmètre de couverture, donc le « 100 % » ne mesure plus la règle elle-même. Elle reste testée par la matrice de `ItemExposureTest` et par `OotdApiTest`, et des mutations (objet perso, logement privé) le confirment.
+- **Autre constat :** aucun test e2e ne couvrait le Scanner, dont la caméra est maintenant partagée avec « Poster un look » (composable `useCamera`). Ajout de `scan.cy.js` : photo par la caméra, photo importée, caméra coupée en quittant l'écran. La réponse de l'IA est simulée.
+- **Bug trouvé par une mutation :** en neutralisant la vérification « photo obligatoire » du front, les tests passaient encore, car le back renvoie le même message. Mais un brouillon était créé en douce. En creusant, l'IA a trouvé qu'une publication qui échoue après la création (envoi de la photo raté, par exemple) créait un brouillon de plus à chaque nouvel essai. Corrigé : l'écran retient l'identifiant du look créé et le met à jour ensuite. Deux tests e2e le vérifient (aucun envoi sans photo ; un seul look après deux essais).
+
+### 4. Profil : « Mes looks / Brouillons · n »
+- **Demande :** remplacer les onglets « Dressing / En vente » du profil par « Mes looks » et « Brouillons · n », les brouillons s'ouvrant sur `/looks/{id}/modifier` ; réactiver « Poster mon look » sur Mon dressing.
+- **Choix de Claude Code :** aucune modification du back, `GET /api/me/ootds` suffit (une seule requête, triée côté front par date de publication). Sur mon profil, les objets portés ouvrent leur fiche. La vignette compacte d'objet (`ItemTile compact`, styles `thumb-*`), qui ne servait qu'aux anciens onglets, est supprimée.
+- **Vérification :** `profile.cy.js` (6 tests) ; 4 mutations détectées (tri retiré, brouillons inversés, brouillon qui ouvre un nouveau look, bouton de Mon dressing désactivé).
+- **Vérification demandée :** `GET /api/me/ootds` n'est pas paginé (`paginationEnabled: false`) : avec 15 looks, l'API les renvoie tous, sans lien `next`. Le profil reçoit donc tout et le compteur « Brouillons · n » est juste ; rien à changer.
+- **Ajout demandé :** supprimer un look publié depuis mes looks (fil, profil), avec confirmation. `delete-look.cy.js` (5 tests) ; 3 mutations détectées (bouton sur le look d'une autre personne dans le fil, bouton sur un profil public, carte non retirée après suppression).
+- **Limite relevée par l'IA :** dans le fil, supprimer un look déjà chargé décale la pagination : la page suivante (« Voir plus ») peut sauter un look. Le look sauté réapparaît au rechargement.

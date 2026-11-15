@@ -18,10 +18,12 @@ describe('Connexion', () => {
     cy.getCy('login-submit').click()
   }
 
-  it('connecte Camille et ouvre son accueil', () => {
+  it('connecte Camille et ouvre le fil, puis son dressing', () => {
     submit('camille@test.local', PASSWORD)
 
     cy.location('pathname').should('eq', '/')
+    cy.getCy('feed-title').should('be.visible')
+    cy.getCy('nav-dressing').click()
     cy.getCy('home-username').should('have.text', 'camille')
     cy.getCy('place-name').should('have.text', 'Maison')
     cy.window().its('localStorage.penderie_token').should('be.a', 'string')

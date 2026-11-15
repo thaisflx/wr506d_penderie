@@ -5,9 +5,8 @@ import { api } from '../api/client'
 import AppIcon from '../components/AppIcon.vue'
 import BottomSheet from '../components/BottomSheet.vue'
 import DecoStar from '../components/DecoStar.vue'
-import ItemTile from '../components/ItemTile.vue'
+import OotdCard from '../components/OotdCard.vue'
 import UserAvatar from '../components/UserAvatar.vue'
-import { toneFor } from '../hierarchy'
 import { useAuthStore } from '../stores/auth'
 import { usePlacesStore } from '../stores/places'
 
@@ -15,20 +14,31 @@ const auth = useAuthStore()
 const placesStore = usePlacesStore()
 const router = useRouter()
 
-const items = ref([])
+// Onglets « Mes looks » (publiés) et « Brouillons » (visibles par moi seul). Les objets en vente ou prêtés
+// restent dans Dressing → Tous mes objets (docs/decisions.md, lot 2).
+const looks = ref([])
 const loading = ref(true)
-const tab = ref('dressing')
+const error = ref('')
+const tab = ref('looks')
 const settingsOpen = ref(false)
 
-// Profil à jour (compteurs) et objets pour les onglets
-Promise.all([auth.fetchMe(), api.list('/items')])
-  .then(([, list]) => (items.value = list))
+// Profil à jour (compteurs) et tous mes looks, brouillons compris (GET /api/me/ootds, non paginé)
+Promise.all([auth.fetchMe(), api.list('/me/ootds')])
+  .then(([, list]) => (looks.value = list))
+  .catch((e) => (error.value = e.message))
   .finally(() => (loading.value = false))
 
 const user = computed(() => auth.user)
-const tabItems = computed(() =>
-  tab.value === 'sale' ? items.value.filter((item) => item.status === 'for_sale') : items.value,
+// Publiés : du plus récent au plus ancien, comme dans le fil ; brouillons : derniers commencés en tête (ordre de l'API)
+const published = computed(() =>
+  looks.value.filter((ootd) => ootd.published).sort((a, b) => b.publishedAt.localeCompare(a.publishedAt)),
 )
+const drafts = computed(() => looks.value.filter((ootd) => !ootd.published))
+// Mon look supprimé : il disparaît de la liste sans recharger
+const removeLook = (id) => (looks.value = looks.value.filter((ootd) => ootd.id !== id))
+
+const TONES = ['tone-glaucous', 'tone-sky', 'tone-peach']
+const draftDate = (ootd) => new Date(`${ootd.wornOn}T12:00:00`).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
 
 function logout() {
   auth.logout()
@@ -96,17 +106,73 @@ function logout() {
       </aside>
 
       <section class="profile-main">
-        <div class="pills profile-tabs" role="tablist" aria-label="Mes objets">
-          <button type="button" class="pill" role="tab" :aria-selected="tab === 'dressing'" :aria-pressed="tab === 'dressing'" @click="tab = 'dressing'">Dressing</button>
-          <button type="button" class="pill" role="tab" :aria-selected="tab === 'sale'" :aria-pressed="tab === 'sale'" @click="tab = 'sale'">En vente</button>
+        <div class="pills profile-tabs" role="tablist" aria-label="Mes looks du jour">
+          <button
+            id="profile-tab-looks"
+            type="button"
+            class="pill"
+            role="tab"
+            aria-controls="profile-panel"
+            :aria-selected="tab === 'looks'"
+            :aria-pressed="tab === 'looks'"
+            data-cy="profile-tab-looks"
+            @click="tab = 'looks'"
+          >Mes looks</button>
+          <button
+            id="profile-tab-drafts"
+            type="button"
+            class="pill"
+            role="tab"
+            aria-controls="profile-panel"
+            :aria-selected="tab === 'drafts'"
+            :aria-pressed="tab === 'drafts'"
+            data-cy="profile-tab-drafts"
+            @click="tab = 'drafts'"
+          >Brouillons<template v-if="!loading"> · {{ drafts.length }}</template></button>
         </div>
 
-        <p v-if="loading" class="loading">Chargement…</p>
-        <div v-else-if="tabItems.length" class="thumb-grid">
-          <ItemTile v-for="(item, index) in tabItems" :key="item.id" :item="item" :tone="toneFor(index)" compact />
-        </div>
-        <div v-else class="empty-state">
-          <p>{{ tab === 'sale' ? 'Aucun objet en vente.' : 'Aucun objet pour l\'instant.' }}</p>
+        <div id="profile-panel" role="tabpanel" :aria-labelledby="`profile-tab-${tab}`" class="stack">
+          <p v-if="loading" class="loading">Chargement…</p>
+          <p v-else-if="error" class="error" role="alert">{{ error }}</p>
+
+          <!-- Mes looks publiés : mes objets ouvrent leur fiche -->
+          <template v-else-if="tab === 'looks'">
+            <div v-if="published.length" class="ootd-list" data-cy="profile-looks">
+              <OotdCard v-for="ootd in published" :key="ootd.id" :ootd="ootd" mine hide-author @deleted="removeLook" />
+            </div>
+            <div v-else class="empty-state" data-cy="profile-looks-empty">
+              <p>Aucun look publié pour l'instant.</p>
+              <RouterLink to="/looks/nouveau" class="btn btn--primary btn--small">
+                <AppIcon name="plus" :size="16" :stroke="2.4" /> Poster mon look
+              </RouterLink>
+            </div>
+          </template>
+
+          <!-- Brouillons : visibles par moi seule, s'ouvrent pour être repris -->
+          <template v-else>
+            <div v-if="drafts.length" class="draft-grid">
+              <RouterLink
+                v-for="(ootd, index) in drafts"
+                :key="ootd.id"
+                :to="`/looks/${ootd.id}/modifier`"
+                class="card draft-card"
+                data-cy="draft-card"
+              >
+                <span class="draft-card-media scallop" :class="ootd.photo ? '' : TONES[index % TONES.length]">
+                  <img v-if="ootd.photo" :src="ootd.photo" alt="" loading="lazy" />
+                  <AppIcon v-else name="camera" :size="30" :stroke="1.8" />
+                  <span class="chip chip--white draft-card-chip">Brouillon</span>
+                </span>
+                <span class="draft-card-text">
+                  <span class="draft-card-caption">{{ ootd.caption || 'Sans légende' }}</span>
+                  <span class="small muted">{{ draftDate(ootd) }} · {{ ootd.wornItems.length }} objet{{ ootd.wornItems.length > 1 ? 's' : '' }}</span>
+                </span>
+              </RouterLink>
+            </div>
+            <div v-else class="empty-state" data-cy="profile-drafts-empty">
+              <p>Aucun brouillon.</p>
+            </div>
+          </template>
         </div>
       </section>
     </div>

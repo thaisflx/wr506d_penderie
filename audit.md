@@ -13,7 +13,7 @@
 | Code source | Snyk Code | ⚠️ 1 H · 1 L | ✅ 2 faux positifs, justifiés |
 | Accessibilité | Lighthouse, axe-core, clavier | 🟢 100 / 1 erreur | ✅ |
 | Performance (prod) | Lighthouse | 🟢 96 | |
-| Tests automatisés | PHPUnit, Cypress | ❌ aucun | ✅ 253 PHPUnit + 24 Cypress, 100 % sur le métier (voir [coverage.md](coverage.md)) |
+| Tests automatisés | PHPUnit, Cypress | ❌ aucun | ✅ 373 PHPUnit + 58 Cypress, 100 % sur le métier, 30 classes (voir [coverage.md](coverage.md)) |
 | Contrastes (refonte Lendly) | Calcul WCAG 2.1 | | ✅ tous les textes ≥ 4,5:1, logo exempté |
 
 ---
@@ -155,7 +155,7 @@ fix available via `npm audit fix`
 | Constat | Risque | Action |
 |---|---|---|
 | `Place::setAddress(string)` refuse `null` alors que la colonne est nullable et que le formulaire envoie `null` si l'adresse est vide | Bug probable | `?string` (idem `User::setBirthDate`) |
-| La règle « qui est le propriétaire ? » est écrite 5 fois (4 `securityPostDenormalize` + `CurrentOwnerExtension`), et `Item` a deux sources de propriétaire (`owner` et la chaîne catégorie → logement) | Moyen | Centraliser dans les Voters (étape suivante) |
+| La règle « qui est le propriétaire ? » est écrite 5 fois (4 `securityPostDenormalize` + `CurrentOwnerExtension`), et `Item` a deux sources de propriétaire (`owner` et la chaîne catégorie → logement) | Moyen | Centraliser dans des Voters. Le premier, `OotdVoter`, existe depuis le lot 2 pour les looks ; la hiérarchie (logement → objet) n'en a pas encore |
 | `Place` n'a pas de règle `security` sur `Patch`/`Delete` : la protection repose uniquement sur le filtre Doctrine | Faible | Règles explicites avec les Voters |
 
 ---
@@ -211,9 +211,9 @@ Référence : [`docs/maquette-v2/`](docs/maquette-v2/README.md) ; décisions dan
 | Poids de la police | `MonoScribble.ttf` : **96,6 Ko**, servi **sans compression** par le serveur Vite en développement (nginx ne sert que l'API) ; **≈ 29,7 Ko en gzip**. `font-display: block` pour ne pas afficher un instant la police de secours. | ⚠️ voir plan d'action |
 | Contrastes (WCAG 2.1 AA) | Calculés pour chaque couple texte / fond : blanc sur violet foncé `#5E6CA8` 5,0:1 ; texte indicatif `#7D6F80` sur blanc 4,7:1 ; texte secondaire sur rose pâle 5,0:1 ; tous les autres couples > 6:1. | ✅ |
 | Logo | Texte en Mono Scribble, `role="img"` et `aria-label="Lendly"`. Le rose `#EEB4B3` (1,7:1) est accepté : un logo est exempté du critère de contraste (WCAG 1.4.3). | ✅ exempté |
-| Éléments à venir | Entrée « Looks » de la barre, « Poster mon look », « Prêter / Vendre à un ami » : affichés désactivés (`aria-disabled`, « Bientôt ») tant que l'API n'existe pas. | ✅ |
+| Éléments à venir | « Prêter / Vendre à un ami » (fiche objet) et « Code-barres » (scanner) : affichés désactivés (`aria-disabled`, « Bientôt ») tant que l'API n'existe pas. Depuis le lot 2, l'entrée « Looks » a laissé place au fil (Accueil) et « Poster mon look » est actif. | ✅ |
 | Décor | Étoiles décoratives en `aria-hidden`, sans `pointer-events` ; pas de ligne violette (choix visuel). | ✅ |
-| Photo de démo | `backend/public/uploads/demo/t-shirt-blanc.jpg` (14 Ko), illustration générée par script pour les fixtures `dev`. | ✅ |
+| Photos de démo | `backend/public/uploads/demo/t-shirt-blanc.jpg` (14 Ko) et, au lot 2, 6 photos de tenues (21 à 30 Ko chacune), toutes dessinées par script pour les fixtures `dev`, sans image source. Supprimer un look ne peut pas les effacer : seul `uploads/ootds/` est nettoyé. | ✅ |
 
 ---
 
@@ -226,15 +226,25 @@ Référence : [`docs/maquette-v2/`](docs/maquette-v2/README.md) ; décisions dan
 - ⚠️ Pas de confirmation après une création ou une modification
 - ✅ Charte Lendly (maquette v2) appliquée à tous les écrans : variables de couleur dans `style.css`, pilules, cartes festonnées, forme fleur, barre de navigation flottante
 - ✅ Statut d'un objet modifiable en un clic depuis la fiche (pilules d'état, testé par `item.cy.js`)
+- ✅ Lot 2 : poster un look (caméra ou galerie, objets partageables seulement, brouillon), reprendre ou supprimer un brouillon ; supprimer un look publié avec confirmation (« Supprimer ce look ? Sa photo sera effacée. »), seulement sur ses propres looks
 
 ---
 
 ## 8. Testabilité
 
 - **Tests** : `backend/tests/` (Unit, Integration, Functional) et `frontend/cypress/e2e/`.
-- **Résultat** : 253 tests PHPUnit et 24 tests Cypress, 100 % de couverture sur les classes métier (19 classes, dont le volet social). Détail dans [coverage.md](coverage.md), commandes et captures dans [ci.md](ci.md).
-- **Anomalies trouvées** : un `catch` « erreur réseau » jamais exécuté dans `ClothingScanner`, et le message « Ce compte est suspendu. » masqué dans `LoginView`. Les deux sont corrigées.
+- **Résultat** : 373 tests PHPUnit et 58 tests Cypress, 100 % de couverture sur les classes métier (30 classes, dont les lots 1 et 2 du volet social). 44 mutations essayées à la main. Détail dans [coverage.md](coverage.md), commandes et captures dans [ci.md](ci.md).
+- **Anomalies trouvées** : un `catch` « erreur réseau » jamais exécuté dans `ClothingScanner`, le message « Ce compte est suspendu. » masqué dans `LoginView`, et (lot 2) des brouillons créés en double dans « Poster un look » quand une publication échouait puis était retentée. Les trois sont corrigées.
 - **Données** : les fixtures de test (groupe `test` : camille, sophie, theo…) sont séparées des fixtures de démo (groupe `dev` : alice, leo, bob…), dans une base dédiée `penderie_db_test`.
+
+### Limites connues (lot 2 : looks du jour)
+
+| Limite | Effet | Piste |
+|---|---|---|
+| **Fil : pagination décalée après une suppression.** Le fil charge 10 looks par page (« Voir plus » demande la page suivante par son numéro). Supprimer un look déjà affiché décale tous les suivants d'un rang. | « Voir plus » peut sauter un look, qui réapparaît au rechargement. Rien n'est perdu ni montré à tort. | Pagination par curseur (« plus ancien que tel look ») au lieu d'un numéro de page, ou recharger la page courante après une suppression |
+| **Règle « partageable » hors du périmètre de couverture.** Elle vit dans `Item::isShareable()` (`src/Entity`, exclu) pour être exposée au front. | Le 100 % ne la mesure pas. | Couverte par `ItemExposureTest`, `OotdApiTest` et deux mutations ; la contrainte `ShareableItems` revérifie toujours côté back |
+| **Profil non paginé.** `GET /api/me/ootds` renvoie tous mes looks (vérifié avec 15). | Choix assumé : le compteur « Brouillons · n » est exact. Une liste très longue serait lourde à charger. | Paginer si le volume le justifie, avec le compteur tiré de `totalItems` |
+| **Caméra et IA simulées dans les tests.** Cypress utilise la caméra simulée d'Electron, et la réponse du scanner est simulée. | Le comportement sur un vrai téléphone (caméra arrière, flash) n'est vérifié qu'à la main. | Vérification manuelle sur téléphone avant une mise en ligne |
 
 ---
 
@@ -253,11 +263,14 @@ Référence : [`docs/maquette-v2/`](docs/maquette-v2/README.md) ; décisions dan
 | ✅ | Snyk Code : 2 faux positifs analysés et justifiés | Fait |
 | ✅ | Tests PHPUnit et e2e Cypress | Fait |
 | ✅ | Volet social, lot 1 : blocage, demandes d'abonnement et d'ami proche, profil public, recherche, page Amis ([decisions.md](docs/decisions.md)) | Fait |
+| ✅ | Volet social, lot 2 : looks du jour (fil en accueil, poster, brouillons, suppression, looks d'un profil), premier Voter (`OotdVoter`) et matrice des droits des looks testée | Fait |
 | 🔴 | `setAddress(?string)`, `setBirthDate(?…)` | À faire |
-| 🟠 | Centraliser les droits dans des Voters (`OotdVoter`, premier Voter, au lot 2 du volet social) | Prochaine étape |
-| 🟠 | Tests des droits quand les Voters seront écrits (la matrice de `RelationshipChecker` est déjà testée) | À faire |
-| 🟠 | Lot 2 du volet social : écran « Looks » (`/feed`, entrée de la barre aujourd'hui désactivée) et « Poster mon look » | Prochaine étape |
+| 🟠 | Voters pour la hiérarchie (logement → objet), sur le modèle d'`OotdVoter`, puis tests des droits de la campagne (Penderie, Garage, liens de partage) | Prochaine étape |
+| 🟠 | Commentaires sur un look (règles déjà décidées dans [decisions.md](docs/decisions.md)) | Lot 3 |
 | 🟢 | Notification de succès | À faire |
-| 🟢 | Police des titres en woff2 sous-ensemblé (≈ 20 Ko au lieu de 96 Ko) après achat de la licence | Piste |
+| 🟢 | Puce « Famille » pour les comptes enfants | Plus tard |
 | 🟢 | Invitation d'amis par lien (« comme Duolingo », brief) : carte « Invite tes proches » de la maquette, non affichée faute d'API | Piste |
+| 🟢 | Reconnaissance par l'IA des objets portés sur la photo d'un look, pour proposer les pièces à cocher | Évolution envisagée |
+| 🟢 | Likes sur les looks | Plus tard |
+| 🟢 | Police des titres en woff2 sous-ensemblé (≈ 20 Ko au lieu de 96 Ko) après achat de la licence | Piste |
 | 🟢 | Jeton JWT en cookie `HttpOnly` | Piste |

@@ -124,7 +124,7 @@ const updateRoom = (payload) =>
 const deleteRoom = () =>
   save(async () => {
     await api.delete(iri('room', props.id))
-    router.push('/')
+    router.push('/dressing')
   })
 
 const createStorage = (payload) =>
@@ -153,11 +153,11 @@ function onStorageDeleted(storage) {
 <template>
   <div class="screen room">
     <div class="room-bar">
-      <RouterLink to="/" class="icon-btn" aria-label="Retour à l'accueil">
+      <RouterLink to="/dressing" class="icon-btn" aria-label="Retour à Mon dressing">
         <AppIcon name="back" :stroke="2.4" />
       </RouterLink>
       <nav v-if="room" class="breadcrumb" aria-label="Fil d'Ariane" data-cy="room-place">
-        <RouterLink to="/">{{ place?.name }}</RouterLink> / <span aria-current="page">{{ room.name }}</span>
+        <RouterLink to="/dressing">{{ place?.name }}</RouterLink> / <span aria-current="page">{{ room.name }}</span>
       </nav>
       <button v-if="room" type="button" class="icon-btn room-settings" aria-label="Réglages de la pièce" @click="openSheet('room-edit')">
         <AppIcon name="settings" :size="19" />

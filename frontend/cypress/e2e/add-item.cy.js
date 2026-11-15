@@ -1,6 +1,6 @@
 describe('Ajout d\'un objet', () => {
   beforeEach(() => {
-    cy.loginAs('camille@test.local')
+    cy.loginAs('camille@test.local', '/dressing')
     cy.getCy('room-tile').contains('Dressing').click()
     cy.getCy('room-name').should('have.text', 'Dressing')
   })

@@ -85,3 +85,46 @@ Référence : [`docs/maquette-v2/`](maquette-v2/README.md), validée (mobile 390
 | Violet foncé `#5E6CA8` pour l'élément actif (texte blanc, 5:1) ; texte indicatif des champs en `#7D6F80` (4,7:1 sur blanc). | Tous les textes respectent 4.5:1. |
 | Pas de ligne décorative violette, seulement des étoiles, avec parcimonie. | Choix visuel : les lignes de la maquette alourdissent les écrans. |
 | Les polices testées (`fonts/` à la racine, `defante.otf`) sortent du dépôt ; `/fonts/` est ignoré. Les HTML de la maquette pointent vers `frontend/src/assets/fonts/MonoScribble.ttf`. | Une seule copie de la police dans le dépôt, celle qu'utilise l'application. |
+
+## 2026-11-14 · Lot 2 : look du jour (OOTD)
+
+Complète les règles de la section « Volet social » (2026-11-08), qui restent valables.
+
+### Navigation
+
+| Décision | Justification |
+|---|---|
+| Barre de navigation : **Accueil · Mon dressing · Scanner (centre) · Amis · Profil**. L'entrée « Looks » grisée disparaît. | Cinq entrées, Scanner au centre : la barre garde sa forme. |
+| **Accueil (`/`) = fil des looks du jour.** | Comme sur les réseaux sociaux : on arrive sur ce que publient ses proches. |
+| **Mon dressing (`/dressing`)** = l'ancien accueil (logement, pièces, carte « look du jour »). **Tous mes objets (`/dressing/objets`)** = l'ancienne page Dressing, avec ses filtres Tout / En vente / Prêtés, ouverte depuis Mon dressing. | Rien n'est perdu : les objets « En vente » du profil restent accessibles ici. |
+| Poster un look : `/looks/nouveau` ; reprendre un brouillon : `/looks/{id}/modifier`. Plein écran, sans barre. | Même logique que le Scanner. |
+| La cloche des demandes d'amis est dans l'en-tête du fil, et retirée de Mon dressing. | Une seule cloche, sur l'écran d'arrivée. |
+| Profil : onglets **« Mes looks »** (publiés, du plus récent au plus ancien, sans en-tête d'auteur, mes objets ouvrent leur fiche) et **« Brouillons · n »** (vignettes qui s'ouvrent sur `/looks/{id}/modifier`). Ils remplacent « Dressing / En vente ». Une seule requête : `GET /api/me/ootds`, triée côté front. | Le profil montre ce que je publie ; les objets restent dans Dressing → Tous mes objets. Le compteur de brouillons rappelle ce qui reste à finir. |
+| La carte « look du jour » de Mon dressing ouvre `/looks/nouveau`. | L'écran existe depuis le commit précédent : le bouton n'est plus grisé. |
+| Supprimer un look publié : bouton corbeille discret sur **mes** looks seulement (fil, onglet « Mes looks »), confirmation « Supprimer ce look ? Sa photo sera effacée. », puis la carte disparaît sans recharger. Jamais sur le look d'une autre personne, ni sur un profil public. | Applique la règle « pas de retour en brouillon, on supprime le look ». Le back refuse déjà la suppression aux autres (`OotdVoter`) : le bouton absent évite seulement une action impossible. |
+
+### Règles techniques
+
+| Décision | Justification |
+|---|---|
+| Visibilité appliquée par une extension Doctrine (`OotdVisibilityExtension`) sur le fil, le détail et les looks d'un profil : un OOTD invisible n'est jamais trouvé (404). `OotdVoter` (premier Voter du projet) contrôle aussi la lecture et réserve la modification et la suppression au propriétaire. | 404 plutôt que 403 : ne pas révéler l'existence d'un brouillon ni d'un blocage (comme au lot 1). |
+| L'extension et `RelationshipChecker::canSeeOotdOf` sont testées l'une contre l'autre sur toute la matrice. | La règle est écrite deux fois (DQL et PHP) : le test garantit qu'elles disent la même chose. |
+| `CurrentOwnerExtension` ne s'applique pas à `Ootd`. | Le fil montre aussi les looks des autres. |
+| Les objets d'un OOTD sont exposés avec le groupe `ootd:item` : identifiant, nom, photo, catégorie, marque. Jamais le rangement, la pièce ni le logement. Un objet devenu privé ou perso après la publication est retiré de l'affichage pour les autres (pas pour le propriétaire). | Montrer le vêtement, pas l'intérieur de la maison. |
+| Photo d'OOTD : même logique que les objets (JPEG en base64, taille maximale, nom aléatoire), dans `uploads/ootds/`. Le fichier est supprimé avec l'OOTD. | Un seul service de stockage des photos pour les deux. |
+| Clés d'attributs en anglais, alignées sur le scanner : `brand`, `size`, `color`, `composition`, `type`, `description` (et `artist`, `year` pour les vinyles). Les fixtures test ont été alignées. | Une seule convention pour le scanner, les fixtures et l'API : la marque d'un objet se lit toujours dans `brand`. |
+| Un objet qui ne m'appartient pas, ajouté à un look, répond **400 « introuvable »** et non 422. | `CurrentOwnerExtension` rend les objets des autres introuvables avant même la validation : l'API ne révèle pas qu'ils existent. La contrainte `ShareableItems` garde le contrôle en défense. |
+| Les objets d'un look sont affichés dans un ordre stable (ordre de création des objets). | Sans ordre explicite, la base peut les renvoyer dans n'importe quel ordre. |
+| Un look publié garde sa photo : on ne peut que la remplacer ou supprimer le look ; la retirer répond 422. | Conséquence de la photo obligatoire pour publier : un look publié sans photo ne doit jamais exister. |
+| La règle « partageable » (un objet peut-il apparaître dans un look) vit dans **`Item::isShareable()`**. Elle est exposée au front dans le champ `shareable` de `GET /api/items`, et l'écran « Poster un look » ne propose que ces objets. Le back la revérifie toujours avec la contrainte `ShareableItems`. `ItemExposure` se contente d'y renvoyer pour rester injectable (`ShareableItemsValidator`, `OotdNormalizer`). | Une seule règle, lue au même endroit par l'API et par le front : le formulaire ne propose rien que l'API refuserait. Le filtre du front n'est qu'un confort, la sécurité reste côté back. Comme `src/Entity` est hors du périmètre de couverture, la règle est testée par la matrice de `ItemExposureTest`, par `OotdApiTest` et par des mutations. |
+
+### Réponses aux questions du plan
+
+| # | Décision | Justification |
+|---|---|---|
+| 1 | Clic sur un objet d'un look : **mes objets** ouvrent leur fiche complète ; **ceux des autres** ouvrent un panneau en lecture seule (photo, nom, catégorie, marque, jamais l'emplacement). | La fiche d'un objet est réservée à son propriétaire (404 pour les autres). |
+| 2 | **Photo obligatoire pour publier** (422 sinon). Un brouillon peut rester sans photo. **Pas de retour en brouillon** après publication : on supprime le look. | Un look du jour, c'est d'abord une photo. Une seule action pour retirer un look : plus simple à comprendre et à tester. |
+| 3 | Dans le fil, **seulement mes looks publiés**. Mes brouillons sont dans mon profil (onglet « Brouillons »). | Le fil montre ce que les autres voient. |
+| 4 | `wornOn` : **aujourd'hui par défaut**, une date passée est acceptée, **une date future est refusée (422)**. | On peut poster la tenue de la veille, pas celle de demain. |
+| 5 | **Looks d'un profil public** dans ce lot : `GET /api/users/{id}/ootds`, avec la même extension, affichés sur le profil public. | Même règle de visibilité que le fil, sans code de droits en plus. |
+| 6 | Fil : **10 looks par page**, avec un bouton « Voir plus ». | Pas de défilement infini : plus simple, accessible au clavier, et l'utilisateur garde la main. |
