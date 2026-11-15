@@ -18,7 +18,7 @@ Les deux tournent dans Docker (conteneurs `penderie_backend`, `penderie_frontend
 | `frontend/cypress/e2e/` | Parcours utilisateur dans le navigateur | Cypress 15.21.1 |
 | `backend/src/DataFixtures/Test/` | Jeu de données du groupe `test`, décrit dans [docs/campagne-test.md](docs/campagne-test.md) | Doctrine Fixtures |
 
-Tous les tests s'appuient sur les mêmes comptes et les mêmes données : Camille (propriétaire), Sacha et Lou (comptes enfants), Sophie (amie proche), Théo (abonné), Nina (demande en attente), Marc (abonné, que les tests bloquent), Zoé (aucune relation), un compte suspendu et un administrateur.
+Tous les tests s'appuient sur les mêmes comptes et les mêmes données : Camille (propriétaire), Sacha et Lou (comptes enfants), Sophie (amie proche), Théo (abonné), Nina (demande en attente), Marc (abonné, que les tests bloquent), Zoé (aucune relation), un compte suspendu et un administrateur. Depuis le lot 2, Camille a aussi deux looks du jour publiés et un brouillon, et Sophie un look publié.
 
 ## Périmètre de couverture
 
@@ -26,17 +26,19 @@ La couverture est mesurée avec PCOV sur le **code métier écrit pour l'applica
 
 | Inclus | Rôle |
 |---|---|
-| `src/Service` | Scan IA des vêtements (`ClothingScanner`), stockage des photos (`ItemPhotoStorage`), `ScanFailedException`, droits entre deux personnes (`RelationshipChecker`) |
-| `src/Security` | `UserChecker` : refus des comptes suspendus |
-| `src/State` | `OwnerProcessor` : le créateur d'un logement ou d'un objet en devient propriétaire ; `PublicProfileProvider`, `RelationshipProcessor`, `BlockProcessor` (volet social) |
-| `src/Doctrine` | `CurrentOwnerExtension` : chaque utilisateur ne voit que son contenu ; `PublicUserExtension`, `RelationshipExtension`, `BlockExtension` (qui peut voir qui, quelle relation, quel blocage) |
-| `src/EventListener` | `ItemPhotoCleaner` : suppression du fichier photo avec l'objet |
-| `src/Controller` | `/api/me`, `/api/scan`, `/api/items/{id}/photo` |
+| `src/Service` | Scan IA des vêtements (`ClothingScanner`), `ScanFailedException`, droits entre deux personnes (`RelationshipChecker`) ; stockage commun des photos (`PhotoStorage`) et ses deux usages (`ItemPhotoStorage`, `OotdPhotoStorage`) ; objet montrable dans un look (`ItemExposure`, lot 2) |
+| `src/Security` | `UserChecker` : refus des comptes suspendus ; `OotdVoter` (lot 2) : lire un look, le modifier ou le supprimer |
+| `src/State` | `OwnerProcessor` : le créateur d'un logement ou d'un objet en devient propriétaire ; `PublicProfileProvider`, `RelationshipProcessor`, `BlockProcessor` (volet social) ; `OotdProcessor` (lot 2) : le propriétaire d'un look est toujours l'utilisateur connecté |
+| `src/Doctrine` | `CurrentOwnerExtension` : chaque utilisateur ne voit que son contenu ; `PublicUserExtension`, `RelationshipExtension`, `BlockExtension` (qui peut voir qui, quelle relation, quel blocage) ; `OotdVisibilityExtension` (lot 2) : looks visibles dans le fil, sur un profil et en lecture |
+| `src/EventListener` | `ItemPhotoCleaner`, `OotdPhotoCleaner` : suppression du fichier photo avec l'objet ou le look |
+| `src/Controller` | `/api/me`, `/api/scan`, `/api/items/{id}/photo`, `/api/ootds/{id}/photo`, et `PhotoRequestTrait` (lecture commune de l'image envoyée) |
+| `src/Validator` | `ShareableItemsValidator` (lot 2) : objets d'un look, seulement les miens, jamais privés ni perso |
+| `src/Serializer` | `OotdNormalizer` (lot 2) : retire d'un look, pour les autres, un objet devenu privé ou perso après la publication |
 | `src/Repository/RelationshipRepository.php`, `src/Repository/BlockRepository.php` | Seuls repositories qui contiennent des requêtes écrites à la main (`countReceived`, `hasAccepted`, `deleteBetween`, `existsBetween`) |
 
 | Exclu | Pourquoi |
 |---|---|
-| `src/Entity` | Mapping Doctrine et accesseurs générés, sans logique. Les deux méthodes qui contiennent une règle métier (`User::isMinor`, `ShareLink::isActive`) ont quand même leurs tests unitaires. |
+| `src/Entity` | Mapping Doctrine et accesseurs générés, sans logique. Les méthodes qui contiennent une règle métier ont quand même leurs tests : `User::isMinor`, `ShareLink::isActive` (unitaires), la validation d'un `Ootd` (photo obligatoire pour publier, date future refusée : `OotdTest`) et **`Item::isShareable`** (lot 2). Cette dernière porte la règle « partageable », exposée au front : elle n'est donc pas mesurée par le 100 %, mais elle est testée par la matrice de `ItemExposureTest` (qui y délègue), par `OotdApiTest` et par des mutations (voir plus bas). |
 | `src/Enum` | Listes de valeurs, sans comportement. |
 | `src/DataFixtures` | Données de test, pas du code de l'application. |
 | Autres `src/Repository/*` | Générés par le maker : un constructeur et des exemples commentés. |
@@ -48,23 +50,29 @@ Le but est de mesurer ce qui peut contenir une erreur de raisonnement : du code 
 
 | Suite | Tests | Assertions |
 |---|---|---|
-| Unit | 68 | 166 |
-| Integration | 51 | 201 |
-| Functional | 134 | 659 |
-| **PHPUnit, total** | **253** | **1026** |
-| Cypress e2e | 22 | — |
+| Unit | 91 | 203 |
+| Integration | 92 | 457 |
+| Functional | 190 | 985 |
+| **PHPUnit, total** | **373** | **1645** |
+| Cypress e2e | 58 (11 specs) | — |
 
 ```
 Code Coverage Report:
  Summary:
-  Classes: 100.00% (19/19)
-  Methods: 100.00% (63/63)
-  Lines:   100.00% (363/363)
+  Classes: 100.00% (30/30)
+  Methods: 100.00% (94/94)
+  Lines:   100.00% (513/513)
 ```
 
-Les 19 classes du périmètre sont à 100 % en lignes et en méthodes. Le rapport HTML est généré dans `backend/var/coverage/` par `make coverage`. Les 22 tests Cypress passent (`make e2e`).
+Les 30 classes du périmètre sont à 100 % en lignes et en méthodes. Le rapport HTML est généré dans `backend/var/coverage/` par `make coverage`. Les 58 tests Cypress passent (`make e2e`).
 
-La première campagne comptait 155 tests PHPUnit, 13 tests Cypress et 11 classes. Le lot 1 du volet social (relations et blocage, voir [docs/decisions.md](docs/decisions.md)) a ajouté 98 tests PHPUnit, 9 tests Cypress et 8 classes.
+| Étape | PHPUnit | Cypress | Classes du périmètre |
+|---|---|---|---|
+| Première campagne | 155 | 13 | 11 |
+| Volet social, lot 1 (relations et blocage) | +98 → 253 | +9 → 22 (24 avec la refonte) | +8 → 19 |
+| Volet social, lot 2 (looks du jour) | +120 → 373 | +34 → 58 | +11 → 30 |
+
+Règles du lot 2 : [docs/decisions.md](docs/decisions.md), sections « Volet social » et « Lot 2 ».
 
 ## Ce que vérifie chaque fichier de test
 
@@ -134,6 +142,19 @@ La première campagne comptait 155 tests PHPUnit, 13 tests Cypress et 11 classes
 - révoqué, révoqué avant sa date limite ;
 - date du jour par défaut.
 
+**`Service/ItemExposureTest.php`** (9 tests, lot 2). Objet montrable dans un look (règle portée par `Item::isShareable`) :
+- montrable : tout ouvert aux abonnés, pièce et rangement réservés aux amis proches ;
+- jamais : objet perso, rangement perso ou privé, pièce perso ou privée, logement privé ;
+- objet sans emplacement : jamais.
+
+**`Service/OotdPhotoStorageTest.php`** (8 tests, lot 2).
+- Photo d'un look dans `uploads/ootds/`, sous un nom aléatoire ; contenu autre que JPEG refusé.
+- Remplacement : l'ancien fichier est supprimé ; suppression du fichier envoyé.
+- Jamais supprimés : la photo de démo des fixtures (`uploads/demo/`), une photo externe, un chemin forgé avec `../`.
+- `OotdPhotoCleaner` supprime la photo avec le look.
+
+**`Validator/ShareableItemsValidatorTest.php`** (6 tests, lot 2). Mes objets partageables sont acceptés ; l'objet d'une autre personne est refusé ; un nouveau look appartient à l'utilisateur connecté ; sans propriétaire ni utilisateur connecté, tout objet est refusé ; les valeurs qui ne sont pas des objets sont ignorées ; une autre contrainte est rejetée.
+
 ### Integration (`backend/tests/Integration/`)
 
 **`Repository/RelationshipRepositoryTest.php`** (9 tests). `countReceived()` sur la vraie base de test, par statut et par type.
@@ -166,6 +187,19 @@ Plus : le propriétaire a tous les droits sur son contenu, le blocage agit dans 
 **`Entity/BlockValidationTest.php`** (3 tests). Blocage valide, se bloquer soi-même refusé, doublon refusé (« Cette personne est déjà bloquée. »).
 
 **`Doctrine/PublicUserExtensionTest.php`** (1 test). Sans utilisateur connecté, l'extension ne renvoie personne, ni en recherche ni en lecture d'un profil (cas que l'API ne peut pas atteindre, puisqu'elle exige un jeton).
+
+**`Entity/OotdTest.php`** (11 tests, lot 2). Validation d'un `Ootd` sur la vraie base :
+- un nouveau look est un brouillon porté aujourd'hui ; un brouillon sans photo est valide ;
+- **publier sans photo est refusé**, avec photo accepté ;
+- date passée acceptée, **date future refusée** ; légende limitée à 500 caractères ;
+- un objet n'est ajouté qu'une fois ; supprimer un objet le retire du look ; supprimer le propriétaire supprime ses looks ;
+- les fixtures correspondent à la matrice des droits.
+
+**`Security/OotdRightsTest.php`** (30 tests, lot 2). Matrice des droits sur les looks de Camille, appliquée à la fois par `OotdVisibilityExtension` (requêtes) et par `OotdVoter` :
+- le fil de chaque compte de la matrice (Camille, Sacha, Lou, Sophie, Théo, Nina, Marc abonné puis bloqué, Zoé) contient exactement les looks attendus ;
+- **l'extension et `RelationshipChecker::canSeeOotdOf` sont comparés pour chaque look publié** : la règle est écrite deux fois (DQL et PHP), le test garantit qu'elles disent la même chose ;
+- seule la propriétaire voit et modifie son brouillon ; « mes looks » contient les brouillons et se filtre par `published` ;
+- un anonyme ne voit rien ; les autres ressources ne sont pas filtrées.
 
 ### Functional (`backend/tests/Functional/`)
 
@@ -233,17 +267,40 @@ Dans tous les cas d'erreur, aucun appel n'est envoyé au modèle. Le scanner sim
 - six cas de 400 (refus par le contrôleur ou par `ItemPhotoStorage`) ;
 - 413 au-delà de 3 Mo.
 
+**`OotdApiTest.php`** (40 tests, lot 2). `/api/ootds`, `/api/me/ootds`, `/api/users/{id}/ootds` :
+- **matrice des droits** en lecture (8 comptes) et looks d'un profil (Théo et Sacha oui ; Nina, Zoé, Marc bloqué non ; Camille sans son brouillon) ;
+- mes looks : brouillons et publiés séparés par `?published=` ; 401 sans jeton ;
+- objets d'un look exposés **sans leur emplacement** ; un objet devenu perso après la publication est masqué aux autres ;
+- création : brouillon avec des objets partageables, date du jour par défaut, propriétaire imposé par le serveur ;
+- **objets refusés (422)** : objet perso, pièce privée, rangement privé ou perso, pièce perso, logement privé ; l'objet d'un autre et un objet inconnu donnent la même réponse (400 « introuvable ») ;
+- champ `shareable` de `GET /api/items` (lot 2, `Item::isShareable`) ;
+- date future refusée ; **publier exige une photo** ; publier un brouillon avec photo ; publier deux fois garde la première date ; **pas de retour en brouillon** ; un PATCH revalide les objets ;
+- suppression par la propriétaire ; Sophie peut voir mais pas supprimer (403), Zoé ne voit même pas le look (404) ;
+- fil : 10 looks par page.
+
+**`OotdPhotoTest.php`** (16 tests, lot 2). `/api/ootds/{id}/photo` :
+- la propriétaire ajoute une photo puis publie ; remplacer la photo d'un look de démo ne supprime pas le fichier de démo ;
+- retirer la photo d'un brouillon ; **un look publié garde sa photo** (422 si on la retire) ; supprimer le look supprime sa photo ;
+- Théo voit le look publié mais ne change pas sa photo (403) ; brouillon ou look invisible : 404 ; look inconnu : 404 ;
+- image absente, corps non JSON, PNG annoncé comme JPEG, image trop grande ou trop lourde : refusées.
+
 ### E2E (`frontend/cypress/e2e/`)
 
 | Spec | Tests | Parcours |
 |---|---|---|
-| `login.cy.js` | 4 | Connexion de Camille ; mauvais mot de passe (« Email ou mot de passe incorrect. ») ; **compte suspendu** (« Ce compte est suspendu. ») ; page protégée → connexion → retour à la page demandée |
-| `navigation.cy.js` | 4 | Pièces de la Maison ; Dressing > Penderie (catégories et objets exacts) ; dépliage du Coffre à bijoux ; retour à l'accueil puis Grenier |
+| `login.cy.js` | 5 | Nom et logo Lendly ; connexion de Camille, arrivée sur le fil puis son dressing ; mauvais mot de passe (« Email ou mot de passe incorrect. ») ; **compte suspendu** (« Ce compte est suspendu. ») ; page protégée → connexion → retour à la page demandée |
+| `navigation.cy.js` | 8 | Barre : fil, Mon dressing, Tous mes objets ; recherche depuis Mon dressing ; ouvrir et fermer « Poster un look » ; « Trouver des amis ». Hiérarchie : pièces de la Maison ; Dressing > Penderie (catégories et objets exacts) ; dépliage du Coffre à bijoux ; retour à Mon dressing puis Grenier |
 | `add-item.cy.js` | 3 | Ajout d'un « Pull rayé » « Au sale » dans Penderie › Hauts, toujours présent après rechargement ; liste des catégories proposées ; fermeture du formulaire sans ajout |
+| `item.cy.js` | 1 | Statut changé depuis les pilules d'état de la fiche, gardé après rechargement |
 | `logout.cy.js` | 2 | Déconnexion depuis les paramètres du profil ; pages protégées inaccessibles ensuite |
 | `friends.cy.js` | 9 | Accepter la demande de Nina depuis la cloche (le badge disparaît) ; la refuser ; bandeau du profil → page Amis ; Zoé cherche et suit Camille puis annule ; Lou absente de la recherche ; profil introuvable ; Camille bloque Marc puis le débloque (abonnement non rétabli) ; Marc ne trouve plus Camille ; blocage de Sacha refusé avec un message |
+| `feed.cy.js` | 7 | Lot 2. Fil de Camille : le look de Sophie et les siens, du plus récent au plus ancien, sans son brouillon ; mes objets ouvrent leur fiche ; Théo voit les objets de Camille en lecture seule, sans emplacement ; « Voir plus » ; fil vide de Zoé avec des pistes ; looks d'un profil public vus par Théo, pas par Zoé |
+| `post-look.cy.js` | 9 | Lot 2. Seuls les objets partageables sont proposés ; publier avec une photo de la galerie et deux objets ; date du jour, pas de date future ; **photo demandée avant de publier, sans rien envoyer** ; **un seul look après un échec puis un nouvel essai** ; photo par la caméra ; brouillon sans photo ; reprendre un brouillon et le publier ; supprimer un brouillon |
+| `profile.cy.js` | 6 | Lot 2. Mes looks publiés, du plus récent au plus ancien ; un objet porté ouvre sa fiche ; « Brouillons · 1 » ouvre la reprise ; le compteur suit la suppression ; profil sans look → « Poster mon look » ; la carte de Mon dressing ouvre « Poster un look » |
+| `delete-look.cy.js` | 5 | Lot 2. Supprimer mon look depuis le fil (sans recharger, il disparaît aussi du profil) ou depuis le profil ; « Garder » le conserve ; **aucun bouton sur le look de Sophie**, ni sur son profil public |
+| `scan.cy.js` | 3 | Lot 2 (caméra partagée avec « Poster un look »). Photo par la caméra et fiche pré-remplie ; photo importée ; caméra coupée en quittant l'écran. La réponse de l'IA est simulée (`cy.intercept`) |
 
-Les éléments utilisés portent des attributs `data-cy`. Chaque test recharge les fixtures `test` avant de commencer : l'ajout d'objet, joué en premier, ne fausse pas la navigation, qui vérifie la liste exacte des objets.
+Les éléments utilisés portent des attributs `data-cy`. Chaque test recharge les fixtures `test` avant de commencer : l'ajout d'objet, joué en premier, ne fausse pas la navigation, qui vérifie la liste exacte des objets. Les looks envoyés avec une photo pendant `post-look.cy.js` sont supprimés par l'API après chaque test, et leur photo avec eux : rien ne reste dans `uploads/ootds/`. Dans Cypress, la caméra est la caméra simulée d'Electron.
 
 ## Anomalies trouvées pendant la campagne de test
 
@@ -258,6 +315,11 @@ Les deux anomalies ont été repérées **en lisant le code pendant l'écriture 
    - **Repéré** en lisant `LoginView.vue` pendant l'écriture de la spec `login.cy.js`.
    - **Corrigé** avant le premier lancement de Cypress : le message générique est désormais réservé à `Invalid credentials.`.
    - **Confirmé** par une mutation : avec l'ancien code remis temporairement, le test « refuse un compte suspendu avec un message clair » échoue (voir le tableau ci-dessous).
+
+3. **Brouillons en double dans « Poster un look » (lot 2).** Quand une publication échouait après la création du look (envoi de la photo raté, par exemple), chaque nouvel essai recréait un brouillon, car l'écran ne retenait pas l'identifiant du look créé.
+   - **Repéré** par une mutation : en neutralisant la vérification « photo obligatoire » du front, les tests passaient encore, car le back renvoie le même message. En regardant pourquoi, un brouillon était créé en douce.
+   - **Corrigé** : `PostLookView` retient l'identifiant du look créé et le met à jour aux essais suivants.
+   - **Vérifié** par deux tests de `post-look.cy.js` : aucune requête envoyée sans photo, et un seul look créé après deux essais. La mutation qui retire la correction est détectée.
 
 ## Contrôle par mutation
 
@@ -293,7 +355,35 @@ Une couverture de 100 % prouve que chaque ligne s'exécute, pas que les tests d�
 | `Block` (groupes) | le client choisit le bloqueur | 1 |
 | `FriendsView` (e2e) | le badge de la cloche n'est plus rechargé après une action | 1 |
 
-Une mutation n'a pas été détectée : ne plus forcer le statut `pending` à la création d'une demande. Ce n'était pas un trou dans les tests mais une ligne sans effet : le statut ne fait pas partie des champs modifiables à la création, et une relation est `pending` par défaut. La ligne a été retirée ; le test `testRequesterAndStatusAreAlwaysSetByTheServer` vérifie toujours qu'un statut envoyé par le client est ignoré.
+**Volet social, lot 2 (looks du jour)** : même méthode, un bug à la fois, fichier restauré ensuite. Pour le back, la suite PHPUnit complète est relancée (sauf les deux premières lignes, lancées sur les tests des looks et des objets partageables). Pour le front, la spec Cypress concernée. Les mutations des classes back ont été rejouées pendant la mise à jour de cette documentation (commit 9) : celles faites en écrivant ces classes n'avaient pas été notées.
+
+| Classe ou écran | Bug introduit | Tests en échec |
+|---|---|---|
+| `Item::isShareable` | un objet perso devient partageable | 5 |
+| `Item::isShareable` | un objet d'un logement privé devient partageable | 1 |
+| `OotdVoter` | un ami voit un brouillon | 6 |
+| `OotdVoter` | un ami peut modifier ou supprimer un look | 12 |
+| `OotdVisibilityExtension` | les brouillons apparaissent dans le fil | 15 |
+| `OotdVisibilityExtension` | le brouillon d'une autre personne est lisible | 9 |
+| `OotdVisibilityExtension` | une demande en attente suffit pour voir les looks | 4 |
+| `OotdNormalizer` | un objet devenu privé reste montré aux autres | 1 |
+| `PhotoStorage` | suppression d'un fichier hors du dossier des photos | 1 |
+| `PostLookView` (e2e) | publier sans photo passe côté front | 1 (après renforcement du test, voir ci-dessous) |
+| `PostLookView` (e2e) | un nouvel essai recrée un brouillon | 1 |
+| `PostLookView` (e2e) | une date future est proposée | 1 |
+| `PostLookView` (e2e) | les objets non partageables sont proposés | 1 |
+| `ScanView` (e2e) | la caméra n'est plus coupée en quittant le scanner | 1 |
+| `ProfileView` (e2e) | tri des looks retiré | 2 |
+| `ProfileView` (e2e) | brouillons et publiés inversés | 3 |
+| `ProfileView` (e2e) | un brouillon ouvre un nouveau look | 2 |
+| `MyDressingView` (e2e) | « Poster mon look » de nouveau désactivé | 1 |
+| `OotdCard` (e2e) | bouton de suppression sur le look d'une autre personne (fil) | 1 |
+| `OotdCard` (e2e) | bouton de suppression sur un profil public | 1 |
+| `OotdCard` (e2e) | la carte reste affichée après la suppression | 2 |
+
+La mutation « publier sans photo passe côté front » n'a **pas été détectée au premier essai** : le back renvoie exactement le même message que le front, donc le test qui ne vérifiait que le message passait. Le test vérifie maintenant qu'aucune requête n'est envoyée. C'est en cherchant pourquoi que l'anomalie n° 3 a été trouvée.
+
+Une mutation du lot 1 n'a pas été détectée : ne plus forcer le statut `pending` à la création d'une demande. Ce n'était pas un trou dans les tests mais une ligne sans effet : le statut ne fait pas partie des champs modifiables à la création, et une relation est `pending` par défaut. La ligne a été retirée ; le test `testRequesterAndStatusAreAlwaysSetByTheServer` vérifie toujours qu'un statut envoyé par le client est ignoré.
 
 ## Choix techniques
 
@@ -311,11 +401,13 @@ Une mutation n'a pas été détectée : ne plus forcer le statut `pending` à la
 ## Limites
 
 - **Couverture des lignes seulement.** PCOV mesure les lignes exécutées, pas chaque branche d'une condition. Les cas limites listés plus haut compensent en partie, mais ne garantissent pas que toutes les combinaisons sont testées.
-- **Contrôle par mutation manuel.** 23 mutations ont été essayées à la main : 4 pour la première campagne, 19 pour le volet social (dont une non détectée, expliquée plus haut). Un outil comme Infection en essaierait des centaines.
-- **Règles de visibilité pas encore testables.** Les scénarios de [docs/campagne-test.md](docs/campagne-test.md) (Théo voit la Penderie mais pas le carnet perso, Sophie voit le garage, liens de partage…) dépendent des Voters, qui ne sont pas écrits. Pour l'instant, `CurrentOwnerExtension` limite chacun à son propre contenu, et c'est ce comportement provisoire qui est testé. `RelationshipChecker` (qui peut voir ou commenter le contenu de qui) est testé, mais ne sera utilisé sur du contenu qu'au lot 2, avec `OotdVoter`.
-- **Front du volet social.** Les écrans Amis, profil public et comptes bloqués sont couverts par `friends.cy.js` uniquement, sans tests unitaires des composants.
+- **Contrôle par mutation manuel.** 44 mutations ont été essayées à la main : 4 pour la première campagne, 19 pour le lot 1 du volet social (dont une non détectée, expliquée plus haut), 21 pour le lot 2 (dont une détectée seulement après renforcement du test). Un outil comme Infection en essaierait des centaines.
+- **Règle « partageable » hors du périmètre mesuré.** Elle vit dans `Item::isShareable()` (`src/Entity`, exclu). Le 100 % ne la mesure pas : elle est couverte par `ItemExposureTest`, `OotdApiTest` et deux mutations.
+- **Règles de visibilité de la hiérarchie pas encore testables.** Les scénarios de [docs/campagne-test.md](docs/campagne-test.md) sur le contenu des logements (Théo voit la Penderie mais pas le carnet perso, Sophie voit le garage, liens de partage…) dépendent de Voters qui ne sont pas écrits. Pour l'instant, `CurrentOwnerExtension` limite chacun à son propre contenu, et c'est ce comportement provisoire qui est testé. Les **looks du jour**, eux, ont leur règle complète depuis le lot 2 (`OotdVoter`, `OotdVisibilityExtension`), testée sur toute la matrice.
+- **Front du volet social.** Les écrans Amis, profil public, comptes bloqués, fil, « Poster un look » et profil sont couverts par les specs Cypress uniquement, sans tests unitaires des composants.
+- **Fil : pagination décalée après une suppression.** Supprimer un look déjà affiché dans le fil décale la page suivante : « Voir plus » peut sauter un look, qui réapparaît au rechargement. Non testé, voir [audit.md](audit.md).
 - **Configuration API Platform non couverte.** Les expressions `securityPostDenormalize` (créer une pièce dans le logement d'un autre), les validations des entités et les opérations PATCH/DELETE générées ne sont pas incluses dans la mesure, et ne sont testées qu'indirectement.
 - **OpenRouter jamais appelé.** Si le format de réponse réel change, les tests ne le verront pas.
-- **Front partiellement couvert.** Il n'y a pas de tests unitaires des composants Vue. Les parcours e2e ne passent pas par le scan, l'envoi de photo depuis l'interface, le dressing ni la fiche objet.
+- **Front partiellement couvert.** Il n'y a pas de tests unitaires des composants Vue. Les parcours e2e passent maintenant par Mon dressing, la fiche objet et, depuis le lot 2, par le scanner (réponse de l'IA simulée), la caméra (simulée par Electron) et l'envoi de la photo d'un look ; ils ne passent pas par l'envoi de la photo d'un objet ni par l'enregistrement d'un objet scanné.
 - **E2E en local uniquement.** Les tests Cypress tournent sur la machine hôte contre le serveur de développement Vite. Aucun pipeline ne les lance automatiquement. Le rechargement des fixtures avant chaque test ajoute environ une seconde par test.
-- **Photos des tests fonctionnels.** Elles sont écrites dans le vrai dossier `backend/public/uploads/items/`, puis supprimées par chaque test.
+- **Photos des tests fonctionnels.** Elles sont écrites dans les vrais dossiers `backend/public/uploads/items/` et `uploads/ootds/`, puis supprimées par chaque test. Les photos de démo (`uploads/demo/`) ne sont jamais supprimées.
