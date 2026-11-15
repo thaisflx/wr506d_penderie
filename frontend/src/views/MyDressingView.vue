@@ -140,7 +140,7 @@ const createRoom = (payload) =>
       </span>
     </form>
 
-    <!-- Look du jour : l'écran pour poster arrive avec le lot 2 du volet social -->
+    <!-- Look du jour : ouvre l'écran « Poster un look » (/looks/nouveau) -->
     <section class="card look-card" aria-labelledby="look-title">
       <div class="look-card-visual">
         <FlowerShape fill="var(--cyan)" />
@@ -152,9 +152,9 @@ const createRoom = (payload) =>
       <div class="look-card-text">
         <h2 id="look-title" class="section-title">look du jour</h2>
         <p class="look-card-desc">Montre ta tenue à tes amis et retrouve les pièces portées.</p>
-        <span class="btn btn--primary btn--small" role="link" aria-disabled="true" title="Bientôt disponible" data-cy="home-post-look">
+        <RouterLink to="/looks/nouveau" class="btn btn--primary btn--small" data-cy="home-post-look">
           <AppIcon name="plus" :size="16" :stroke="2.4" /> Poster mon look
-        </span>
+        </RouterLink>
       </div>
     </section>
 

@@ -14,6 +14,9 @@ load()
 
 // Objet d'une autre personne ouvert en lecture seule
 const preview = ref(null)
+
+// Mon look supprimé : il disparaît du fil sans recharger
+const removeLook = (id) => (ootds.value = ootds.value.filter((ootd) => ootd.id !== id))
 </script>
 
 <template>
@@ -48,6 +51,7 @@ const preview = ref(null)
           :mine="isMine(ootd)"
           :relation="relationOf(ootd)"
           @preview-item="preview = $event"
+          @deleted="removeLook"
         />
       </div>
       <button v-if="hasMore" type="button" class="btn btn--block" data-cy="feed-more" :disabled="loadingMore" @click="loadMore">

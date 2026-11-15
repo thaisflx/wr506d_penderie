@@ -99,6 +99,9 @@ Complète les règles de la section « Volet social » (2026-11-08), qui restent
 | **Mon dressing (`/dressing`)** = l'ancien accueil (logement, pièces, carte « look du jour »). **Tous mes objets (`/dressing/objets`)** = l'ancienne page Dressing, avec ses filtres Tout / En vente / Prêtés, ouverte depuis Mon dressing. | Rien n'est perdu : les objets « En vente » du profil restent accessibles ici. |
 | Poster un look : `/looks/nouveau` ; reprendre un brouillon : `/looks/{id}/modifier`. Plein écran, sans barre. | Même logique que le Scanner. |
 | La cloche des demandes d'amis est dans l'en-tête du fil, et retirée de Mon dressing. | Une seule cloche, sur l'écran d'arrivée. |
+| Profil : onglets **« Mes looks »** (publiés, du plus récent au plus ancien, sans en-tête d'auteur, mes objets ouvrent leur fiche) et **« Brouillons · n »** (vignettes qui s'ouvrent sur `/looks/{id}/modifier`). Ils remplacent « Dressing / En vente ». Une seule requête : `GET /api/me/ootds`, triée côté front. | Le profil montre ce que je publie ; les objets restent dans Dressing → Tous mes objets. Le compteur de brouillons rappelle ce qui reste à finir. |
+| La carte « look du jour » de Mon dressing ouvre `/looks/nouveau`. | L'écran existe depuis le commit précédent : le bouton n'est plus grisé. |
+| Supprimer un look publié : bouton corbeille discret sur **mes** looks seulement (fil, onglet « Mes looks »), confirmation « Supprimer ce look ? Sa photo sera effacée. », puis la carte disparaît sans recharger. Jamais sur le look d'une autre personne, ni sur un profil public. | Applique la règle « pas de retour en brouillon, on supprime le look ». Le back refuse déjà la suppression aux autres (`OotdVoter`) : le bouton absent évite seulement une action impossible. |
 
 ### Règles techniques
 

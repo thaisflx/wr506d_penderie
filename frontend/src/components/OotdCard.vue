@@ -1,7 +1,10 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, ref } from 'vue'
 import { RouterLink } from 'vue-router'
+import { api } from '../api/client'
 import { relativeTime } from '../utils/relativeTime'
+import AppIcon from './AppIcon.vue'
+import BottomSheet from './BottomSheet.vue'
 import DecoStar from './DecoStar.vue'
 import ItemVisual from './ItemVisual.vue'
 import UserAvatar from './UserAvatar.vue'
@@ -11,15 +14,34 @@ const props = defineProps({
   ootd: { type: Object, required: true },
   // « Ami proche », « Abonné » ou null : mon lien avec l'auteur
   relation: { type: String, default: null },
-  // Mon look : mes objets ouvrent leur fiche ; ceux des autres, un panneau en lecture seule
+  // Mon look : mes objets ouvrent leur fiche (ceux des autres, un panneau en lecture seule) et je peux le supprimer
   mine: { type: Boolean, default: false },
   // Profil public : l'auteur est déjà en tête de page
   hideAuthor: { type: Boolean, default: false },
 })
-const emit = defineEmits(['preview-item'])
+const emit = defineEmits(['preview-item', 'deleted'])
 
 const TONES = ['tone-glaucous', 'tone-sky', 'tone-peach']
 const when = computed(() => relativeTime(props.ootd.publishedAt))
+
+// Suppression de mon look (pas de retour en brouillon : docs/decisions.md, lot 2), après confirmation
+const confirming = ref(false)
+const deleting = ref(false)
+const deleteError = ref('')
+
+async function remove() {
+  deleting.value = true
+  deleteError.value = ''
+  try {
+    await api.delete(`/ootds/${props.ootd.id}`)
+    confirming.value = false
+    emit('deleted', props.ootd.id)
+  } catch (e) {
+    deleteError.value = e.message
+  } finally {
+    deleting.value = false
+  }
+}
 </script>
 
 <template>
@@ -33,8 +55,16 @@ const when = computed(() => relativeTime(props.ootd.publishedAt))
         <time class="ootd-card-when" :datetime="ootd.publishedAt" data-cy="ootd-when">{{ when }}</time>
       </span>
       <span v-if="relation" class="chip chip--peach" data-cy="ootd-relation">{{ relation }}</span>
+      <button v-if="mine" type="button" class="icon-btn ootd-card-delete" aria-label="Supprimer ce look" data-cy="ootd-delete" @click="confirming = true">
+        <AppIcon name="trash" :size="18" />
+      </button>
     </header>
-    <time v-else class="ootd-card-when" :datetime="ootd.publishedAt" data-cy="ootd-when">{{ when }}</time>
+    <div v-else class="ootd-card-meta">
+      <time class="ootd-card-when" :datetime="ootd.publishedAt" data-cy="ootd-when">{{ when }}</time>
+      <button v-if="mine" type="button" class="icon-btn ootd-card-delete" aria-label="Supprimer ce look" data-cy="ootd-delete" @click="confirming = true">
+        <AppIcon name="trash" :size="18" />
+      </button>
+    </div>
 
     <div class="ootd-card-photo scallop" :class="ootd.photo ? '' : 'tone-glaucous'">
       <img v-if="ootd.photo" :src="ootd.photo" :alt="`Tenue de ${ootd.owner.username}`" loading="lazy" />
@@ -58,5 +88,14 @@ const when = computed(() => relativeTime(props.ootd.publishedAt))
         </template>
       </div>
     </section>
+
+    <BottomSheet v-if="confirming" title="Supprimer ce look ?" @close="confirming = false">
+      <div class="confirm-box" role="alert">
+        <p>Sa photo sera effacée.</p>
+        <p v-if="deleteError" class="error">{{ deleteError }}</p>
+        <button type="button" class="btn btn--danger btn--block" data-cy="ootd-delete-confirm" :disabled="deleting" @click="remove">Supprimer</button>
+        <button type="button" class="btn btn--soft btn--block" @click="confirming = false">Garder</button>
+      </div>
+    </BottomSheet>
   </article>
 </template>

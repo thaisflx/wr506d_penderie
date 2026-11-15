@@ -565,13 +565,6 @@ textarea::placeholder {
   gap: 10px;
 }
 
-/* Vignettes compactes du profil : 3 colonnes sur mobile */
-.thumb-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 8px;
-}
-
 .tone-sky {
   background: var(--cyan);
 }
@@ -592,59 +585,16 @@ textarea::placeholder {
   background: var(--rose);
 }
 
-/* Vignette d'objet (photo ou illustration) */
-.thumb {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 4px;
-  width: 100%;
-  height: 110px;
-  overflow: hidden;
-  color: var(--wine);
-  border-radius: 18px;
-}
-
-.thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-/* Vignette compacte (profil) : image festonnée et nom dessous */
-.thumb-card {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-  color: var(--ink);
-  text-decoration: none;
-}
-
-.thumb-card .thumb {
-  height: 132px;
-  border-radius: 18px 18px 0 0;
-}
-
-.thumb-card-name {
-  margin-top: 6px;
-  overflow: hidden;
-  font-size: 11px;
-  font-weight: 700;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
 @media (hover: hover) {
   .item-card,
   .room-tile,
-  .thumb-card {
+  .draft-card {
     transition: transform 0.15s ease;
   }
 
   .item-card:hover,
   .room-tile:hover,
-  .thumb-card:hover {
+  .draft-card:hover {
     transform: translateY(-2px);
   }
 }
@@ -707,6 +657,23 @@ textarea::placeholder {
 .ootd-card-when {
   font-size: 12px;
   color: var(--muted);
+}
+
+/* Profil : date et suppression sur une ligne (pas d'en-tête d'auteur) */
+.ootd-card-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+/* Supprimer mon look : bouton discret, sans bordure */
+.ootd-card-delete {
+  width: 36px;
+  height: 36px;
+  color: var(--muted);
+  background: transparent;
+  border-color: transparent;
 }
 
 /* Photo festonnée, arrondie en haut ; format portrait */
@@ -801,6 +768,70 @@ textarea::placeholder {
 
 .profile-looks {
   margin-top: 12px;
+}
+
+/* Brouillons du profil : vignette festonnée (photo ou appareil photo), légende et date dessous */
+.draft-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.draft-card {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  padding: 0;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+.draft-card-media {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 150px;
+  color: var(--wine);
+}
+
+.draft-card-media img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.draft-card-chip {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  padding: 3px 9px;
+  font-weight: 700;
+}
+
+.draft-card-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px 12px;
+}
+
+.draft-card-caption {
+  overflow: hidden;
+  font-weight: 700;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (min-width: 900px) {
+  .draft-grid {
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+
+  .draft-card-media {
+    height: 200px;
+  }
 }
 
 /* Poster un look (maquette v2 : Poster.png) */
@@ -2367,15 +2398,6 @@ select.input {
     gap: 16px;
   }
 
-  .thumb-grid {
-    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-    gap: 12px;
-  }
-
-  .thumb-grid .thumb {
-    height: 140px;
-  }
-
   .fab {
     right: 32px;
   }
@@ -2628,19 +2650,6 @@ select.input {
 
   .item-card--featured .item-card-name {
     font-size: 26px;
-  }
-
-  .thumb-grid {
-    grid-template-columns: repeat(auto-fill, minmax(190px, 1fr));
-    gap: 16px;
-  }
-
-  .thumb-card .thumb {
-    height: 190px;
-  }
-
-  .thumb-card-name {
-    font-size: 14px;
   }
 
   /* Profil : bannière haute et grand avatar qui chevauche le bas festonné */
