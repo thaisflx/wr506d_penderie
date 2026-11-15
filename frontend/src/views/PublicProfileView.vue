@@ -5,7 +5,10 @@ import { api } from '../api/client'
 import AppIcon from '../components/AppIcon.vue'
 import BottomSheet from '../components/BottomSheet.vue'
 import DecoStar from '../components/DecoStar.vue'
+import ItemPreviewSheet from '../components/ItemPreviewSheet.vue'
+import OotdCard from '../components/OotdCard.vue'
 import UserAvatar from '../components/UserAvatar.vue'
+import { useOotdFeed } from '../composables/useOotdFeed'
 
 // Profil public d'un autre compte : pseudo, avatar, bio, et mon lien avec lui (suivre, ami proche, bloquer)
 const props = defineProps({
@@ -21,12 +24,18 @@ const busy = ref(false)
 // Panneau ouvert : { kind: 'remove', type, title, text, action } ou { kind: 'block' }
 const sheet = ref(null)
 
+// Ses looks du jour publiés, avec la même règle de visibilité que le fil (GET /api/users/{id}/ootds)
+const looks = useOotdFeed(() => `/users/${props.id}/ootds`)
+const { ootds, loading: looksLoading, loadingMore, hasMore, loadMore, relationOf } = looks
+const preview = ref(null)
+
 async function load() {
   error.value = ''
   try {
     profile.value = await api.get(`/users/${props.id}`)
     // Mon propre profil public : la page Profil le montre déjà
     if (profile.value.viewerRelationship.isMe) router.replace('/profile')
+    else looks.load()
   } catch (e) {
     // Introuvable, suspendu ou bloqué : rien n'indique pourquoi
     if (e.status === 404) notFound.value = true
@@ -165,8 +174,31 @@ function openBlock() {
         <button type="button" class="link-btn link-btn--danger profile-block" data-cy="block-open" @click="openBlock">
           Bloquer {{ profile.username }}
         </button>
+
+        <section class="stack profile-looks" aria-labelledby="public-looks-title" data-cy="public-looks">
+          <h2 id="public-looks-title" class="section-title">ses looks du jour</h2>
+          <p v-if="looksLoading" class="loading">Chargement…</p>
+          <p v-else-if="!ootds.length" class="small muted" data-cy="public-looks-empty">Aucun look du jour à afficher.</p>
+          <template v-else>
+            <div class="ootd-list">
+              <OotdCard
+                v-for="ootd in ootds"
+                :key="ootd.id"
+                :ootd="ootd"
+                :relation="relationOf(ootd)"
+                hide-author
+                @preview-item="preview = $event"
+              />
+            </div>
+            <button v-if="hasMore" type="button" class="btn btn--block" :disabled="loadingMore" @click="loadMore">
+              {{ loadingMore ? 'Chargement…' : 'Voir plus' }}
+            </button>
+          </template>
+        </section>
       </template>
     </main>
+
+    <ItemPreviewSheet v-if="preview" :item="preview" @close="preview = null" />
 
     <BottomSheet v-if="sheet?.kind === 'remove'" :title="sheet.title" @close="sheet = null">
       <div class="confirm-box" role="alert">

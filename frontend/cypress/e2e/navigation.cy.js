@@ -41,6 +41,8 @@ describe('Barre de navigation', () => {
   })
 
   it('« Trouver des amis » ouvre la recherche de la page Amis', () => {
+    // Zoé ne suit personne : son fil est vide et propose de trouver des amis
+    cy.loginAs('zoe@test.local')
     cy.getCy('feed-find-friends').click()
 
     cy.location('pathname').should('eq', '/friends')
