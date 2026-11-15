@@ -10,6 +10,7 @@ use ApiPlatform\Metadata\Link;
 use ApiPlatform\Metadata\Patch;
 use ApiPlatform\Metadata\Post;
 use App\Enum\ItemStatus;
+use App\Enum\Visibility;
 use App\Repository\ItemRepository;
 use App\State\OwnerProcessor;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -238,6 +239,26 @@ class Item
     public function getCategoryName(): ?string
     {
         return $this->category?->getName();
+    }
+
+    /**
+     * Peut-il apparaître dans un look du jour ? Non s'il est perso, ou si son rangement, sa pièce ou son
+     * logement est privé ou perso (docs/decisions.md, lot 2). Lu par le front pour proposer les objets
+     * d'un look ; le back revérifie avec la contrainte ShareableItems.
+     */
+    #[Groups(['item:read'])]
+    public function isShareable(): bool
+    {
+        $storage = $this->getStorage();
+        $room = $storage?->getRoom();
+        $place = $room?->getPlace();
+        if ($this->isPersonal || null === $storage || null === $room || null === $place) {
+            return false;
+        }
+
+        return !$storage->isPersonal() && Visibility::Private !== $storage->getVisibility()
+            && !$room->isPersonal() && Visibility::Private !== $room->getVisibility()
+            && Visibility::Private !== $place->getVisibility();
     }
 
     // Marque (scan ou saisie), montrée dans un look du jour sans l'emplacement de l'objet (groupe ootd:item)

@@ -113,6 +113,7 @@ Complète les règles de la section « Volet social » (2026-11-08), qui restent
 | Un objet qui ne m'appartient pas, ajouté à un look, répond **400 « introuvable »** et non 422. | `CurrentOwnerExtension` rend les objets des autres introuvables avant même la validation : l'API ne révèle pas qu'ils existent. La contrainte `ShareableItems` garde le contrôle en défense. |
 | Les objets d'un look sont affichés dans un ordre stable (ordre de création des objets). | Sans ordre explicite, la base peut les renvoyer dans n'importe quel ordre. |
 | Un look publié garde sa photo : on ne peut que la remplacer ou supprimer le look ; la retirer répond 422. | Conséquence de la photo obligatoire pour publier : un look publié sans photo ne doit jamais exister. |
+| La règle « partageable » (un objet peut-il apparaître dans un look) vit dans **`Item::isShareable()`**. Elle est exposée au front dans le champ `shareable` de `GET /api/items`, et l'écran « Poster un look » ne propose que ces objets. Le back la revérifie toujours avec la contrainte `ShareableItems`. `ItemExposure` se contente d'y renvoyer pour rester injectable (`ShareableItemsValidator`, `OotdNormalizer`). | Une seule règle, lue au même endroit par l'API et par le front : le formulaire ne propose rien que l'API refuserait. Le filtre du front n'est qu'un confort, la sécurité reste côté back. Comme `src/Entity` est hors du périmètre de couverture, la règle est testée par la matrice de `ItemExposureTest`, par `OotdApiTest` et par des mutations. |
 
 ### Réponses aux questions du plan
 

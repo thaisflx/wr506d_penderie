@@ -3,7 +3,6 @@
 namespace App\Service;
 
 use App\Entity\Item;
-use App\Enum\Visibility;
 
 /**
  * Un objet peut-il être montré dans un look du jour (OOTD) ? Voir docs/decisions.md, lot 2.
@@ -12,21 +11,9 @@ use App\Enum\Visibility;
  */
 final class ItemExposure
 {
+    // La règle est portée par l'objet (Item::isShareable, aussi exposée au front) ; ce service la rend injectable
     public function isShareable(Item $item): bool
     {
-        if ($item->isPersonal()) {
-            return false;
-        }
-
-        $storage = $item->getStorage();
-        $room = $storage?->getRoom();
-        $place = $room?->getPlace();
-        if (null === $storage || null === $room || null === $place) {
-            return false;
-        }
-
-        return !$storage->isPersonal() && Visibility::Private !== $storage->getVisibility()
-            && !$room->isPersonal() && Visibility::Private !== $room->getVisibility()
-            && Visibility::Private !== $place->getVisibility();
+        return $item->isShareable();
     }
 }

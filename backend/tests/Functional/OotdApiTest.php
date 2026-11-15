@@ -224,6 +224,19 @@ final class OotdApiTest extends ApiTestCase
         self::assertSame(0, $this->em()->getRepository(Ootd::class)->count(['owner' => $this->user('camille'), 'caption' => null]));
     }
 
+    public function testMyItemsSayWhetherTheyCanBeShownInALook(): void
+    {
+        $this->logIn('camille');
+
+        $shareable = array_column($this->request('GET', '/api/items')['member'], 'shareable', 'name');
+
+        self::assertTrue($shareable['T-shirt blanc']);
+        self::assertTrue($shareable['Ponceuse']);
+        foreach (['Carnet intime', 'Contrat de location', 'Guirlande lumineuse', 'Bague de grand-mère', 'Montre de collection', 'Manteau en laine'] as $hidden) {
+            self::assertFalse($shareable[$hidden], $hidden);
+        }
+    }
+
     public function testAForeignItemAndAnUnknownItemGiveTheSameAnswer(): void
     {
         // Rien ne doit distinguer « l'objet existe mais n'est pas à moi » de « l'objet n'existe pas »
