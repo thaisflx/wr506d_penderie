@@ -6,6 +6,10 @@ menu:
     dashboard: Dashboard
     community: Community
     users: Accounts
+    looks: Published looks
+    content: Content
+    items: Items shown
+    categories: Categories
 dashboard:
     title: Dashboard
     intro: Lendly's key figures, without the details of the wardrobes, which stay private.
@@ -21,3 +25,28 @@ user:
     created_at: Signed up
     last_login_at: Last login
     cannot_lock_yourself: You can't suspend yourself or remove your own administrator role.
+look:
+    singular: Look
+    plural: Published looks
+    photo: Photo
+    owner: Posted by
+    caption: Caption
+    items: What is worn
+    worn_on: Worn on
+    published_at: Published on
+item:
+    singular: Item
+    plural: Items shown in a published look
+    photo: Photo
+    name: Name
+    type: Type
+    brand: Brand
+    owner: Owner
+    published_looks: Published looks
+category:
+    singular: Category
+    plural: Categories
+    name: Name
+    type: Type
+    item_count: Items
+    not_empty: "This category contains items: it can't be deleted."

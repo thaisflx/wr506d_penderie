@@ -6,6 +6,10 @@ menu:
     dashboard: Übersicht
     community: Community
     users: Konten
+    looks: Veröffentlichte Looks
+    content: Inhalte
+    items: Gezeigte Gegenstände
+    categories: Kategorien
 dashboard:
     title: Übersicht
     intro: Die wichtigsten Zahlen von Lendly, ohne die Details der Kleiderschränke, die privat bleiben.
@@ -21,3 +25,28 @@ user:
     created_at: Registriert am
     last_login_at: Letzte Anmeldung
     cannot_lock_yourself: Du kannst dich nicht selbst sperren oder dir die Administratorrolle entziehen.
+look:
+    singular: Look
+    plural: Veröffentlichte Looks
+    photo: Foto
+    owner: Gepostet von
+    caption: Bildunterschrift
+    items: Was getragen wird
+    worn_on: Getragen am
+    published_at: Veröffentlicht am
+item:
+    singular: Gegenstand
+    plural: In einem veröffentlichten Look gezeigte Gegenstände
+    photo: Foto
+    name: Name
+    type: Art
+    brand: Marke
+    owner: Besitzer
+    published_looks: Veröffentlichte Looks
+category:
+    singular: Kategorie
+    plural: Kategorien
+    name: Name
+    type: Art
+    item_count: Gegenstände
+    not_empty: 'Diese Kategorie enthält Gegenstände: Sie kann nicht gelöscht werden.'

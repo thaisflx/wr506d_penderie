@@ -48,6 +48,7 @@
             <directory>src/Serializer</directory>
             <file>src/Repository/RelationshipRepository.php</file>
             <file>src/Repository/BlockRepository.php</file>
+            <file>src/Repository/ItemRepository.php</file>
         </include>
 
         <deprecationTrigger>

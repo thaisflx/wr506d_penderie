@@ -1,0 +1,4 @@
+{# Photo d'un look ou d'un objet (URL publique /uploads/...), affichée telle quelle ; rien si pas de photo #}
+{% if field.value %}
+    <img src="{{ field.value }}" alt="" loading="lazy" style="max-width: 120px; max-height: 160px; border-radius: 8px;">
+{% endif %}
