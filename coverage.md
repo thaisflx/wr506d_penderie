@@ -51,11 +51,11 @@ Le but est de mesurer ce qui peut contenir une erreur de raisonnement : du code 
 
 | Suite | Tests | Assertions |
 |---|---|---|
-| Unit | 137 | 373 |
+| Unit | 140 | 377 |
 | Integration | 105 | 547 |
-| Functional | 267 | 1359 |
-| **PHPUnit, total** | **509** | **2279** |
-| Cypress e2e | 61 (12 specs) | — |
+| Functional | 270 | 1374 |
+| **PHPUnit, total** | **515** | **2298** |
+| Cypress e2e | 65 (13 specs) | — |
 
 ```
 Code Coverage Report:
@@ -65,7 +65,7 @@ Code Coverage Report:
   Lines:   100.00% (917/917)
 ```
 
-Les 42 classes du périmètre sont à 100 % en lignes et en méthodes. Le rapport HTML est généré dans `backend/var/coverage/` par `make coverage`. Les 61 tests Cypress passent (`make e2e`). Chiffres de la branche `feature/back-office` (i18n côté API, back office et « Mon espace »).
+Les 42 classes du périmètre sont à 100 % en lignes et en méthodes. Le rapport HTML est généré dans `backend/var/coverage/` par `make coverage`. Les 65 tests Cypress passent (`make e2e`), et `make i18n-check` vérifie les traductions du front (357 clés en fr, en, de). Chiffres de la branche `feature/back-office` après la fusion de `feature/i18n`.
 
 | Étape | PHPUnit | Cypress | Classes du périmètre |
 |---|---|---|---|
@@ -73,7 +73,8 @@ Les 42 classes du périmètre sont à 100 % en lignes et en méthodes. Le rappor
 | Volet social, lot 1 (relations et blocage) | +98 → 253 | +9 → 22 (24 avec la refonte) | +8 → 19 |
 | Volet social, lot 2 (looks du jour) | +120 → 373 | +34 → 58 | +11 → 30 |
 | i18n côté API (traduction, langue du compte et de l'en-tête) | +51 → 424 | — | +1 → 31 |
-| Back office (EasyAdmin, KPI) et « Mon espace » | +85 → 509 | +3 → 61 | +11 → 42 |
+| i18n du front et catégories proposées traduites (`labelKey`) | +6 → 430 | +4 → 62 | 31 |
+| Back office (EasyAdmin, KPI) et « Mon espace », fusionné avec l'i18n | +85 → 515 | +3 → 65 | +11 → 42 |
 
 Règles du lot 2 : [docs/decisions.md](docs/decisions.md), sections « Volet social » et « Lot 2 ».
 
@@ -301,6 +302,7 @@ Dans tous les cas d'erreur, aucun appel n'est envoyé au modèle. Le scanner sim
 | `post-look.cy.js` | 9 | Lot 2. Seuls les objets partageables sont proposés ; publier avec une photo de la galerie et deux objets ; date du jour, pas de date future ; **photo demandée avant de publier, sans rien envoyer** ; **un seul look après un échec puis un nouvel essai** ; photo par la caméra ; brouillon sans photo ; reprendre un brouillon et le publier ; supprimer un brouillon |
 | `profile.cy.js` | 6 | Lot 2. Mes looks publiés, du plus récent au plus ancien ; un objet porté ouvre sa fiche ; « Brouillons · 1 » ouvre la reprise ; le compteur suit la suppression ; profil sans look → « Poster mon look » ; la carte de Mon dressing ouvre « Poster un look » |
 | `delete-look.cy.js` | 5 | Lot 2. Supprimer mon look depuis le fil (sans recharger, il disparaît aussi du profil) ou depuis le profil ; « Garder » le conserve ; **aucun bouton sur le look de Sophie**, ni sur son profil public |
+| `i18n.cy.js` | 4 | Internationalisation. Écran de connexion passé en anglais (attribut `lang`, en-tête `Accept-Language` envoyé, erreur de l'API en anglais) ; choix gardé au rechargement ; langue du compte en allemand (enregistrée par `PATCH /api/me`, pluriel, date relative « gestern », relation « Enger Freund », gardée au rechargement) ; catégorie proposée traduite (« Tops »), date « yesterday » |
 | `scan.cy.js` | 3 | Lot 2 (caméra partagée avec « Poster un look »). Photo par la caméra et fiche pré-remplie ; photo importée ; caméra coupée en quittant l'écran. La réponse de l'IA est simulée (`cy.intercept`) |
 
 Les éléments utilisés portent des attributs `data-cy`. Chaque test recharge les fixtures `test` avant de commencer : l'ajout d'objet, joué en premier, ne fausse pas la navigation, qui vérifie la liste exacte des objets. Les looks envoyés avec une photo pendant `post-look.cy.js` sont supprimés par l'API après chaque test, et leur photo avec eux : rien ne reste dans `uploads/ootds/`. Dans Cypress, la caméra est la caméra simulée d'Electron.
@@ -386,21 +388,32 @@ Une couverture de 100 % prouve que chaque ligne s'exécute, pas que les tests d�
 
 La mutation « publier sans photo passe côté front » n'a **pas été détectée au premier essai** : le back renvoie exactement le même message que le front, donc le test qui ne vérifiait que le message passait. Le test vérifie maintenant qu'aucune requête n'est envoyée. C'est en cherchant pourquoi que l'anomalie n° 3 a été trouvée.
 
-**Internationalisation, côté API** (9 mutations, toutes détectées) :
+**Internationalisation** (20 mutations, toutes détectées) :
 
-| Bug introduit | Tests en échec |
+| Bug introduit | Détecté par |
 |---|---|
-| Langue du compte ignorée | 10 |
-| `UserLocaleSubscriber` placé avant le firewall (utilisateur pas encore connu) | 7 |
-| Langue enregistrée en base non vérifiée | 1 |
-| `PATCH /api/me` accepte d'autres champs que la langue | 1 |
-| Scanner sans la langue de la requête | 1 |
-| Clé allemande supprimée | 3 |
-| Clé utilisée dans le code mais absente des traductions | 4 |
-| Libellé d'enum manquant en anglais | 2 |
-| `Accept-Language` ignoré (configuration) | 5 |
+| Langue du compte ignorée | 10 tests PHPUnit |
+| `UserLocaleSubscriber` placé avant le firewall | 7 tests PHPUnit |
+| Langue enregistrée en base non vérifiée | 1 test PHPUnit |
+| `PATCH /api/me` accepte d'autres champs que la langue | 1 test PHPUnit |
+| Scanner sans la langue de la requête | 1 test PHPUnit |
+| Clé allemande supprimée (back) | 3 tests PHPUnit (`TranslationFilesTest`) |
+| Clé utilisée dans le code mais absente (back) | 4 tests PHPUnit |
+| Libellé d'enum manquant en anglais | 2 tests PHPUnit |
+| `Accept-Language` ignoré (configuration) | 5 tests PHPUnit |
+| Renommer une catégorie garde sa `labelKey` | 2 tests PHPUnit |
+| `labelKey` écrite par un client | 1 test PHPUnit |
+| `labelKey` absente des objets | 1 test PHPUnit |
+| Fixtures de test sans `labelKey` | 2 tests PHPUnit |
+| `relativeTime` en français quelle que soit la langue | 2 tests Cypress |
+| Attribut `lang` non mis à jour | 3 tests Cypress |
+| `Accept-Language` non envoyé par le front | 1 test Cypress |
+| Langue du compte non appliquée après connexion | 2 tests Cypress |
+| `labelKey` ignorée à l'affichage | 1 test Cypress |
+| Clé allemande supprimée (front) | `make i18n-check` |
+| Règle du pluriel français retirée (« 0 objets ») | 1 test Cypress (après ajout de la vérification « 0 choisi ») |
 
-**Back office et « Mon espace »** (39 mutations, toutes détectées ; trois l'ont été après un renforcement des données de test, voir ci-dessous) :
+**Back office et « Mon espace »** (41 mutations, toutes détectées ; trois l'ont été après un renforcement des données de test, voir ci-dessous) :
 
 | Classe ou écran | Bug introduit | Tests en échec |
 |---|---|---|
@@ -424,6 +437,7 @@ La mutation « publier sans photo passe côté front » n'a **pas été détect�
 | `MySpace` | brouillons comptés comme portés / blocage subi révélé dans l'export | 2 / 1 |
 | `MySpace` | abonnés comptés deux fois / email des autres dans l'export / « plus portés » non triés | 1 / 2 / 1 |
 | `MySpaceController` | export affiché au lieu d'être téléchargé | 1 |
+| `MySpace`, `MySpaceView` (après la fusion de l'i18n) | catégorie proposée non traduite : `labelKey` absente de l'API / ignorée à l'écran | 1 / 1 |
 | `ProfileView`, `MySpaceView` (e2e) | lien vers « Mon espace » cassé / langue non envoyée | 3 / 1 |
 
 Trois mutations n'ont d'abord pas été détectées, faute de données qui fassent la différence : aucun logement privé avec des pièces ouvertes (règle en requête), aucune connexion d'une personne inscrite dans une autre période (personnes venues), aucune date tombant pile un lundi à minuit (semaines). Les tests ont été complétés, puis les mutations rejouées et détectées.
@@ -446,7 +460,9 @@ Une mutation du lot 1 n'a pas été détectée : ne plus forcer le statut `pendi
 ## Limites
 
 - **Couverture des lignes seulement.** PCOV mesure les lignes exécutées, pas chaque branche d'une condition. Les cas limites listés plus haut compensent en partie, mais ne garantissent pas que toutes les combinaisons sont testées.
-- **Contrôle par mutation manuel.** 92 mutations ont été essayées à la main : 4 pour la première campagne, 19 pour le lot 1 du volet social (dont une non détectée, expliquée plus haut), 21 pour le lot 2, 9 pour l'i18n côté API et 39 pour le back office et « Mon espace » (trois détectées seulement après renforcement des tests). Un outil comme Infection en essaierait des centaines.
+- **Contrôle par mutation manuel.** 105 mutations ont été essayées à la main : 4 pour la première campagne, 19 pour le lot 1 du volet social (dont une non détectée, expliquée plus haut), 21 pour le lot 2 (dont une détectée seulement après renforcement du test), 20 pour l'internationalisation et 41 pour le back office et « Mon espace » (trois détectées seulement après renforcement des tests). Un outil comme Infection en essaierait des centaines.
+- **Base de test partagée entre PHPUnit et Cypress.** Cypress recharge les fixtures avant chaque test, mais le dernier test d'une spec laisse ses changements (ex. `post-look.cy.js` supprime le brouillon de Camille). Lancé juste après, `make test` peut alors échouer sur des tests qui attendent les fixtures. Lancer `make fixtures-test` avant `make test` dans ce cas.
+- **Traductions vérifiées par clés, pas par sens.** `TranslationFilesTest` et `make i18n-check` garantissent qu'aucune clé ne manque ; la justesse des traductions anglaises et allemandes est relue à la main.
 - **Back office testé côté serveur.** Les pages EasyAdmin sont testées par des requêtes PHPUnit (`WebTestCase`), pas dans un navigateur : le JavaScript d'EasyAdmin (fenêtres de confirmation, recherche) n'est vérifié qu'à la main.
 - **Règle « partageable » hors du périmètre mesuré.** Elle vit dans `Item::isShareable()` (`src/Entity`, exclu). Le 100 % ne la mesure pas : elle est couverte par `ItemExposureTest`, `OotdApiTest` et deux mutations.
 - **Règles de visibilité de la hiérarchie pas encore testables.** Les scénarios de [docs/campagne-test.md](docs/campagne-test.md) sur le contenu des logements (Théo voit la Penderie mais pas le carnet perso, Sophie voit le garage, liens de partage…) dépendent de Voters qui ne sont pas écrits. Pour l'instant, `CurrentOwnerExtension` limite chacun à son propre contenu, et c'est ce comportement provisoire qui est testé. Les **looks du jour**, eux, ont leur règle complète depuis le lot 2 (`OotdVoter`, `OotdVisibilityExtension`), testée sur toute la matrice.

@@ -241,6 +241,13 @@ class Item
         return $this->category?->getName();
     }
 
+    // Clé de traduction de la catégorie proposée par l'application (null : catégorie nommée par l'utilisateur)
+    #[Groups(['item:read', 'ootd:item'])]
+    public function getCategoryLabelKey(): ?string
+    {
+        return $this->category?->getLabelKey();
+    }
+
     /**
      * Peut-il apparaître dans un look du jour ? Non s'il est perso, ou si son rangement, sa pièce ou son
      * logement est privé ou perso (docs/decisions.md, lot 2). Lu par le front pour proposer les objets

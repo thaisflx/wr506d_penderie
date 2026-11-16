@@ -13,7 +13,10 @@
 | Code source | Snyk Code | ⚠️ 1 H · 1 L | ✅ 2 faux positifs, justifiés |
 | Accessibilité | Lighthouse, axe-core, clavier | 🟢 100 / 1 erreur | ✅ |
 | Performance (prod) | Lighthouse | 🟢 96 | |
-| Tests automatisés | PHPUnit, Cypress | ❌ aucun | ✅ 509 PHPUnit + 61 Cypress, 100 % sur le métier, 42 classes (voir [coverage.md](coverage.md)) |
+| Tests automatisés | PHPUnit, Cypress | ❌ aucun | ✅ 515 PHPUnit + 65 Cypress, 100 % sur le métier, 42 classes (voir [coverage.md](coverage.md)) |
+| Internationalisation | `TranslationFilesTest`, `make i18n-check`, `i18n.cy.js` | ❌ français seulement | ✅ fr, en, de ; aucune clé manquante (357 côté front) |
+| Tests automatisés | PHPUnit, Cypress | ❌ aucun | ✅ 430 PHPUnit + 62 Cypress, 100 % sur le métier, 31 classes (voir [coverage.md](coverage.md)) |
+| Internationalisation | `TranslationFilesTest`, `make i18n-check`, `i18n.cy.js` | ❌ français seulement | ✅ fr, en, de ; aucune clé manquante (341 côté front) |
 | Contrastes (refonte Lendly) | Calcul WCAG 2.1 | | ✅ tous les textes ≥ 4,5:1, logo exempté |
 
 ---
@@ -237,6 +240,17 @@ Référence : [`docs/maquette-v2/`](docs/maquette-v2/README.md) ; décisions dan
 - **Anomalies trouvées** : un `catch` « erreur réseau » jamais exécuté dans `ClothingScanner`, le message « Ce compte est suspendu. » masqué dans `LoginView`, et (lot 2) des brouillons créés en double dans « Poster un look » quand une publication échouait puis était retentée. Les trois sont corrigées.
 - **Données** : les fixtures de test (groupe `test` : camille, sophie, theo…) sont séparées des fixtures de démo (groupe `dev` : alice, leo, bob…), dans une base dédiée `penderie_db_test`.
 
+### Internationalisation (fr, en, de)
+
+- **Ce qui suit la langue** : tous les textes du front, les messages de l'API (validations, erreurs, connexion), les libellés des enums, les réponses du scanner IA, les dates et dates relatives (`Intl`), les pluriels, et les catégories proposées par l'application (`labelKey`). Les contenus saisis par les utilisateurs ne sont pas traduits.
+- **Accessibilité** : l'attribut `lang` de la page suit la langue choisie (prononciation des lecteurs d'écran, césure) ; chaque option du choix de la langue porte son propre `lang` (« Deutsch » lu en allemand).
+- **Langue des visiteurs** : sans compte, celle choisie sur l'écran de connexion ou, à la première visite, celle du navigateur si elle est proposée (brief : « pas obligé de créer un compte pour regarder »).
+
+| Limite | Effet | Piste |
+|---|---|---|
+| Calendrier de `<input type="date">` | Suit la langue du navigateur, pas celle de l'application | Accepté (comportement du navigateur) |
+| Traductions relues à la main | Les tests vérifient les clés, pas le sens | Relecture de l'allemand (niveau B1) et de l'anglais |
+| Base de test partagée par PHPUnit et Cypress | `make test` lancé juste après Cypress peut échouer (brouillon des fixtures supprimé) | `make fixtures-test` avant ; à automatiser dans `make test` |
 ### Back office et « Mon espace »
 
 - **Accès** : `/admin` (port 8000), `ROLE_ADMIN`, firewall de session séparé de l'API JWT, formulaire protégé par CSRF, comptes suspendus refusés. Testé dans les deux sens : un jeton JWT n'ouvre pas `/admin`, une session admin n'ouvre pas l'API.
@@ -248,7 +262,6 @@ Référence : [`docs/maquette-v2/`](docs/maquette-v2/README.md) ; décisions dan
 | Heures du back office en **UTC** (même cause que le bug du fuseau horaire ci-dessous) | « Publié le 16 nov. 2026, 04:07 » pour 05:07 à Paris | Branche `fix/fuseau-horaire` |
 | KPI calculés à chaque affichage, une partie en PHP | Rapide avec des centaines de comptes, à revoir avec des dizaines de milliers | Cache court ou requêtes agrégées |
 | Règle « partageable » écrite deux fois (méthode et requête) | Une modification oubliée d'un côté | Le test d'intégration compare les deux objet par objet |
-| Textes de « Mon espace » en français | En attente de vue-i18n (commit front de l'i18n) | Commit 4 de `feature/i18n` |
 
 ### Limites connues (lot 2 : looks du jour)
 

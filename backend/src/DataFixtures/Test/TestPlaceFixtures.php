@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures\Test;
 
+use App\DataFixtures\CategoryLabels;
 use App\Entity\Category;
 use App\Entity\Place;
 use App\Entity\Room;
@@ -127,7 +128,7 @@ class TestPlaceFixtures extends Fixture implements DependentFixtureInterface, Fi
 
     private function category(ObjectManager $manager, Storage $storage, string $name, CategoryType $type, string $reference): void
     {
-        $category = (new Category())->setName($name)->setType($type);
+        $category = (new Category())->setName($name)->setType($type)->setLabelKey(CategoryLabels::keyFor($name));
         $storage->addCategory($category);
         $manager->persist($category);
         $this->addReference($reference, $category);

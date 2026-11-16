@@ -4,7 +4,8 @@ import { RouterLink, useRouter } from 'vue-router'
 import { api } from '../api/client'
 import AppIcon from '../components/AppIcon.vue'
 import ItemVisual from '../components/ItemVisual.vue'
-import { CATEGORY_TYPE_OPTIONS, iri, optionLabel } from '../hierarchy'
+import { CATEGORY_TYPE_OPTIONS, categoryLabel, iri, optionLabel } from '../hierarchy'
+import { t } from '../i18n'
 import { useCamera } from '../composables/useCamera'
 import { fileToJpegDataUrl } from '../utils/image'
 
@@ -12,8 +13,8 @@ import { fileToJpegDataUrl } from '../utils/image'
 const router = useRouter()
 
 const MODES = [
-  { value: 'photo', label: 'Photo', hint: 'Cadre le vêtement en entier, puis prends la photo' },
-  { value: 'label', label: 'Étiquette', hint: "Cadre l'étiquette bien à plat et lisible" },
+  { value: 'photo', get label() { return t('scan.mode_photo') }, get hint() { return t('scan.hint_photo') } },
+  { value: 'label', get label() { return t('scan.mode_label') }, get hint() { return t('scan.hint_label') } },
 ]
 const mode = ref('photo')
 const hint = computed(() => MODES.find((m) => m.value === mode.value).hint)
@@ -84,7 +85,7 @@ async function analyze(dataUrl) {
   try {
     const result = await api.post('/scan', { image: dataUrl, mode: mode.value })
     if (!result.name) {
-      scanError.value = mode.value === 'label' ? "Aucune étiquette lisible : réessaie de plus près." : "Je n'ai rien reconnu : réessaie avec l'objet bien cadré."
+      scanError.value = mode.value === 'label' ? t('scan.no_label') : t('scan.nothing')
       step.value = 'manual'
       return
     }
@@ -160,21 +161,21 @@ async function save() {
   <div class="scan">
     <!-- Aperçu caméra en fond, ou la photo prise -->
     <video ref="video" class="scan-video" :class="{ 'scan-video--hidden': photo || !cameraReady }" playsinline muted></video>
-    <img v-if="photo" :src="photo" alt="Photo prise" class="scan-video scan-photo" />
+    <img v-if="photo" :src="photo" :alt="$t('scan.photo_taken')" class="scan-video scan-photo" />
     <div class="scan-shade" aria-hidden="true"></div>
 
     <div class="scan-stage">
       <header class="scan-header">
-        <RouterLink to="/" class="icon-btn icon-btn--on-dark" aria-label="Fermer le scanner">
+        <RouterLink to="/" class="icon-btn icon-btn--on-dark" :aria-label="$t('scan.close')">
           <AppIcon name="close" :stroke="2.4" />
         </RouterLink>
-        <h1 class="scan-title">Scanner</h1>
+        <h1 class="scan-title">{{ $t('scan.title') }}</h1>
         <button
           v-if="torchAvailable && !photo"
           type="button"
           class="icon-btn icon-btn--on-dark"
           :aria-pressed="torchOn"
-          aria-label="Flash"
+          :aria-label="$t('camera.flash')"
           @click="toggleTorch"
         >
           <AppIcon name="flash" />
@@ -182,9 +183,9 @@ async function save() {
         <span v-else class="scan-header-spacer" aria-hidden="true"></span>
       </header>
 
-      <div class="scan-modes" role="tablist" aria-label="Type de scan">
-        <button type="button" role="tab" aria-selected="false" aria-disabled="true" title="Bientôt disponible" disabled>
-          Code-barres
+      <div class="scan-modes" role="tablist" :aria-label="$t('scan.modes')">
+        <button type="button" role="tab" aria-selected="false" aria-disabled="true" :title="$t('item.coming_soon')" disabled>
+          {{ $t('scan.barcode') }}
         </button>
         <button
           v-for="option in MODES"
@@ -205,21 +206,21 @@ async function save() {
             <path d="M3 50V25A22 22 0 0 1 25 3h25M200 3h25a22 22 0 0 1 22 22v25M247 200v25a22 22 0 0 1-22 22h-25M50 247H25A22 22 0 0 1 3 225v-25" />
           </svg>
           <span class="scan-line" aria-hidden="true"></span>
-          <span v-if="!cameraReady && !photo" class="scan-frame-text">{{ cameraError || 'Ouverture de la caméra…' }}</span>
+          <span v-if="!cameraReady && !photo" class="scan-frame-text">{{ cameraError || $t('camera.opening') }}</span>
         </div>
         <p v-if="step === 'aim' || step === 'analyzing'" class="scan-hint" aria-live="polite">
-          {{ step === 'analyzing' ? "Analyse en cours… l'IA regarde ta photo" : hint }}
+          {{ step === 'analyzing' ? $t('scan.analyzing_hint') : hint }}
         </p>
 
         <div v-if="step === 'aim'" class="scan-controls">
-          <button type="button" class="scan-side-btn" aria-label="Importer une photo" @click="fileInput.click()">
+          <button type="button" class="scan-side-btn" :aria-label="$t('scan.import')" @click="fileInput.click()">
             <AppIcon name="image" :size="22" />
           </button>
           <button
             type="button"
             class="scan-shutter"
             :disabled="!cameraReady"
-            aria-label="Prendre la photo"
+            :aria-label="$t('camera.shoot')"
             @click="capture"
           ></button>
           <span class="scan-side-btn scan-side-btn--ghost" aria-hidden="true"></span>
@@ -236,14 +237,14 @@ async function save() {
       <template v-if="step === 'aim'">
         <p v-if="scanError" class="error" role="alert">{{ scanError }}</p>
         <p class="scan-panel-intro">
-          Prends une photo : l'IA reconnaît le type, la couleur et décrit l'objet. Tu pourras tout corriger avant d'ajouter.
+          {{ $t('scan.intro') }}
         </p>
         <div class="scan-actions">
           <button type="button" class="btn btn--large" @click="enterManually">
-            <AppIcon name="keyboard" /> À la main
+            <AppIcon name="keyboard" /> {{ $t('scan.manual') }}
           </button>
           <button type="button" class="btn btn--primary btn--large scan-actions-main" @click="fileInput.click()">
-            Importer une photo
+            {{ $t('scan.import') }}
           </button>
         </div>
       </template>
@@ -252,9 +253,9 @@ async function save() {
       <div v-else-if="step === 'analyzing'" class="scan-summary">
         <div class="scan-thumb"><img v-if="photo" :src="photo" alt="" /></div>
         <div class="scan-summary-text">
-          <span class="chip chip--peach">Analyse…</span>
-          <span class="display scan-summary-title">On regarde ça</span>
-          <span class="small muted">Ça prend quelques secondes</span>
+          <span class="chip chip--peach">{{ $t('scan.analyzing') }}</span>
+          <span class="display scan-summary-title">{{ $t('scan.looking') }}</span>
+          <span class="small muted">{{ $t('scan.few_seconds') }}</span>
         </div>
       </div>
 
@@ -266,9 +267,9 @@ async function save() {
             <ItemVisual v-else :item="{ name: form.name }" :category-type="form.categoryType" :size="44" />
           </div>
           <div class="scan-summary-text">
-            <span v-if="step === 'result'" class="chip chip--glaucous"><AppIcon name="check" :size="12" :stroke="3" /> Trouvé</span>
-            <span v-else class="chip">À la main</span>
-            <span class="display scan-summary-title">{{ form.name || 'Nouvel objet' }}</span>
+            <span v-if="step === 'result'" class="chip chip--glaucous"><AppIcon name="check" :size="12" :stroke="3" /> {{ $t('scan.found') }}</span>
+            <span v-else class="chip">{{ $t('scan.manual') }}</span>
+            <span class="display scan-summary-title">{{ form.name || $t('scan.new_item') }}</span>
             <span class="small muted">{{ subtitle }}</span>
           </div>
         </div>
@@ -276,47 +277,47 @@ async function save() {
         <p v-if="scanError" class="error" role="alert">{{ scanError }}</p>
 
         <label class="field">
-          <span class="field-label">Nom</span>
-          <input v-model="form.name" class="input" type="text" required placeholder="Pull bleu marine" />
+          <span class="field-label">{{ $t('form.name') }}</span>
+          <input v-model="form.name" class="input" type="text" required :placeholder="$t('scan.name_placeholder')" />
         </label>
         <div class="scan-fields-row">
           <label class="field">
-            <span class="field-label">Couleur</span>
-            <input v-model="form.color" class="input" type="text" placeholder="Bleu marine" />
+            <span class="field-label">{{ $t('item.color') }}</span>
+            <input v-model="form.color" class="input" type="text" :placeholder="$t('scan.color_placeholder')" />
           </label>
           <label class="field">
-            <span class="field-label">Type</span>
-            <input v-model="form.type" class="input" type="text" placeholder="Pull" />
+            <span class="field-label">{{ $t('item.type') }}</span>
+            <input v-model="form.type" class="input" type="text" :placeholder="$t('scan.type_placeholder')" />
           </label>
         </div>
         <label class="field">
-          <span class="field-label">Description</span>
-          <textarea v-model="form.description" class="input input--area" rows="2" placeholder="Maille côtelée, col rond"></textarea>
+          <span class="field-label">{{ $t('scan.description') }}</span>
+          <textarea v-model="form.description" class="input input--area" rows="2" :placeholder="$t('scan.description_placeholder')"></textarea>
         </label>
 
         <label class="field">
-          <span class="field-label">Ranger dans</span>
+          <span class="field-label">{{ $t('scan.store_in') }}</span>
           <select v-if="categories.length" v-model="categoryIri" class="input" required>
             <option v-for="category in categories" :key="category.id" :value="iri('category', category.id)">
-              {{ category.location }} › {{ category.name }}
+              {{ category.location }} › {{ categoryLabel(category) }}
             </option>
           </select>
           <span v-else class="empty-state">
-            Il faut d'abord une catégorie dans un rangement.
-            <RouterLink to="/dressing" class="btn btn--soft btn--small">Aller à mes pièces</RouterLink>
+            {{ $t('scan.need_category') }}
+            <RouterLink to="/dressing" class="btn btn--soft btn--small">{{ $t('scan.go_to_rooms') }}</RouterLink>
           </span>
         </label>
 
         <p v-if="saveError" class="error" role="alert">{{ saveError }}</p>
         <div class="scan-actions">
           <button type="button" class="btn btn--large" @click="restart">
-            <AppIcon name="scan" /> Reprendre
+            <AppIcon name="scan" /> {{ $t('scan.restart') }}
           </button>
           <button type="submit" class="btn btn--primary btn--large scan-actions-main" :disabled="saving || !categories.length">
-            {{ saving ? 'Ajout…' : 'Ajouter' }}
+            {{ saving ? $t('scan.adding') : $t('common.add') }}
           </button>
         </div>
-        <p v-if="step === 'result' && model" class="small muted scan-model">Analysé par {{ model }}</p>
+        <p v-if="step === 'result' && model" class="small muted scan-model">{{ $t('scan.analysed_by', { model }) }}</p>
       </form>
     </section>
   </div>

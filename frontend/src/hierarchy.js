@@ -1,87 +1,76 @@
+import { t } from './i18n'
+
 // Niveaux de la hiérarchie place > room > storage > category > item :
 // ressource d'API, champs des formulaires et libellés.
 
-export const VISIBILITY_OPTIONS = [
-  { value: 'private', label: 'Privé' },
-  { value: 'close_friends', label: 'Amis proches' },
-  { value: 'followers', label: 'Abonnés' },
-]
+// Option d'une liste (visibilité, type, statut) : la valeur envoyée à l'API et son libellé traduit, lu à chaque
+// affichage pour suivre la langue choisie
+const option = (value, key) => ({ value, get label() { return t(key) } })
 
-export const CATEGORY_TYPE_OPTIONS = [
-  { value: 'top', label: 'Haut' },
-  { value: 'bottom', label: 'Bas' },
-  { value: 'shoes', label: 'Chaussures' },
-  { value: 'media', label: 'Média' },
-  { value: 'other', label: 'Autre' },
-]
+export const VISIBILITY_OPTIONS = ['private', 'close_friends', 'followers'].map((value) => option(value, `enum.visibility.${value}`))
 
-export const ITEM_STATUS_OPTIONS = [
-  { value: 'available', label: 'Disponible' },
-  { value: 'in_laundry', label: 'Au sale' },
-  { value: 'reserved', label: 'Réservé' },
-  { value: 'lent', label: 'Prêté' },
-  { value: 'for_sale', label: 'En vente' },
-]
+export const CATEGORY_TYPE_OPTIONS = ['top', 'bottom', 'shoes', 'media', 'other'].map((value) => option(value, `enum.category_type.${value}`))
+
+export const ITEM_STATUS_OPTIONS = ['available', 'in_laundry', 'reserved', 'lent', 'for_sale'].map((value) => option(value, `enum.item_status.${value}`))
 
 export function optionLabel(options, value) {
   return options.find((option) => option.value === value)?.label ?? value
 }
 
-const visibilityField = { name: 'visibility', label: 'Qui peut le voir ?', type: 'select', options: VISIBILITY_OPTIONS, default: 'private' }
-const personalField = { name: 'isPersonal', label: 'Perso (visible par moi seul)', type: 'checkbox', default: false }
+// Champ de formulaire au libellé (et à l'exemple) traduits
+const field = (definition, labelKey, placeholderKey = null) => ({
+  ...definition,
+  get label() { return t(labelKey) },
+  get placeholder() { return placeholderKey ? t(placeholderKey) : undefined },
+})
+const nameField = (level) => field({ name: 'name', type: 'text', required: true }, 'form.name', `form.placeholder.${level}`)
+const visibilityField = field({ name: 'visibility', type: 'select', options: VISIBILITY_OPTIONS, default: 'private' }, 'form.visibility')
+const personalField = field({ name: 'isPersonal', type: 'checkbox', default: false }, 'form.personal')
+
+const level = (key, definition) => ({ ...definition, get label() { return t(`level.${key}`) } })
 
 export const LEVELS = {
-  place: {
-    label: 'logement',
+  place: level('place', {
     resource: '/places',
     parentField: null,
-    fields: [
-      { name: 'name', label: 'Nom', type: 'text', required: true, placeholder: 'Maison, appartement…' },
-      { name: 'city', label: 'Ville', type: 'text' },
-      { name: 'address', label: 'Adresse', type: 'text' },
-      visibilityField,
-    ],
-  },
-  room: {
-    label: 'pièce',
+    fields: [nameField('place'), field({ name: 'city', type: 'text' }, 'form.city'), field({ name: 'address', type: 'text' }, 'form.address'), visibilityField],
+  }),
+  room: level('room', {
     resource: '/rooms',
     parentField: 'place',
-    fields: [
-      { name: 'name', label: 'Nom', type: 'text', required: true, placeholder: 'Chambre, salon, grenier…' },
-      visibilityField,
-      personalField,
-    ],
-  },
-  storage: {
-    label: 'rangement',
+    fields: [nameField('room'), visibilityField, personalField],
+  }),
+  storage: level('storage', {
     resource: '/storages',
     parentField: 'room',
-    fields: [
-      { name: 'name', label: 'Nom', type: 'text', required: true, placeholder: 'Armoire, carton, malle…' },
-      visibilityField,
-      personalField,
-    ],
-  },
-  category: {
-    label: 'catégorie',
+    fields: [nameField('storage'), visibilityField, personalField],
+  }),
+  category: level('category', {
     resource: '/categories',
     parentField: 'storage',
-    fields: [
-      { name: 'name', label: 'Nom', type: 'text', required: true, placeholder: 'T-shirts, vinyles rock…' },
-      { name: 'type', label: 'Type', type: 'select', options: CATEGORY_TYPE_OPTIONS, default: 'other' },
-    ],
-  },
-  item: {
-    label: 'objet',
+    fields: [nameField('category'), field({ name: 'type', type: 'select', options: CATEGORY_TYPE_OPTIONS, default: 'other' }, 'form.type')],
+  }),
+  item: level('item', {
     resource: '/items',
     parentField: 'category',
     fields: [
-      { name: 'name', label: 'Nom', type: 'text', required: true, placeholder: 'Pull bleu, Abbey Road…' },
-      { name: 'status', label: 'Statut', type: 'select', options: ITEM_STATUS_OPTIONS, default: 'available' },
-      { name: 'barcode', label: 'Code-barres', type: 'text' },
+      nameField('item'),
+      field({ name: 'status', type: 'select', options: ITEM_STATUS_OPTIONS, default: 'available' }, 'form.status'),
+      field({ name: 'barcode', type: 'text' }, 'form.barcode'),
       personalField,
     ],
-  },
+  }),
+}
+
+// Nom affiché d'une catégorie : la traduction d'une catégorie proposée par l'application (labelKey), sinon le nom
+// saisi par l'utilisateur, qui ne se traduit pas (docs/decisions.md, « Internationalisation »)
+export function categoryLabel(category) {
+  return category?.labelKey ? t(category.labelKey) : (category?.name ?? '')
+}
+
+// Même chose pour la catégorie d'un objet (champs categoryLabelKey et categoryName de l'API)
+export function itemCategoryLabel(item) {
+  return categoryLabel({ labelKey: item?.categoryLabelKey, name: item?.categoryName })
 }
 
 // IRI d'un élément, ex. iri('room', 3) -> /api/rooms/3
@@ -102,7 +91,7 @@ const VISIBILITY_RANK = { private: 0, close_friends: 1, followers: 2 }
  */
 export function effectiveVisibility(item, containers) {
   if (item.isPersonal || containers.some((container) => container?.isPersonal)) {
-    return { value: 'personal', label: 'Moi seul (perso)' }
+    return { value: 'personal', label: t('enum.visibility.personal') }
   }
   const value = containers
     .map((container) => container?.visibility ?? 'private')
@@ -135,6 +124,3 @@ export function statusChip(status, tone) {
   return chip.replace('chip--', 'tone-') === tone ? 'chip--white' : chip
 }
 
-export function plural(count, singular, pluralForm = `${singular}s`) {
-  return `${count} ${count > 1 ? pluralForm : singular}`
-}

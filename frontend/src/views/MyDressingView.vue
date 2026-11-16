@@ -8,7 +8,8 @@ import BottomSheet from '../components/BottomSheet.vue'
 import DecoStar from '../components/DecoStar.vue'
 import FlowerShape from '../components/FlowerShape.vue'
 import NodeForm from '../components/NodeForm.vue'
-import { LEVELS, VISIBILITY_OPTIONS, iri, optionLabel, plural, roomIcon } from '../hierarchy'
+import { LEVELS, VISIBILITY_OPTIONS, iri, optionLabel, roomIcon } from '../hierarchy'
+import { t } from '../i18n'
 import { useAuthStore } from '../stores/auth'
 import { usePlacesStore } from '../stores/places'
 
@@ -32,7 +33,7 @@ const place = computed(() => placesStore.current)
 const TONES = ['tone-sky', 'tone-glaucous', 'tone-peach']
 
 // Puce de visibilité d'une pièce : Perso l'emporte sur la visibilité choisie
-const visibilityLabel = (room) => (room.isPersonal ? 'Perso' : optionLabel(VISIBILITY_OPTIONS, room.visibility))
+const visibilityLabel = (room) => (room.isPersonal ? t('common.personal') : optionLabel(VISIBILITY_OPTIONS, room.visibility))
 
 async function loadPlaces() {
   loading.value = true
@@ -121,13 +122,13 @@ const createRoom = (payload) =>
     <AppHeader />
 
     <div class="home-hello">
-      <h1 class="display page-title">Bonjour <span class="home-name" data-cy="home-username">{{ auth.user?.username }}</span></h1>
+      <h1 class="display page-title">{{ $t('dressing.hello') }} <span class="home-name" data-cy="home-username">{{ auth.user?.username }}</span></h1>
       <DecoStar class="home-star" :size="22" />
-      <p class="home-tagline">Tout ce que tu possèdes, rangé et à portée de main.</p>
+      <p class="home-tagline">{{ $t('dressing.tagline') }}</p>
     </div>
 
     <form role="search" @submit.prevent="searchItems">
-      <label for="home-search" class="visually-hidden">Rechercher un objet</label>
+      <label for="home-search" class="visually-hidden">{{ $t('dressing.search_label') }}</label>
       <span class="input-wrap">
         <span class="input-icon"><AppIcon name="search" :size="18" :stroke="2.2" /></span>
         <input
@@ -135,7 +136,7 @@ const createRoom = (payload) =>
           v-model.trim="search"
           class="input input--search"
           type="search"
-          placeholder="Un pull, un vinyle, la perceuse…"
+          :placeholder="$t('dressing.search_placeholder')"
         />
       </span>
     </form>
@@ -150,10 +151,10 @@ const createRoom = (payload) =>
         <DecoStar class="look-card-star" :size="16" color="var(--glaucous)" />
       </div>
       <div class="look-card-text">
-        <h2 id="look-title" class="section-title">look du jour</h2>
-        <p class="look-card-desc">Montre ta tenue à tes amis et retrouve les pièces portées.</p>
+        <h2 id="look-title" class="section-title">{{ $t('dressing.look_title') }}</h2>
+        <p class="look-card-desc">{{ $t('dressing.look_desc') }}</p>
         <RouterLink to="/looks/nouveau" class="btn btn--primary btn--small" data-cy="home-post-look">
-          <AppIcon name="plus" :size="16" :stroke="2.4" /> Poster mon look
+          <AppIcon name="plus" :size="16" :stroke="2.4" /> {{ $t('look.post_mine') }}
         </RouterLink>
       </div>
     </section>
@@ -161,24 +162,24 @@ const createRoom = (payload) =>
     <p v-if="error" class="error" role="alert">{{ error }}</p>
 
     <section v-if="placesStore.loaded && !placesStore.places.length" class="empty-state">
-      <p><strong>Bienvenue !</strong> Commence par ajouter ton logement.</p>
+      <p><strong>{{ $t('dressing.welcome') }}</strong> {{ $t('dressing.start') }}</p>
       <button type="button" class="btn btn--primary" @click="openSheet('place-create')">
-        <AppIcon name="plus" :stroke="2.4" /> Ajouter un logement
+        <AppIcon name="plus" :stroke="2.4" /> {{ $t('dressing.add_place') }}
       </button>
     </section>
 
     <section v-else-if="place" class="stack" aria-labelledby="rooms-title">
       <div class="section-head">
-        <h2 id="rooms-title" class="section-title home-rooms-title">mes pièces</h2>
+        <h2 id="rooms-title" class="section-title home-rooms-title">{{ $t('dressing.my_rooms') }}</h2>
         <span class="home-rooms-links">
-          <RouterLink to="/dressing/objets" class="text-link" data-cy="dressing-all-items">Tous mes objets</RouterLink>
-          <button type="button" class="text-link link-reset" :aria-label="`Changer de logement (actuel : ${place.name})`" @click="openSheet('switch')">
+          <RouterLink to="/dressing/objets" class="text-link" data-cy="dressing-all-items">{{ $t('dressing.all_items') }}</RouterLink>
+          <button type="button" class="text-link link-reset" :aria-label="$t('dressing.switch_place', { name: place.name })" @click="openSheet('switch')">
             <span data-cy="place-name">{{ place.name }}</span><span aria-hidden="true"> ▾</span>
           </button>
         </span>
       </div>
 
-      <p v-if="loading" class="loading">Chargement…</p>
+      <p v-if="loading" class="loading">{{ $t('common.loading') }}</p>
       <div v-else class="tile-grid">
         <RouterLink v-for="(room, index) in rooms" :key="room.id" :to="`/rooms/${room.id}`" class="card room-tile" data-cy="room-tile">
           <span class="room-tile-media scallop" :class="TONES[index % TONES.length]">
@@ -188,7 +189,7 @@ const createRoom = (payload) =>
           <span class="room-tile-text">
             <span class="room-tile-name">{{ room.name }}</span>
             <span class="room-tile-meta">
-              {{ plural(room.itemCount ?? 0, 'objet') }} · {{ plural(room.storageCount ?? 0, 'rangement') }}
+              {{ $t('count.items', room.itemCount ?? 0) }} · {{ $t('count.storages', room.storageCount ?? 0) }}
             </span>
           </span>
         </RouterLink>
@@ -197,13 +198,13 @@ const createRoom = (payload) =>
             <AppIcon name="plus" :size="32" :stroke="2" />
           </span>
           <span class="room-tile-text">
-            <span class="room-tile-name">ajouter une pièce</span>
-            <span class="room-tile-meta">Cuisine, cave, grenier…</span>
+            <span class="room-tile-name">{{ $t('dressing.add_room') }}</span>
+            <span class="room-tile-meta">{{ $t('dressing.add_room_hint') }}</span>
           </span>
         </button>
       </div>
     </section>
-    <BottomSheet v-if="sheet === 'switch'" title="Mes logements" @close="sheet = null">
+    <BottomSheet v-if="sheet === 'switch'" :title="$t('dressing.my_places')" @close="sheet = null">
       <ul class="sheet-list">
         <li v-for="item in placesStore.places" :key="item.id">
           <button
@@ -213,38 +214,38 @@ const createRoom = (payload) =>
             @click="placesStore.select(item.id); sheet = null"
           >
             <span>{{ item.name }}<span v-if="item.city" class="small sheet-option-sub"> · {{ item.city }}</span></span>
-            <span class="small">{{ plural(item.roomCount ?? 0, 'pièce') }}</span>
+            <span class="small">{{ $t('count.rooms', item.roomCount ?? 0) }}</span>
           </button>
         </li>
       </ul>
       <button type="button" class="btn btn--block" @click="openSheet('place-edit')">
-        <AppIcon name="edit" /> Modifier « {{ place?.name }} »
+        <AppIcon name="edit" /> {{ $t('dressing.edit_place', { name: place?.name }) }}
       </button>
       <button type="button" class="btn btn--soft btn--block" @click="openSheet('place-create')">
-        <AppIcon name="plus" :stroke="2.4" /> Ajouter un logement
+        <AppIcon name="plus" :stroke="2.4" /> {{ $t('dressing.add_place') }}
       </button>
     </BottomSheet>
 
-    <BottomSheet v-if="sheet === 'place-create'" title="Nouveau logement" @close="sheet = null">
-      <NodeForm :fields="LEVELS.place.fields" :saving="saving" :error="formError" submit-label="Créer" @submit="createPlace" />
+    <BottomSheet v-if="sheet === 'place-create'" :title="$t('dressing.new_place')" @close="sheet = null">
+      <NodeForm :fields="LEVELS.place.fields" :saving="saving" :error="formError" :submit-label="$t('common.create')" @submit="createPlace" />
     </BottomSheet>
 
-    <BottomSheet v-if="sheet === 'place-edit'" title="Modifier le logement" @close="sheet = null">
+    <BottomSheet v-if="sheet === 'place-edit'" :title="$t('dressing.edit_place_title')" @close="sheet = null">
       <NodeForm
         :fields="LEVELS.place.fields"
         :initial="place"
         :saving="saving"
         :error="formError"
         deletable
-        delete-label="Supprimer ce logement"
-        delete-warning="Toutes les pièces, tous les rangements et tous les objets de ce logement seront supprimés."
+        :delete-label="$t('dressing.delete_place')"
+        :delete-warning="$t('dressing.delete_place_warning')"
         @submit="updatePlace"
         @delete="deletePlace"
       />
     </BottomSheet>
 
-    <BottomSheet v-if="sheet === 'room-create'" title="Nouvelle pièce" @close="sheet = null">
-      <NodeForm :fields="LEVELS.room.fields" :saving="saving" :error="formError" submit-label="Créer" @submit="createRoom" />
+    <BottomSheet v-if="sheet === 'room-create'" :title="$t('dressing.new_room')" @close="sheet = null">
+      <NodeForm :fields="LEVELS.room.fields" :saving="saving" :error="formError" :submit-label="$t('common.create')" @submit="createRoom" />
     </BottomSheet>
   </main>
 </template>

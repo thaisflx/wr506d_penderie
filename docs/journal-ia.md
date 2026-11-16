@@ -183,6 +183,13 @@ L'IA m'a fait gagner du temps sur l'analyse du code et la structuration des règ
 - **Pourquoi l'allemand :** pas d'écriture de droite à gauche comme l'arabe, et je parle allemand (B1), donc je peux relire les traductions.
 - **Inscription :** le brief la demande (« créer un compte »). Elle fera l'objet d'une branche à part, après l'i18n et avant le back office.
 
+### 2. Internationalisation du front (commit fait seul pendant la nuit)
+- **Choix de Claude Code, dans le plan validé :** vue-i18n en mode Composition, fichiers `fr`, `en`, `de` ; les libellés des listes (visibilité, statuts, types) deviennent des « getters » qui traduisent à chaque affichage, pour suivre un changement de langue sans recharger ; le fil garde le **type** de relation et la carte le traduit.
+- **Dates :** `Intl.RelativeTimeFormat` donne « hier », « yesterday », « gestern » sans traduction écrite ; en français, Intl met une espace insécable fine avant « h » (« il y a 2 h ») : gardée, c'est la typographie correcte, et le test compare les espaces normalisées.
+- **Pluriel français :** vue-i18n met « 0 » au pluriel par défaut (« 0 objets ») ; règle française ajoutée (0 et 1 au singulier).
+- **Tests Cypress :** le navigateur de Cypress est en anglais ; sans choix déjà fait, l'application démarrait en anglais. Le support Cypress fixe le français par défaut, sauf si un test a choisi une langue.
+- **Constat :** `make test` lancé juste après un run Cypress peut échouer, car la base de test garde les changements du dernier test (fragilité qui date du lot 2, notée dans les limites).
+
 ---
 
 ## 16/11/2026 : back office et « Mon espace »
@@ -207,3 +214,7 @@ L'IA m'a fait gagner du temps sur l'analyse du code et la structuration des règ
 - **Bug trouvé en testant la connexion admin :** après le formulaire, EasyAdmin renvoyait vers « / » (page hors du back office). Corrigé en donnant l'adresse du tableau de bord au formulaire.
 - **Fixtures de démo :** dates d'inscription et de connexion étalées sur 8 semaines et 8 comptes sans contenu (dont un suspendu), pour que les graphiques du tableau de bord aient des chiffres parlants.
 - **Mutations non détectées au premier essai (3)**, toutes dues à des données de test qui ne faisaient pas la différence : tests complétés, mutations détectées ensuite.
+
+### 4. Fusion de `feature/i18n` dans `feature/back-office` (matin, à ma demande)
+- **Conflits :** seulement dans la documentation (`audit.md`, `ci.md`, `coverage.md`, ce journal) et `style.css` (deux blocs ajoutés au même endroit) : les deux versions sont gardées, les chiffres recalculés après les tests.
+- **« Mon espace » traduit :** textes passés dans vue-i18n (clés `space.*` en fr, en, de) ; les chiffres de l'API renvoient aussi la `labelKey` des catégories, sinon « Hauts » restait en français dans l'écran en allemand. Deux mutations ajoutées (API et écran), détectées.

@@ -31,7 +31,7 @@ final class MySpace
     /**
      * @return array{
      *     itemCount: int,
-     *     itemsByCategory: list<array{id: ?int, name: ?string, location: ?string, count: int}>,
+     *     itemsByCategory: list<array{id: ?int, name: ?string, labelKey: ?string, location: ?string, count: int}>,
      *     itemsByPlace: list<array{id: ?int, name: ?string, count: int}>,
      *     neverWorn: list<array{id: ?int, name: ?string}>,
      *     mostWorn: list<array{id: ?int, name: ?string, count: int}>,
@@ -49,7 +49,8 @@ final class MySpace
             foreach ($this->categoriesOf($place) as $category) {
                 $count = $category->getItems()->count();
                 $placeCount += $count;
-                $categories[] = ['id' => $category->getId(), 'name' => $category->getName(), 'location' => $category->getLocation(), 'count' => $count];
+                // labelKey : nom traduit par le front pour les catégories proposées par l'application
+                $categories[] = ['id' => $category->getId(), 'name' => $category->getName(), 'labelKey' => $category->getLabelKey(), 'location' => $category->getLocation(), 'count' => $count];
             }
             $places[] = ['id' => $place->getId(), 'name' => $place->getName(), 'count' => $placeCount];
         }

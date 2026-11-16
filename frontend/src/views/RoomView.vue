@@ -6,7 +6,8 @@ import AppIcon from '../components/AppIcon.vue'
 import BottomSheet from '../components/BottomSheet.vue'
 import NodeForm from '../components/NodeForm.vue'
 import StorageAccordion from '../components/StorageAccordion.vue'
-import { LEVELS, idFromIri, iri, plural } from '../hierarchy'
+import { LEVELS, categoryLabel, idFromIri, iri } from '../hierarchy'
+import { t } from '../i18n'
 
 const props = defineProps({
   id: { type: String, required: true },
@@ -46,7 +47,7 @@ async function load() {
     place.value = placeData
     storages.value = storageList
   } catch (e) {
-    error.value = e.status === 404 ? 'Cette pièce est introuvable.' : e.message
+    error.value = e.status === 404 ? t('room.not_found') : e.message
   } finally {
     loading.value = false
   }
@@ -62,15 +63,10 @@ watch(
 )
 
 // « 5 objets · visible par tes abonnés »
-const VISIBILITY_TEXT = {
-  private: 'privée',
-  close_friends: 'visible par tes amis proches',
-  followers: 'visible par tes abonnés',
-}
 const summary = computed(() => {
   if (!room.value) return ''
-  const visibility = room.value.isPersonal ? 'perso, visible par toi seul' : VISIBILITY_TEXT[room.value.visibility]
-  return [plural(room.value.itemCount ?? 0, 'objet'), plural(room.value.storageCount ?? 0, 'rangement'), visibility].join(' · ')
+  const visibility = t(`room.visibility.${room.value.isPersonal ? 'personal' : room.value.visibility}`)
+  return [t('count.items', room.value.itemCount ?? 0), t('count.storages', room.value.storageCount ?? 0), visibility].join(' · ')
 })
 
 // Formulaire d'objet : les champs de l'objet + le choix de la catégorie
@@ -78,7 +74,7 @@ const itemFields = computed(() => [
   LEVELS.item.fields[0],
   {
     name: 'category',
-    label: 'Catégorie',
+    label: t('item.category'),
     type: 'select',
     required: true,
     options: categoryOptions.value,
@@ -98,7 +94,7 @@ async function openItemSheet(category = null) {
   // Liste « Rangement › Catégorie » de toute la pièce
   const lists = await Promise.all(storages.value.map((storage) => api.list(`/storages/${storage.id}/categories`)))
   categoryOptions.value = storages.value.flatMap((storage, i) =>
-    lists[i].map((cat) => ({ value: iri('category', cat.id), label: `${storage.name} › ${cat.name}` })),
+    lists[i].map((cat) => ({ value: iri('category', cat.id), label: `${storage.name} › ${categoryLabel(cat)}` })),
   )
   sheet.value = 'item-create'
 }
@@ -153,18 +149,18 @@ function onStorageDeleted(storage) {
 <template>
   <div class="screen room">
     <div class="room-bar">
-      <RouterLink to="/dressing" class="icon-btn" aria-label="Retour à Mon dressing">
+      <RouterLink to="/dressing" class="icon-btn" :aria-label="$t('items.back')">
         <AppIcon name="back" :stroke="2.4" />
       </RouterLink>
-      <nav v-if="room" class="breadcrumb" aria-label="Fil d'Ariane" data-cy="room-place">
+      <nav v-if="room" class="breadcrumb" :aria-label="$t('room.breadcrumb')" data-cy="room-place">
         <RouterLink to="/dressing">{{ place?.name }}</RouterLink> / <span aria-current="page">{{ room.name }}</span>
       </nav>
-      <button v-if="room" type="button" class="icon-btn room-settings" aria-label="Réglages de la pièce" @click="openSheet('room-edit')">
+      <button v-if="room" type="button" class="icon-btn room-settings" :aria-label="$t('room.settings')" @click="openSheet('room-edit')">
         <AppIcon name="settings" :size="19" />
       </button>
     </div>
 
-    <p v-if="loading" class="loading">Chargement…</p>
+    <p v-if="loading" class="loading">{{ $t('common.loading') }}</p>
     <p v-else-if="error" class="error" role="alert">{{ error }}</p>
     <template v-else>
       <div>
@@ -173,8 +169,8 @@ function onStorageDeleted(storage) {
       </div>
 
       <!-- Pilules : « Tout » affiche chaque rangement dépliable, une pilule n'affiche que ce rangement -->
-      <div v-if="storages.length > 1" class="pills" role="group" aria-label="Rangements">
-        <button type="button" class="pill" :aria-pressed="selectedStorage === null" @click="selectedStorage = null">Tout</button>
+      <div v-if="storages.length > 1" class="pills" role="group" :aria-label="$t('room.storages')">
+        <button type="button" class="pill" :aria-pressed="selectedStorage === null" @click="selectedStorage = null">{{ $t('room.all') }}</button>
         <button
           v-for="storage in storages"
           :key="storage.id"
@@ -183,7 +179,7 @@ function onStorageDeleted(storage) {
           :aria-pressed="selectedStorage === storage.id"
           @click="selectedStorage = storage.id"
         >
-          {{ storage.name }}<template v-if="storage.isPersonal"> · perso</template>
+          {{ storage.name }}<template v-if="storage.isPersonal"> · {{ $t('room.personal_suffix') }}</template>
         </button>
       </div>
 
@@ -200,7 +196,7 @@ function onStorageDeleted(storage) {
         />
 
         <button type="button" class="add-tile add-tile--row" @click="openSheet('storage-create')">
-          <AppIcon name="plus" :stroke="2.4" /> Ajouter un rangement
+          <AppIcon name="plus" :stroke="2.4" /> {{ $t('room.add_storage') }}
         </button>
       </div>
     </template>
@@ -210,34 +206,34 @@ function onStorageDeleted(storage) {
       type="button"
       class="fab"
       data-cy="add-item"
-      :aria-label="`Ajouter un objet dans ${room.name}`"
+      :aria-label="$t('room.add_item_in', { name: room.name })"
       @click="openItemSheet()"
     >
-      <AppIcon name="plus" :size="20" :stroke="2.4" /> Ajouter un objet
+      <AppIcon name="plus" :size="20" :stroke="2.4" /> {{ $t('room.add_item') }}
     </button>
-    <BottomSheet v-if="sheet === 'room-edit'" title="Réglages de la pièce" @close="sheet = null">
+    <BottomSheet v-if="sheet === 'room-edit'" :title="$t('room.settings')" @close="sheet = null">
       <NodeForm
         :fields="LEVELS.room.fields"
         :initial="room"
         :saving="saving"
         :error="formError"
         deletable
-        delete-label="Supprimer cette pièce"
-        delete-warning="Tous ses rangements et tous les objets qu'ils contiennent seront supprimés."
+        :delete-label="$t('room.delete_room')"
+        :delete-warning="$t('room.delete_room_warning')"
         @submit="updateRoom"
         @delete="deleteRoom"
       />
     </BottomSheet>
 
-    <BottomSheet v-if="sheet === 'storage-create'" title="Nouveau rangement" @close="sheet = null">
-      <NodeForm :fields="LEVELS.storage.fields" :saving="saving" :error="formError" submit-label="Créer" @submit="createStorage" />
+    <BottomSheet v-if="sheet === 'storage-create'" :title="$t('room.new_storage')" @close="sheet = null">
+      <NodeForm :fields="LEVELS.storage.fields" :saving="saving" :error="formError" :submit-label="$t('common.create')" @submit="createStorage" />
     </BottomSheet>
 
-    <BottomSheet v-if="sheet === 'item-create'" title="Nouvel objet" @close="sheet = null">
+    <BottomSheet v-if="sheet === 'item-create'" :title="$t('room.new_item')" @close="sheet = null">
       <div v-if="!categoryOptions.length" class="empty-state">
-        <p>Il faut d'abord une catégorie dans un rangement pour y ranger un objet.</p>
+        <p>{{ $t('room.need_category') }}</p>
       </div>
-      <NodeForm v-else :fields="itemFields" :saving="saving" :error="formError" submit-label="Ajouter" @submit="createItem" />
+      <NodeForm v-else :fields="itemFields" :saving="saving" :error="formError" :submit-label="$t('common.add')" @submit="createItem" />
     </BottomSheet>
   </div>
 </template>

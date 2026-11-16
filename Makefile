@@ -1,7 +1,7 @@
 PHP  = docker exec -w /var/www/backend penderie_backend
 NODE = docker exec -w /app penderie_frontend
 
-.PHONY: help phpstan lint audit quality fixtures-dev fixtures-test test-db test test-unit test-integration test-functional coverage e2e e2e-open
+.PHONY: help phpstan lint audit quality fixtures-dev fixtures-test test-db test test-unit test-integration test-functional coverage e2e e2e-open i18n-check
 
 help: ## Affiche les commandes disponibles
 	@grep -E '^[a-zA-Z_-]+:.*?## ' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  \033[36m%-16s\033[0m %s\n", $$1, $$2}'
@@ -59,3 +59,6 @@ e2e: ## Tests e2e Cypress en ligne de commande (depuis frontend/, sur la machine
 
 e2e-open: ## Ouvre l'interface Cypress (depuis frontend/, sur la machine hôte)
 	$(CYPRESS) test:e2e:open
+
+i18n-check: ## Traductions du front : mêmes clés en fr, en, de, et clés du code présentes (sur la machine hôte, sans dépendance)
+	cd frontend && node scripts/check-i18n.mjs

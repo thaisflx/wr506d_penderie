@@ -6,6 +6,7 @@ import AppIcon from '../components/AppIcon.vue'
 import BottomSheet from '../components/BottomSheet.vue'
 import DecoStar from '../components/DecoStar.vue'
 import UserAvatar from '../components/UserAvatar.vue'
+import { t } from '../i18n'
 import { useAuthStore } from '../stores/auth'
 
 // Page Amis : demandes reçues (accepter, refuser), relations en cours (retirer, se désabonner, annuler)
@@ -24,9 +25,7 @@ const busyId = ref(null)
 // Suppression à confirmer : { relationship, title, text, action }
 const confirm = ref(null)
 
-const TYPE_LABELS = { follower: 'Abonnement', close_friend: 'Ami proche' }
-// Phrase de la carte de demande : « veut s'abonner à toi », « veut devenir ton ami proche »
-const REQUEST_TEXTS = { follower: ["s'abonner", ' à toi'], close_friend: ['devenir ton ami proche', ''] }
+// Phrase de la carte de demande (« veut s'abonner à toi ») : début, verbe en gras, fin, selon le type et la langue
 
 // Recherche : lancée 300 ms après la dernière frappe, à partir de 2 caractères (comme l'API)
 const search = ref('')
@@ -77,9 +76,9 @@ const followers = computed(() => received.value.filter((r) => r.status === 'acce
 
 // Les sections de l'onglet « Mes relations » ; « Mes abonnements » regroupe les relations que j'ai envoyées
 const sections = computed(() => [
-  { key: 'close-friends', title: 'Amis proches', people: closeFriends.value.map((r) => ({ r, user: r.requester })), empty: 'Aucun ami proche pour l\'instant.' },
-  { key: 'followers', title: 'Abonnés', people: followers.value.map((r) => ({ r, user: r.requester })), empty: 'Personne ne te suit encore.' },
-  { key: 'sent', title: 'Mes abonnements', people: sent.value.map((r) => ({ r, user: r.addressee })), empty: 'Tu ne suis personne pour l\'instant.' },
+  { key: 'close-friends', title: t('friends.section.close_friends'), people: closeFriends.value.map((r) => ({ r, user: r.requester })), empty: t('friends.section.close_friends_empty') },
+  { key: 'followers', title: t('friends.section.followers'), people: followers.value.map((r) => ({ r, user: r.requester })), empty: t('friends.section.followers_empty') },
+  { key: 'sent', title: t('friends.section.sent'), people: sent.value.map((r) => ({ r, user: r.addressee })), empty: t('friends.section.sent_empty') },
 ])
 
 // Après chaque action : la liste et les compteurs du profil (badge de la cloche) sont rechargés
@@ -104,10 +103,13 @@ function askRemove(r, user) {
   const mine = r.requester.id === myId.value
   if (mine) {
     confirm.value = r.status === 'pending'
-      ? { r, title: 'Annuler la demande', text: `Annuler ta demande à ${name} ?`, action: 'Annuler la demande' }
-      : { r, title: r.type === 'close_friend' ? 'Quitter les amis proches' : 'Se désabonner', text: `Tu ne verras plus ce que ${name} réserve à ses ${r.type === 'close_friend' ? 'amis proches' : 'abonnés'}.`, action: r.type === 'close_friend' ? 'Quitter' : 'Se désabonner' }
+      ? { r, title: t('friends.confirm.cancel_title'), text: t('friends.confirm.cancel_text', { name }), action: t('friends.confirm.cancel_title') }
+      : r.type === 'close_friend'
+        ? { r, title: t('friends.confirm.leave_title'), text: t('friends.confirm.leave_text', { name }), action: t('friends.confirm.leave_action') }
+        : { r, title: t('friends.confirm.unfollow_title'), text: t('friends.confirm.unfollow_text', { name }), action: t('friends.confirm.unfollow_title') }
   } else {
-    confirm.value = { r, title: 'Retirer', text: `Retirer ${name} de tes ${r.type === 'close_friend' ? 'amis proches' : 'abonnés'} ? Il ou elle ne sera pas prévenu·e.`, action: 'Retirer' }
+    const text = r.type === 'close_friend' ? 'friends.confirm.remove_close_friend_text' : 'friends.confirm.remove_follower_text'
+    confirm.value = { r, title: t('friends.confirm.remove_title'), text: t(text, { name }), action: t('friends.confirm.remove_title') }
   }
 }
 
@@ -118,36 +120,36 @@ async function confirmRemove() {
 }
 
 function statusLabel(r, mine) {
-  if (r.status === 'pending') return 'En attente'
-  return mine ? TYPE_LABELS[r.type] : null
+  if (r.status === 'pending') return t('friends.pending')
+  return mine ? t(`friends.type.${r.type}`) : null
 }
 </script>
 
 <template>
   <main class="screen friends">
     <div class="page-intro">
-      <h1 class="display page-title">Mes amis</h1>
+      <h1 class="display page-title">{{ $t('friends.title') }}</h1>
       <DecoStar class="page-intro-star" :size="22" />
-      <p class="page-intro-text">Ceux qui voient ton dressing, et ceux que tu suis.</p>
+      <p class="page-intro-text">{{ $t('friends.intro') }}</p>
     </div>
 
-    <div class="segmented" role="tablist" aria-label="Amis">
+    <div class="segmented" role="tablist" :aria-label="$t('friends.tabs')">
       <button type="button" role="tab" data-cy="friends-tab-requests" :aria-selected="tab === 'requests'" @click="tab = 'requests'">
-        Demandes<template v-if="requests.length"> · {{ requests.length }}</template>
+        {{ $t('friends.tab_requests') }}<template v-if="requests.length"> · {{ requests.length }}</template>
       </button>
       <button type="button" role="tab" data-cy="friends-tab-relations" :aria-selected="tab === 'relations'" @click="tab = 'relations'">
-        Mes relations
+        {{ $t('friends.tab_relations') }}
       </button>
       <button type="button" role="tab" data-cy="friends-tab-search" :aria-selected="tab === 'search'" @click="tab = 'search'">
-        Rechercher
+        {{ $t('friends.tab_search') }}
       </button>
     </div>
 
     <p v-if="error" class="error" role="alert" data-cy="friends-error">{{ error }}</p>
     <!-- Recherche par pseudo -->
-    <section v-if="tab === 'search'" class="stack" aria-label="Rechercher un compte">
+    <section v-if="tab === 'search'" class="stack" :aria-label="$t('friends.search_section')">
       <div role="search">
-        <label for="friends-search" class="visually-hidden">Rechercher un pseudo</label>
+        <label for="friends-search" class="visually-hidden">{{ $t('friends.search_label') }}</label>
         <span class="input-wrap">
           <span class="input-icon input-icon--search"><AppIcon name="search" :stroke="2.2" /></span>
           <input
@@ -155,14 +157,14 @@ function statusLabel(r, mine) {
             v-model="search"
             class="input input--pill input--search"
             type="search"
-            placeholder="Pseudo d'un ami"
+            :placeholder="$t('friends.search_placeholder')"
             autocomplete="off"
             data-cy="friends-search"
           />
         </span>
       </div>
-      <p v-if="search.trim().length < 2" class="small muted">Tape au moins 2 caractères du pseudo.</p>
-      <p v-else-if="searching" class="loading">Recherche…</p>
+      <p v-if="search.trim().length < 2" class="small muted">{{ $t('friends.search_min') }}</p>
+      <p v-else-if="searching" class="loading">{{ $t('friends.searching') }}</p>
       <ul v-else-if="results.length" class="person-list">
         <li v-for="user in results" :key="user.id">
           <RouterLink :to="`/users/${user.id}`" class="person-row person-row--link" data-cy="search-result">
@@ -175,37 +177,37 @@ function statusLabel(r, mine) {
           </RouterLink>
         </li>
       </ul>
-      <p v-else class="small muted" data-cy="search-empty">Aucun compte ne correspond.</p>
+      <p v-else class="small muted" data-cy="search-empty">{{ $t('friends.no_result') }}</p>
     </section>
 
-    <p v-else-if="loading" class="loading">Chargement…</p>
+    <p v-else-if="loading" class="loading">{{ $t('common.loading') }}</p>
 
     <!-- Demandes reçues en attente -->
-    <section v-else-if="tab === 'requests'" class="stack" aria-label="Demandes reçues">
+    <section v-else-if="tab === 'requests'" class="stack" :aria-label="$t('friends.requests_section')">
       <ul v-if="requests.length" class="person-list">
         <li v-for="r in requests" :key="r.id" class="card request-card" data-cy="request-row">
           <div class="request-card-head">
             <UserAvatar :name="r.requester.username" :src="r.requester.avatar" :size="52" flower />
             <span class="person-row-text">
               <RouterLink :to="`/users/${r.requester.id}`" class="person-row-name person-row-name--link" data-cy="request-name">{{ r.requester.username }}</RouterLink>
-              <span class="small muted">veut <strong class="request-verb">{{ REQUEST_TEXTS[r.type][0] }}</strong>{{ REQUEST_TEXTS[r.type][1] }}</span>
+              <span class="small muted">{{ $t(`friends.request.${r.type}.before`) }} <strong class="request-verb">{{ $t(`friends.request.${r.type}.verb`) }}</strong>{{ $t(`friends.request.${r.type}.after`) }}</span>
             </span>
             <span class="chip" :class="r.type === 'close_friend' ? 'chip--peach' : 'chip--glaucous'" data-cy="request-type">
-              {{ TYPE_LABELS[r.type] }}
+              {{ $t(`friends.type.${r.type}`) }}
             </span>
           </div>
           <div class="request-card-actions">
             <button type="button" class="btn btn--primary" data-cy="request-accept" :disabled="busyId === r.id" @click="accept(r)">
-              Accepter
+              {{ $t('friends.accept') }}
             </button>
             <button type="button" class="btn" data-cy="request-refuse" :disabled="busyId === r.id" @click="refuse(r)">
-              Refuser
+              {{ $t('friends.refuse') }}
             </button>
           </div>
         </li>
       </ul>
       <div v-else class="empty-state" data-cy="requests-empty">
-        <p>Aucune demande en attente.</p>
+        <p>{{ $t('friends.no_request') }}</p>
       </div>
     </section>
 
@@ -222,7 +224,7 @@ function statusLabel(r, mine) {
             </span>
             <span class="person-row-actions">
               <button type="button" class="btn btn--soft btn--small" data-cy="relation-remove" :disabled="busyId === r.id" @click="askRemove(r, user)">
-                {{ section.key === 'sent' ? (r.status === 'pending' ? 'Annuler' : 'Ne plus suivre') : 'Retirer' }}
+                {{ section.key === 'sent' ? (r.status === 'pending' ? $t('common.cancel') : $t('friends.unfollow')) : $t('friends.confirm.remove_title') }}
               </button>
             </span>
           </li>
@@ -235,7 +237,7 @@ function statusLabel(r, mine) {
       <div class="confirm-box" role="alert">
         <p>{{ confirm.text }}</p>
         <button type="button" class="btn btn--primary btn--block" data-cy="confirm-remove" @click="confirmRemove">{{ confirm.action }}</button>
-        <button type="button" class="btn btn--soft btn--block" @click="confirm = null">Garder</button>
+        <button type="button" class="btn btn--soft btn--block" @click="confirm = null">{{ $t('look.keep') }}</button>
       </div>
     </BottomSheet>
   </main>

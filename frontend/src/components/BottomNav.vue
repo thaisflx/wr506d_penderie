@@ -10,26 +10,26 @@ defineProps({
 </script>
 
 <template>
-  <nav class="bottom-nav" aria-label="Navigation principale">
+  <nav class="bottom-nav" :aria-label="$t('nav.label')">
     <RouterLink to="/" class="nav-link" data-cy="nav-home" :aria-current="current === 'home' ? 'page' : undefined">
       <NavIcon name="home" />
-      <span>Accueil</span>
+      <span>{{ $t('nav.home') }}</span>
     </RouterLink>
     <!-- Libellé court pour laisser de la place au Scanner ; le nom complet reste lu par les lecteurs d'écran -->
-    <RouterLink to="/dressing" class="nav-link" data-cy="nav-dressing" aria-label="Mon dressing" :aria-current="current === 'dressing' ? 'page' : undefined">
+    <RouterLink to="/dressing" class="nav-link" data-cy="nav-dressing" :aria-label="$t('nav.dressing_full')" :aria-current="current === 'dressing' ? 'page' : undefined">
       <NavIcon name="dressing" />
-      <span>Dressing</span>
+      <span>{{ $t('nav.dressing') }}</span>
     </RouterLink>
-    <RouterLink to="/scan" class="nav-scan" aria-label="Scanner un objet" title="Scanner un objet">
+    <RouterLink to="/scan" class="nav-scan" :aria-label="$t('nav.scan')" :title="$t('nav.scan')">
       <NavIcon name="scan" :size="76" />
     </RouterLink>
     <RouterLink to="/friends" class="nav-link" data-cy="nav-friends" :aria-current="current === 'friends' ? 'page' : undefined">
       <NavIcon name="friends" />
-      <span>Amis</span>
+      <span>{{ $t('nav.friends') }}</span>
     </RouterLink>
     <RouterLink to="/profile" class="nav-link" data-cy="nav-profile" :aria-current="current === 'profile' ? 'page' : undefined">
       <NavIcon name="profile" />
-      <span>Profil</span>
+      <span>{{ $t('nav.profile') }}</span>
     </RouterLink>
   </nav>
 </template>

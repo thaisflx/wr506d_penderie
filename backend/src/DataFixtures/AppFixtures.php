@@ -312,7 +312,7 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
 
     private function createCategory(ObjectManager $manager, Storage $storage, string $name, CategoryType $type): Category
     {
-        $category = (new Category())->setName($name)->setType($type);
+        $category = (new Category())->setName($name)->setType($type)->setLabelKey(CategoryLabels::keyFor($name));
         $storage->addCategory($category);
         $manager->persist($category);
 

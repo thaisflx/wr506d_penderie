@@ -21,7 +21,7 @@ final class MySpaceTest extends ApiTestCase
 
         $this->assertStatus(200);
         self::assertSame(14, $stats['itemCount']);
-        self::assertSame(['name' => 'Hauts', 'location' => 'Dressing › Penderie', 'count' => 3], array_diff_key($stats['itemsByCategory'][0], ['id' => 0]));
+        self::assertSame(['name' => 'Hauts', 'labelKey' => 'category.tops', 'location' => 'Dressing › Penderie', 'count' => 3], array_diff_key($stats['itemsByCategory'][0], ['id' => 0]));
         self::assertSame(14, array_sum(array_column($stats['itemsByCategory'], 'count')));
         self::assertSame(['Maison' => 13, 'Garde-meuble' => 1], array_column($stats['itemsByPlace'], 'count', 'name'));
         // Looks publiés de Camille : T-shirt blanc et Ponceuse, puis Jean brut ; les Baskets ne sont que dans un brouillon

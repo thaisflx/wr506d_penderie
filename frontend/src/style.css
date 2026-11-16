@@ -3158,3 +3158,10 @@ ul.pills {
 .space-settings {
   padding: 16px;
 }
+
+/* Choix de la langue sur l'écran de connexion (avant d'avoir un compte) */
+.auth-language {
+  align-self: flex-end;
+  width: auto;
+  min-width: 160px;
+}

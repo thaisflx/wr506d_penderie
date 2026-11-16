@@ -10,12 +10,14 @@ import ItemVisual from '../components/ItemVisual.vue'
 import NodeForm from '../components/NodeForm.vue'
 import {
   CATEGORY_TYPE_OPTIONS,
+  categoryLabel,
   ITEM_STATUS_OPTIONS,
   LEVELS,
   effectiveVisibility,
   iri,
   optionLabel,
 } from '../hierarchy'
+import { t } from '../i18n'
 import { fileToJpegDataUrl } from '../utils/image'
 
 const props = defineProps({
@@ -46,7 +48,7 @@ async function load() {
     room.value = await api.get(storage.value.room)
     place.value = await api.get(room.value.place)
   } catch (e) {
-    error.value = e.status === 404 ? 'Cet objet est introuvable.' : e.message
+    error.value = e.status === 404 ? t('item.not_found') : e.message
   } finally {
     loading.value = false
   }
@@ -63,8 +65,8 @@ const chips = computed(() => {
   if (!item.value) return []
   const attributes = item.value.attributes ?? {}
   return [
-    category.value?.name,
-    attributes.size ? `Taille ${attributes.size}` : null,
+    categoryLabel(category.value),
+    attributes.size ? t('item.size', { size: attributes.size }) : null,
     attributes.composition,
   ].filter(Boolean)
 })
@@ -74,11 +76,11 @@ const infos = computed(() => {
   if (!item.value) return []
   const attributes = item.value.attributes ?? {}
   return [
-    { label: 'Marque', value: attributes.brand },
-    { label: 'Couleur', value: attributes.color },
-    { label: 'Type', value: attributes.type ?? optionLabel(CATEGORY_TYPE_OPTIONS, category.value?.type) },
-    { label: 'Code-barres', value: item.value.barcode },
-    { label: 'Visible par', value: visibility.value?.value === 'private' ? 'Moi seul' : visibility.value?.label },
+    { label: t('item.brand'), value: attributes.brand },
+    { label: t('item.color'), value: attributes.color },
+    { label: t('item.type'), value: attributes.type ?? optionLabel(CATEGORY_TYPE_OPTIONS, category.value?.type) },
+    { label: t('item.barcode'), value: item.value.barcode },
+    { label: t('item.visible_by'), value: visibility.value?.value === 'private' ? t('item.only_me') : visibility.value?.label },
   ].filter((info) => info.value)
 })
 
@@ -165,10 +167,10 @@ async function remove() {
   <div class="item-page">
     <div class="item-hero">
       <div class="item-bar">
-        <RouterLink :to="backLink" class="icon-btn" aria-label="Retour">
+        <RouterLink :to="backLink" class="icon-btn" :aria-label="$t('common.back')">
           <AppIcon name="back" :stroke="2.4" />
         </RouterLink>
-        <button v-if="item" type="button" class="icon-btn" aria-label="Modifier l'objet" @click="editing = true; formError = null">
+        <button v-if="item" type="button" class="icon-btn" :aria-label="$t('item.edit')" @click="editing = true; formError = null">
           <AppIcon name="edit" :size="19" />
         </button>
       </div>
@@ -187,9 +189,9 @@ async function remove() {
       <div v-if="item" class="item-photo-actions">
         <button type="button" class="btn btn--soft btn--small" :disabled="photoBusy" @click="photoInput.click()">
           <AppIcon name="image" :size="14" />
-          {{ photoBusy ? 'Envoi…' : item.photo ? 'Changer la photo' : 'Ajouter une photo' }}
+          {{ photoBusy ? $t('item.sending') : item.photo ? $t('item.change_photo') : $t('item.add_photo') }}
         </button>
-        <button v-if="item.photo" type="button" class="btn btn--soft btn--small" :disabled="photoBusy" aria-label="Retirer la photo" @click="removePhoto">
+        <button v-if="item.photo" type="button" class="btn btn--soft btn--small" :disabled="photoBusy" :aria-label="$t('item.remove_photo')" @click="removePhoto">
           <AppIcon name="trash" :size="14" />
         </button>
         <!-- Sans "capture" : le téléphone propose la galerie ou l'appareil photo -->
@@ -199,11 +201,11 @@ async function remove() {
     </div>
 
     <main class="item-details">
-      <p v-if="loading" class="loading">Chargement…</p>
+      <p v-if="loading" class="loading">{{ $t('common.loading') }}</p>
       <p v-else-if="error" class="error" role="alert">{{ error }}</p>
       <template v-else-if="item">
         <div>
-          <nav class="item-place" aria-label="Emplacement">
+          <nav class="item-place" :aria-label="$t('item.location')">
             <RouterLink to="/dressing">{{ place.name }}</RouterLink> ›
             <RouterLink :to="`/rooms/${room.id}`">{{ room.name }}</RouterLink> ›
             <span>{{ storage.name }}</span>
@@ -215,7 +217,7 @@ async function remove() {
           <p v-if="item.attributes?.description" class="item-description">{{ item.attributes.description }}</p>
         </div>
 
-        <div class="segmented segmented--wrap" role="group" aria-label="État de l'objet">
+        <div class="segmented segmented--wrap" role="group" :aria-label="$t('item.status_group')">
           <button
             v-for="option in ITEM_STATUS_OPTIONS"
             :key="option.value"
@@ -236,27 +238,26 @@ async function remove() {
           </div>
         </dl>
         <p class="small muted">
-          La visibilité est calculée à partir de l'objet et de son rangement, de sa pièce et de son logement : le plus fermé
-          l'emporte.<template v-if="item.attributes?.scannedWith"> Reconnu par l'IA ({{ item.attributes.scannedWith }}).</template>
+          {{ $t('item.visibility_note') }}<template v-if="item.attributes?.scannedWith"> {{ $t('item.recognised_by_ai', { model: item.attributes.scannedWith }) }}</template>
         </p>
       </template>
     </main>
 
     <!-- Prêt et vente : pas encore d'API (entités Sale et Reservation sans endpoint) -->
     <div v-if="item" class="item-actions">
-      <p class="item-actions-soon">Prêt et vente entre amis : bientôt disponibles</p>
-      <span class="btn btn--primary btn--large" role="button" aria-disabled="true" title="Bientôt disponible">Prêter à un ami</span>
-      <span class="btn btn--large" role="button" aria-disabled="true" title="Bientôt disponible">Vendre à un ami</span>
+      <p class="item-actions-soon">{{ $t('item.lend_sell_soon') }}</p>
+      <span class="btn btn--primary btn--large" role="button" aria-disabled="true" :title="$t('item.coming_soon')">{{ $t('item.lend') }}</span>
+      <span class="btn btn--large" role="button" aria-disabled="true" :title="$t('item.coming_soon')">{{ $t('item.sell') }}</span>
     </div>
 
-    <BottomSheet v-if="editing" title="Modifier l'objet" @close="editing = false">
+    <BottomSheet v-if="editing" :title="$t('item.edit')" @close="editing = false">
       <NodeForm
         :fields="LEVELS.item.fields"
         :initial="item"
         :saving="saving"
         :error="formError"
         deletable
-        delete-label="Supprimer cet objet"
+        :delete-label="$t('item.delete')"
         @submit="save"
         @delete="remove"
       />

@@ -18,15 +18,19 @@ describe('Mon espace', () => {
     cy.getCy('space-never-worn').should('contain.text', 'Baskets montantes').and('not.contain.text', 'Ponceuse')
   })
 
-  it('enregistre la langue sur mon compte', () => {
+  it('enregistre la langue sur mon compte et traduit l\'écran', () => {
     cy.intercept('PATCH', '/api/me').as('saveLocale')
 
     cy.getCy('space-locale').select('Deutsch')
 
     cy.wait('@saveLocale').its('request.body').should('deep.equal', { locale: 'de' })
     cy.getCy('space-locale-saved').should('be.visible')
+    // L'écran passe en allemand, catégories proposées comprises (labelKey)
+    cy.get('h1').should('have.text', 'Mein Bereich')
+    cy.getCy('space-categories').find('li').first().should('contain.text', 'Oberteile')
     cy.reload()
     cy.getCy('space-locale').should('have.value', 'de')
+    cy.getCy('space-export').should('have.text', 'Meine Daten herunterladen')
   })
 
   it('télécharge toutes mes données dans un fichier JSON', () => {
