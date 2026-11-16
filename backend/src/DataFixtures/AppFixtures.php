@@ -67,6 +67,29 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
         $dan = $this->createUser($manager, 'dan', 'dan@penderie.test', '1990-02-14');
         $eve = $this->createUser($manager, 'eve', 'eve@penderie.test', '1993-07-30');
 
+        // --- Dates d'inscription et de dernière connexion (tableau de bord du back office) ---
+        // Relatives au jour du chargement, pour que les KPI restent parlants : inscriptions étalées sur 8 semaines,
+        // connexions récentes ou anciennes, des comptes jamais revenus
+        $this->setDates($admin, '-60 days', '-1 hour');
+        $this->setDates($alice, '-52 days', '-2 hours');
+        $this->setDates($leo, '-45 days', '-12 days');
+        $this->setDates($mia, '-45 days', null);
+        $this->setDates($noa, '-20 days', null);
+        $this->setDates($bob, '-38 days', '-1 day');
+        $this->setDates($carla, '-30 days', '-3 days');
+        $this->setDates($dan, '-9 days', '-25 days');
+        $this->setDates($eve, '-4 days', '-4 days');
+        // Comptes de démo sans contenu : ils remplissent les graphiques par semaine ; malo est suspendu (modération)
+        foreach ([
+            ['fanny', '-55 days', '-40 days'], ['gabin', '-33 days', '-6 days'], ['hugo', '-24 days', '-20 days'],
+            ['ines', '-17 days', '-2 days'], ['jules', '-11 days', '-11 days'], ['lina', '-6 days', '-1 day'],
+            ['malo', '-5 days', '-5 days'], ['nora', '-2 days', '-1 hour'],
+        ] as [$username, $signedUp, $lastLogin]) {
+            $member = $this->createUser($manager, $username, $username.'@penderie.test', '1998-05-10');
+            $this->setDates($member, $signedUp, $lastLogin);
+            $member->setIsSuspended('malo' === $username);
+        }
+
         // --- Relations avec alice ---
         $this->createRelationship($manager, $bob, $alice, RelationshipType::CloseFriend, RelationshipStatus::Accepted);
         $this->createRelationship($manager, $bob, $alice, RelationshipType::Follower, RelationshipStatus::Accepted);
@@ -251,6 +274,13 @@ class AppFixtures extends Fixture implements FixtureGroupInterface
             $ootd->addItem($item);
         }
         $manager->persist($ootd);
+    }
+
+    // Date d'inscription et de dernière connexion (null : jamais connecté), relatives au jour du chargement
+    private function setDates(User $user, string $signedUp, ?string $lastLogin): void
+    {
+        $user->setCreatedAt(new \DateTimeImmutable($signedUp))
+            ->setLastLoginAt(null === $lastLogin ? null : new \DateTimeImmutable($lastLogin));
     }
 
     /**
