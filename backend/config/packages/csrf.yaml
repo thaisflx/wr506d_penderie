@@ -1,0 +1,4 @@
+# Jetons CSRF classiques, gardés en session : seul le back office (/admin) a des formulaires et une session.
+# L'API (JWT, sans état) n'utilise pas de cookie de session, donc pas de CSRF (docs/decisions.md, « Back office »).
+framework:
+    csrf_protection: true

@@ -27,6 +27,21 @@ security:
                 password_path: password
                 success_handler: lexik_jwt_authentication.handler.authentication_success
                 failure_handler: lexik_jwt_authentication.handler.authentication_failure
+        # Back office (EasyAdmin) : site classique, avec session et formulaire de connexion protégé par CSRF.
+        # Séparé de l'API : un jeton JWT n'ouvre pas /admin, une session admin n'ouvre pas l'API
+        admin:
+            pattern: ^/admin
+            lazy: true
+            provider: app_user_provider
+            user_checker: App\Security\UserChecker
+            form_login:
+                login_path: admin_login
+                check_path: admin_login
+                enable_csrf: true
+                default_target_path: admin
+            logout:
+                path: /admin/logout
+                target: admin_login
         # Le reste de l'API s'authentifie avec l'en-tête "Authorization: Bearer <token>"
         api:
             pattern: ^/api
@@ -37,6 +52,8 @@ security:
 
     # Note: Only the *first* matching rule is applied
     access_control:
+        - { path: ^/admin/login$, roles: PUBLIC_ACCESS }
+        - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/api/login_check$, roles: PUBLIC_ACCESS }
         # Documentation de l'API (Swagger)
         - { path: ^/api/docs, roles: PUBLIC_ACCESS }

@@ -37,6 +37,10 @@ final class LastLoginTest extends ApiTestCase
 
     public function testRefusedLoginDoesNotChangeIt(): void
     {
+        // Point de départ fixé ici : la base de test peut garder une connexion d'un test Cypress précédent
+        $this->user('camille')->setLastLoginAt(null);
+        $this->em()->flush();
+
         $this->request('POST', '/api/login_check', ['email' => 'camille@test.local', 'password' => 'mauvais']);
 
         $this->assertStatus(401);

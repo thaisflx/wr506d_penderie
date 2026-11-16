@@ -39,4 +39,26 @@ final class UserTest extends TestCase
     {
         self::assertFalse((new User())->isMinor());
     }
+
+    // Case « administrateur » du back office : seul ROLE_ADMIN change, les autres rôles restent
+    public function testSetAdminAddsOrRemovesOnlyTheAdminRole(): void
+    {
+        $user = (new User())->setRoles(['ROLE_BETA']);
+
+        $user->setAdmin(true);
+        self::assertTrue($user->isAdmin());
+        self::assertSame(['ROLE_BETA', 'ROLE_ADMIN', 'ROLE_USER'], $user->getRoles());
+
+        $user->setAdmin(true);
+        self::assertSame(['ROLE_BETA', 'ROLE_ADMIN', 'ROLE_USER'], $user->getRoles());
+
+        $user->setAdmin(false);
+        self::assertFalse($user->isAdmin());
+        self::assertSame(['ROLE_BETA', 'ROLE_USER'], $user->getRoles());
+    }
+
+    public function testRoleUserAloneIsNotAdmin(): void
+    {
+        self::assertFalse((new User())->setRoles(['ROLE_USER'])->isAdmin());
+    }
 }

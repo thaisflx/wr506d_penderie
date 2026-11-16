@@ -20,7 +20,7 @@ use Symfony\Component\Translation\Translator;
 final class TranslationFilesTest extends TestCase
 {
     private const DIR = __DIR__.'/../../../translations';
-    private const DOMAINS = ['messages', 'validators', 'security'];
+    private const DOMAINS = ['messages', 'validators', 'security', 'admin'];
     private const LOCALES = ['en', 'de'];
 
     /**

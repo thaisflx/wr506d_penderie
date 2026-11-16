@@ -1,0 +1,23 @@
+login:
+    email: E-Mail
+    password: Passwort
+    sign_in: Anmelden
+menu:
+    dashboard: Übersicht
+    community: Community
+    users: Konten
+dashboard:
+    title: Übersicht
+    intro: Die wichtigsten Zahlen von Lendly, ohne die Details der Kleiderschränke, die privat bleiben.
+user:
+    singular: Konto
+    plural: Konten
+    username: Benutzername
+    email: E-Mail
+    admin: Administrator
+    suspended: Gesperrt
+    minor: Minderjährig
+    item_count: Gespeicherte Gegenstände
+    created_at: Registriert am
+    last_login_at: Letzte Anmeldung
+    cannot_lock_yourself: Du kannst dich nicht selbst sperren oder dir die Administratorrolle entziehen.

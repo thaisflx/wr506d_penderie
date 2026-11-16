@@ -156,7 +156,7 @@ Consigne des chapitres 22-23 : un back office pour le commanditaire (administrer
 
 | Décision | Justification |
 |---|---|
-| **EasyAdmin 4** sous **`/admin`**, servi par Symfony (port 8000 en local), réservé à **`ROLE_ADMIN`**. | Le client « ne connaît rien en informatique » et veut quelque chose de « très très simple » : EasyAdmin donne des listes, des fiches et des boutons standard, sans écran à concevoir. |
+| **EasyAdmin 5** (version stable installée par Composer ; le plan parlait de la 4) sous **`/admin`**, servi par Symfony (port 8000 en local), réservé à **`ROLE_ADMIN`**. | Le client « ne connaît rien en informatique » et veut quelque chose de « très très simple » : EasyAdmin donne des listes, des fiches et des boutons standard, sans écran à concevoir. |
 | **Firewall `admin` séparé, avec session** et formulaire de connexion (`form_login`, jeton CSRF), à côté du firewall `api` (JWT, sans état), inchangé. Un jeton JWT n'ouvre pas `/admin`, une session admin n'ouvre pas l'API. Les comptes suspendus sont refusés (`UserChecker`). | Le back office est un site classique (pages, formulaires) : la session et le CSRF sont la protection adaptée. Séparer les firewalls évite qu'une faille de l'un ouvre l'autre. |
 | **Suspension seulement, pas de suppression de compte.** Un admin ne peut ni se suspendre ni retirer son propre `ROLE_ADMIN`. Pas de modification du mot de passe, de l'email ni du profil. | Une suspension se défait, une suppression non. Se retirer ses propres droits bloquerait l'administration. |
 | **Pas de notification** quand un look est supprimé par la modération. | Réponse au plan : l'application n'a pas de notifications aujourd'hui. |

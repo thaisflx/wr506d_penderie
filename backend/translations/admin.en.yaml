@@ -1,0 +1,23 @@
+login:
+    email: Email
+    password: Password
+    sign_in: Sign in
+menu:
+    dashboard: Dashboard
+    community: Community
+    users: Accounts
+dashboard:
+    title: Dashboard
+    intro: Lendly's key figures, without the details of the wardrobes, which stay private.
+user:
+    singular: Account
+    plural: Accounts
+    username: Username
+    email: Email
+    admin: Administrator
+    suspended: Suspended
+    minor: Minor
+    item_count: Items stored
+    created_at: Signed up
+    last_login_at: Last login
+    cannot_lock_yourself: You can't suspend yourself or remove your own administrator role.

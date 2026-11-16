@@ -1,0 +1,25 @@
+# Back office (domaine admin) : libellés simples, sans jargon (docs/decisions.md, « Back office »).
+# Mêmes clés en en et de : TranslationFilesTest.
+login:
+    email: Email
+    password: Mot de passe
+    sign_in: Se connecter
+menu:
+    dashboard: Tableau de bord
+    community: Communauté
+    users: Comptes
+dashboard:
+    title: Tableau de bord
+    intro: Les chiffres clés de Lendly, sans le détail des dressings, qui restent privés.
+user:
+    singular: Compte
+    plural: Comptes
+    username: Pseudo
+    email: Email
+    admin: Administrateur
+    suspended: Suspendu
+    minor: Mineur
+    item_count: Objets rangés
+    created_at: Inscription
+    last_login_at: Dernière connexion
+    cannot_lock_yourself: Tu ne peux ni te suspendre ni te retirer le rôle administrateur.
