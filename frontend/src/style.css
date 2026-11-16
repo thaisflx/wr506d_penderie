@@ -3090,3 +3090,71 @@ select.input {
   font-size: 14px;
   font-weight: 600;
 }
+
+/* « Mon espace » : chiffres de mon dressing (barres simples, sans bibliothèque de graphiques) */
+.my-space .stat-grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.space-bars,
+.space-list,
+ul.pills {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.space-bars li {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr) 2.5em;
+  align-items: center;
+  gap: 10px;
+  padding: 4px 0;
+}
+
+.space-bars-label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.space-bar {
+  height: 10px;
+  min-width: 3px;
+  background: var(--wine);
+  border-radius: 999px;
+}
+
+.space-bars-count {
+  font-weight: 700;
+  text-align: right;
+}
+
+.space-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  counter-reset: worn;
+}
+
+.space-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  counter-increment: worn;
+}
+
+.space-list li::before {
+  content: counter(worn) '.';
+  font-weight: 700;
+  color: var(--wine);
+}
+
+.space-list li a {
+  flex: 1;
+  color: var(--ink);
+}
+
+.space-settings {
+  padding: 16px;
+}

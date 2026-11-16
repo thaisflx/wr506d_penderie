@@ -85,6 +85,10 @@ function logout() {
           </div>
         </div>
 
+        <RouterLink to="/espace" class="btn btn--soft btn--block" data-cy="profile-my-space">
+          <AppIcon name="box" :size="18" /> Mon espace
+        </RouterLink>
+
         <!-- Bandeau des demandes reçues : ouvre la page Amis -->
         <RouterLink v-if="user.pendingRequestCount" to="/friends" class="notice notice--link notice--request" data-cy="profile-requests-notice">
           <span class="notice-text">

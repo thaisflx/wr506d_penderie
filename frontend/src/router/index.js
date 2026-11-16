@@ -7,6 +7,7 @@ import ItemView from '../views/ItemView.vue'
 import ItemsView from '../views/ItemsView.vue'
 import LoginView from '../views/LoginView.vue'
 import MyDressingView from '../views/MyDressingView.vue'
+import MySpaceView from '../views/MySpaceView.vue'
 import PostLookView from '../views/PostLookView.vue'
 import ProfileView from '../views/ProfileView.vue'
 import PublicProfileView from '../views/PublicProfileView.vue'
@@ -27,6 +28,7 @@ const router = createRouter({
     { path: '/friends', name: 'friends', component: FriendsView, meta: { requiresAuth: true, nav: 'friends' } },
     { path: '/users/:id', name: 'user', component: PublicProfileView, props: true, meta: { requiresAuth: true, nav: 'friends' } },
     { path: '/blocked', name: 'blocked', component: BlockedView, meta: { requiresAuth: true, nav: 'profile' } },
+    { path: '/espace', name: 'my-space', component: MySpaceView, meta: { requiresAuth: true, nav: 'profile' } },
     { path: '/profile', name: 'profile', component: ProfileView, meta: { requiresAuth: true, nav: 'profile' } },
     { path: '/scan', name: 'scan', component: ScanView, meta: { requiresAuth: true, nav: false } },
     { path: '/looks/nouveau', name: 'look-new', component: PostLookView, meta: { requiresAuth: true, nav: false } },
