@@ -366,6 +366,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->createdAt;
     }
 
+    // Date d'inscription : fixée à la création ; modifiable pour les fixtures de démo et les tests des KPI
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
+    }
+
     public function getParent(): ?User
     {
         return $this->parent;

@@ -52,3 +52,27 @@ category:
     type: Type
     item_count: Objets
     not_empty: 'Cette catégorie contient des objets : elle ne peut pas être supprimée.'
+kpi:
+    signups:
+        title: Nouveaux comptes ces 7 derniers jours
+        sub: '%last30% sur les 30 derniers jours. Par semaine :'
+    active:
+        title: Personnes venues ces 30 derniers jours
+        sub: '%last7% ces 7 derniers jours, sur %total% comptes.'
+    looks:
+        title: Looks publiés
+        sub: 'Au total. Par semaine :'
+    items_per_user:
+        title: Objets rangés par personne
+        sub: 'Valeur du milieu ; la moyenne est de %average%.'
+    shareable:
+        title: Objets que leurs propriétaires acceptent de montrer
+        sub: '%shareable% objets sur %total%. Le reste est privé ou perso.'
+    relationships:
+        title: Demandes d'amis acceptées
+        sub: '%percent% % des demandes sont acceptées. En attente : %pending%.'
+    items_by_type:
+        title: Objets par type
+    suspended:
+        title: Comptes suspendus
+        sub: Par la modération.

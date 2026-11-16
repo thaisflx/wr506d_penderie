@@ -50,3 +50,27 @@ category:
     type: Art
     item_count: Gegenstände
     not_empty: 'Diese Kategorie enthält Gegenstände: Sie kann nicht gelöscht werden.'
+kpi:
+    signups:
+        title: Neue Konten in den letzten 7 Tagen
+        sub: '%last30% in den letzten 30 Tagen. Pro Woche:'
+    active:
+        title: Personen, die in den letzten 30 Tagen da waren
+        sub: '%last7% in den letzten 7 Tagen, von %total% Konten.'
+    looks:
+        title: Veröffentlichte Looks
+        sub: 'Insgesamt. Pro Woche:'
+    items_per_user:
+        title: Gespeicherte Gegenstände pro Person
+        sub: 'Mittlerer Wert; der Durchschnitt liegt bei %average%.'
+    shareable:
+        title: Gegenstände, die ihre Besitzer zeigen möchten
+        sub: '%shareable% von %total% Gegenständen. Der Rest ist privat oder persönlich.'
+    relationships:
+        title: Angenommene Freundschaftsanfragen
+        sub: '%percent% % der Anfragen werden angenommen. Offen: %pending%.'
+    items_by_type:
+        title: Gegenstände nach Art
+    suspended:
+        title: Gesperrte Konten
+        sub: Durch die Moderation.

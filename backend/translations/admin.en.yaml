@@ -50,3 +50,27 @@ category:
     type: Type
     item_count: Items
     not_empty: "This category contains items: it can't be deleted."
+kpi:
+    signups:
+        title: New accounts in the last 7 days
+        sub: '%last30% over the last 30 days. Per week:'
+    active:
+        title: People who came in the last 30 days
+        sub: '%last7% in the last 7 days, out of %total% accounts.'
+    looks:
+        title: Published looks
+        sub: 'In total. Per week:'
+    items_per_user:
+        title: Items stored per person
+        sub: 'Middle value; the average is %average%.'
+    shareable:
+        title: Items their owners agree to show
+        sub: '%shareable% items out of %total%. The rest is private or personal.'
+    relationships:
+        title: Friend requests accepted
+        sub: '%percent% % of requests are accepted. Waiting: %pending%.'
+    items_by_type:
+        title: Items by type
+    suspended:
+        title: Suspended accounts
+        sub: By moderation.
