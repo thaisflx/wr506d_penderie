@@ -417,5 +417,23 @@
     "restart": "Start again",
     "adding": "Adding…",
     "analysed_by": "Analysed by {model}"
+  },
+  "space": {
+    "title": "My space",
+    "intro": "What your wardrobe holds, what you wear, and your data.",
+    "stat_looks": "published look | published looks",
+    "stat_following": "following | following",
+    "by_place": "by home",
+    "by_category": "by category",
+    "most_worn": "most worn",
+    "no_worn": "No item worn in a published look yet.",
+    "worn_count": "{n} look | {n} looks",
+    "never_worn": "never worn · {n}",
+    "never_worn_help": "Items that don't appear in any published look.",
+    "language": "language",
+    "data": "my data",
+    "data_help": "A file with everything Lendly keeps about you: profile, homes, items, looks and relationships.",
+    "export": "Download my data",
+    "exporting": "Preparing…"
   }
 }

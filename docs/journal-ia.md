@@ -189,3 +189,32 @@ L'IA m'a fait gagner du temps sur l'analyse du code et la structuration des règ
 - **Pluriel français :** vue-i18n met « 0 » au pluriel par défaut (« 0 objets ») ; règle française ajoutée (0 et 1 au singulier).
 - **Tests Cypress :** le navigateur de Cypress est en anglais ; sans choix déjà fait, l'application démarrait en anglais. Le support Cypress fixe le français par défaut, sauf si un test a choisi une langue.
 - **Constat :** `make test` lancé juste après un run Cypress peut échouer, car la base de test garde les changements du dernier test (fragilité qui date du lot 2, notée dans les limites).
+
+---
+
+## 16/11/2026 : back office et « Mon espace »
+
+**Outil :** Claude Code, en autonomie la nuit, avec une autorisation écrite : commiter seulement si `make test` et `make e2e` passent et si toutes les mutations du commit sont détectées ; ne jamais pousser, fusionner, supprimer de branche, ni toucher à `.env` ou à la clé OpenRouter ; s'en tenir au brief, à la consigne, à `decisions.md` et au plan validé.
+
+### 1. Ce que l'admin peut voir (RGPD)
+- **Proposition de Claude Code :** des agrégats pour tout ce qui est privé ; en clair, seulement ce qui est déjà montré à d'autres (looks publiés, objets visibles dans ces looks, sans emplacement) et ce qui sert à gérer les comptes (email, rôles, suspension, dernière connexion, « mineur » au lieu de la date de naissance).
+- **Mon choix :** validé, avec suspension seulement (pas de suppression de compte) et pas de notification à l'auteur d'un look supprimé.
+- **Pourquoi :** brief, « le dressing doit être privé » ; minimisation des données (RGPD, art. 5.1.c).
+
+### 2. KPI
+- **Proposition de Claude Code :** 8 KPI tirés des données existantes, avec `lastLoginAt` à ajouter pour les personnes actives. Pas d'« objets ajoutés par période » faute de date de création sur `Item`, rien sur les prêts.
+- **Mon choix :** validé tel quel, avec `lastLoginAt` mis à jour à chaque connexion.
+- **Pourquoi :** le client « ne connaît rien en informatique » : peu de chiffres, chacun avec un libellé simple.
+
+### 3. Choix faits seul pendant la nuit (règle : le plus simple, dans le périmètre)
+- **EasyAdmin 5 au lieu de 4.** Composer a installé la version stable actuelle (5.10) ; le plan parlait de la 4. Gardée : compatible avec Symfony 7.4, rien à adapter.
+- **Jetons CSRF classiques, en session.** La recette proposait des jetons « sans état » (vérification de l'en-tête Origin ou d'un cookie posé en JavaScript). Le back office a de toute façon une session : les jetons classiques sont plus simples et testables.
+- **Date de dernière connexion seulement à la saisie des identifiants.** L'authentificateur JWT déclenche le même événement à chaque requête : sans filtre, chaque appel à l'API aurait écrit en base.
+- **Données ICU complètes dans l'image PHP.** Les dates du back office sortaient en anglais en français et en allemand : Alpine n'installe que les données ICU anglaises. Ajout de `icu-data-full` au Dockerfile, image reconstruite.
+- **Bug trouvé en testant la connexion admin :** après le formulaire, EasyAdmin renvoyait vers « / » (page hors du back office). Corrigé en donnant l'adresse du tableau de bord au formulaire.
+- **Fixtures de démo :** dates d'inscription et de connexion étalées sur 8 semaines et 8 comptes sans contenu (dont un suspendu), pour que les graphiques du tableau de bord aient des chiffres parlants.
+- **Mutations non détectées au premier essai (3)**, toutes dues à des données de test qui ne faisaient pas la différence : tests complétés, mutations détectées ensuite.
+
+### 4. Fusion de `feature/i18n` dans `feature/back-office` (matin, à ma demande)
+- **Conflits :** seulement dans la documentation (`audit.md`, `ci.md`, `coverage.md`, ce journal) et `style.css` (deux blocs ajoutés au même endroit) : les deux versions sont gardées, les chiffres recalculés après les tests.
+- **« Mon espace » traduit :** textes passés dans vue-i18n (clés `space.*` en fr, en, de) ; les chiffres de l'API renvoient aussi la `labelKey` des catégories, sinon « Hauts » restait en français dans l'écran en allemand. Deux mutations ajoutées (API et écran), détectées.

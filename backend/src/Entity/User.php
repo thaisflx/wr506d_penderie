@@ -95,6 +95,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
 
+    // Dernière connexion (identifiants saisis, API ou back office), pour le KPI des personnes actives ; null si jamais
+    #[ORM\Column(nullable: true)]
+    private ?\DateTimeImmutable $lastLoginAt = null;
+
     // Compte parent : si le parent est supprimé, l'enfant devient autonome
     #[ORM\ManyToOne(targetEntity: self::class, inversedBy: 'children')]
     #[ORM\JoinColumn(onDelete: 'SET NULL')]
@@ -261,6 +265,20 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    // Rôle administrateur (back office), sous forme de case à cocher : seul rôle que l'admin peut donner ou retirer
+    public function isAdmin(): bool
+    {
+        return \in_array('ROLE_ADMIN', $this->roles, true);
+    }
+
+    public function setAdmin(bool $admin): static
+    {
+        $roles = array_values(array_diff($this->roles, ['ROLE_ADMIN']));
+        $this->roles = $admin ? [...$roles, 'ROLE_ADMIN'] : $roles;
+
+        return $this;
+    }
+
     public function getBirthDate(): ?\DateTimeImmutable
     {
         return $this->birthDate;
@@ -331,9 +349,29 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
+    public function getLastLoginAt(): ?\DateTimeImmutable
+    {
+        return $this->lastLoginAt;
+    }
+
+    public function setLastLoginAt(?\DateTimeImmutable $lastLoginAt): static
+    {
+        $this->lastLoginAt = $lastLoginAt;
+
+        return $this;
+    }
+
     public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
+    }
+
+    // Date d'inscription : fixée à la création ; modifiable pour les fixtures de démo et les tests des KPI
+    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    {
+        $this->createdAt = $createdAt;
+
+        return $this;
     }
 
     public function getParent(): ?User

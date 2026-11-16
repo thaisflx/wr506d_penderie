@@ -26,16 +26,16 @@ La couverture est mesurée avec PCOV sur le **code métier écrit pour l'applica
 
 | Inclus | Rôle |
 |---|---|
-| `src/Service` | Scan IA des vêtements (`ClothingScanner`), `ScanFailedException`, droits entre deux personnes (`RelationshipChecker`) ; stockage commun des photos (`PhotoStorage`) et ses deux usages (`ItemPhotoStorage`, `OotdPhotoStorage`) ; objet montrable dans un look (`ItemExposure`, lot 2) |
+| `src/Service` | Scan IA des vêtements (`ClothingScanner`), `ScanFailedException`, droits entre deux personnes (`RelationshipChecker`) ; stockage commun des photos (`PhotoStorage`) et ses deux usages (`ItemPhotoStorage`, `OotdPhotoStorage`) ; objet montrable dans un look (`ItemExposure`, lot 2) ; KPI du back office (`AdminStats`) ; « Mon espace » (`MySpace`) |
 | `src/Security` | `UserChecker` : refus des comptes suspendus ; `OotdVoter` (lot 2) : lire un look, le modifier ou le supprimer |
 | `src/State` | `OwnerProcessor` : le créateur d'un logement ou d'un objet en devient propriétaire ; `PublicProfileProvider`, `RelationshipProcessor`, `BlockProcessor` (volet social) ; `OotdProcessor` (lot 2) : le propriétaire d'un look est toujours l'utilisateur connecté |
 | `src/Doctrine` | `CurrentOwnerExtension` : chaque utilisateur ne voit que son contenu ; `PublicUserExtension`, `RelationshipExtension`, `BlockExtension` (qui peut voir qui, quelle relation, quel blocage) ; `OotdVisibilityExtension` (lot 2) : looks visibles dans le fil, sur un profil et en lecture |
 | `src/EventListener` | `ItemPhotoCleaner`, `OotdPhotoCleaner` : suppression du fichier photo avec l'objet ou le look |
-| `src/EventSubscriber` | `UserLocaleSubscriber` (i18n) : la langue du compte s'applique à la requête, avant la validation |
-| `src/Controller` | `/api/me`, `/api/scan`, `/api/items/{id}/photo`, `/api/ootds/{id}/photo`, et `PhotoRequestTrait` (lecture commune de l'image envoyée) |
+| `src/EventSubscriber` | `UserLocaleSubscriber` (i18n) : langue du compte appliquée à la requête ; `LastLoginSubscriber` (back office) : date de dernière connexion |
+| `src/Controller` | `/api/me` (et `PATCH /api/me`, i18n), `/api/me/stats`, `/api/me/export` (« Mon espace »), `/api/scan`, `/api/items/{id}/photo`, `/api/ootds/{id}/photo`, `PhotoRequestTrait` ; `Controller/Admin` : connexion, tableau de bord et CRUD du back office (EasyAdmin) |
 | `src/Validator` | `ShareableItemsValidator` (lot 2) : objets d'un look, seulement les miens, jamais privés ni perso |
 | `src/Serializer` | `OotdNormalizer` (lot 2) : retire d'un look, pour les autres, un objet devenu privé ou perso après la publication |
-| `src/Repository/RelationshipRepository.php`, `src/Repository/BlockRepository.php` | Seuls repositories qui contiennent des requêtes écrites à la main (`countReceived`, `hasAccepted`, `deleteBetween`, `existsBetween`) |
+| `src/Repository/RelationshipRepository.php`, `src/Repository/BlockRepository.php`, `src/Repository/ItemRepository.php` | Seuls repositories qui contiennent des requêtes écrites à la main (`countReceived`, `hasAccepted`, `deleteBetween`, `existsBetween` ; règle « partageable » en requête pour le back office) |
 
 | Exclu | Pourquoi |
 |---|---|
@@ -51,28 +51,30 @@ Le but est de mesurer ce qui peut contenir une erreur de raisonnement : du code 
 
 | Suite | Tests | Assertions |
 |---|---|---|
-| Unit | 120 | 337 |
-| Integration | 92 | 457 |
-| Functional | 218 | 1096 |
-| **PHPUnit, total** | **430** | **1890** |
-| Cypress e2e | 62 (12 specs) | — |
+| Unit | 140 | 377 |
+| Integration | 105 | 547 |
+| Functional | 270 | 1374 |
+| **PHPUnit, total** | **515** | **2298** |
+| Cypress e2e | 65 (13 specs) | — |
 
 ```
 Code Coverage Report:
  Summary:
-  Classes: 100.00% (31/31)
-  Methods: 100.00% (101/101)
-  Lines:   100.00% (541/541)
+  Classes: 100.00% (42/42)
+  Methods: 100.00% (162/162)
+  Lines:   100.00% (917/917)
 ```
 
-Les 31 classes du périmètre sont à 100 % en lignes et en méthodes. Le rapport HTML est généré dans `backend/var/coverage/` par `make coverage`. Les 62 tests Cypress passent (`make e2e`), et `make i18n-check` vérifie les traductions du front (341 clés en fr, en, de).
+Les 42 classes du périmètre sont à 100 % en lignes et en méthodes. Le rapport HTML est généré dans `backend/var/coverage/` par `make coverage`. Les 65 tests Cypress passent (`make e2e`), et `make i18n-check` vérifie les traductions du front (357 clés en fr, en, de). Chiffres de la branche `feature/back-office` après la fusion de `feature/i18n`.
 
 | Étape | PHPUnit | Cypress | Classes du périmètre |
 |---|---|---|---|
 | Première campagne | 155 | 13 | 11 |
 | Volet social, lot 1 (relations et blocage) | +98 → 253 | +9 → 22 (24 avec la refonte) | +8 → 19 |
 | Volet social, lot 2 (looks du jour) | +120 → 373 | +34 → 58 | +11 → 30 |
-| Internationalisation (fr, en, de) | +57 → 430 | +4 → 62 | +1 → 31 |
+| i18n côté API (traduction, langue du compte et de l'en-tête) | +51 → 424 | — | +1 → 31 |
+| i18n du front et catégories proposées traduites (`labelKey`) | +6 → 430 | +4 → 62 | 31 |
+| Back office (EasyAdmin, KPI) et « Mon espace », fusionné avec l'i18n | +85 → 515 | +3 → 65 | +11 → 42 |
 
 Règles du lot 2 : [docs/decisions.md](docs/decisions.md), sections « Volet social » et « Lot 2 ».
 
@@ -411,6 +413,35 @@ La mutation « publier sans photo passe côté front » n'a **pas été détect�
 | Clé allemande supprimée (front) | `make i18n-check` |
 | Règle du pluriel français retirée (« 0 objets ») | 1 test Cypress (après ajout de la vérification « 0 choisi ») |
 
+**Back office et « Mon espace »** (41 mutations, toutes détectées ; trois l'ont été après un renforcement des données de test, voir ci-dessous) :
+
+| Classe ou écran | Bug introduit | Tests en échec |
+|---|---|---|
+| `LastLoginSubscriber` | dernière connexion mise à jour à chaque requête JWT | 2 |
+| `LastLoginSubscriber` | jamais enregistrée / enregistrée sans flush / back office oublié | 3 / 3 / 1 |
+| `security.yaml` | back office ouvert à `ROLE_USER` | 1 |
+| `security.yaml` | comptes suspendus acceptés au back office | 1 |
+| `security.yaml` | formulaire de connexion sans CSRF | 1 |
+| `UserCrudController` | un admin peut se suspendre ou se retirer le rôle | 2 |
+| `UserCrudController` | suppression de compte possible / email modifiable / date de naissance affichée | 1 / 1 / 2 |
+| `SecurityController` | retour vers « / » après la connexion | 1 |
+| `OotdCrudController` | brouillons listés / brouillon ouvert par son adresse / looks modifiables | 1 / 1 / 1 |
+| `ItemCrudController` | tous les objets listés / objet privé ouvert par son adresse / emplacement affiché | 1 / 3 / 2 |
+| `ItemRepository` | règle en requête sans la condition « logement privé » | 1 (après ajout d'un test) |
+| `worn_items.html.twig` | objet devenu perso montré dans le look | 1 |
+| `CategoryCrudController` | catégorie pleine supprimée / création possible | 1 / 1 |
+| `AdminStats` | brouillons comptés dans les looks / médiane remplacée par la moyenne | 1 / 1 |
+| `AdminStats` | personnes venues = inscrits / semaine qui déborde sur la suivante | 1 / 1 (après renforcement des dates de test) |
+| `AdminStats` | tous les objets montrables / taux sans les demandes en attente / types vides oubliés | 1 / 2 / 1 |
+| `AdminStats` | tous les comptes suspendus / période de 7 jours remplacée par 30 | 1 / 1 |
+| `MySpace` | brouillons comptés comme portés / blocage subi révélé dans l'export | 2 / 1 |
+| `MySpace` | abonnés comptés deux fois / email des autres dans l'export / « plus portés » non triés | 1 / 2 / 1 |
+| `MySpaceController` | export affiché au lieu d'être téléchargé | 1 |
+| `MySpace`, `MySpaceView` (après la fusion de l'i18n) | catégorie proposée non traduite : `labelKey` absente de l'API / ignorée à l'écran | 1 / 1 |
+| `ProfileView`, `MySpaceView` (e2e) | lien vers « Mon espace » cassé / langue non envoyée | 3 / 1 |
+
+Trois mutations n'ont d'abord pas été détectées, faute de données qui fassent la différence : aucun logement privé avec des pièces ouvertes (règle en requête), aucune connexion d'une personne inscrite dans une autre période (personnes venues), aucune date tombant pile un lundi à minuit (semaines). Les tests ont été complétés, puis les mutations rejouées et détectées.
+
 Une mutation du lot 1 n'a pas été détectée : ne plus forcer le statut `pending` à la création d'une demande. Ce n'était pas un trou dans les tests mais une ligne sans effet : le statut ne fait pas partie des champs modifiables à la création, et une relation est `pending` par défaut. La ligne a été retirée ; le test `testRequesterAndStatusAreAlwaysSetByTheServer` vérifie toujours qu'un statut envoyé par le client est ignoré.
 
 ## Choix techniques
@@ -429,9 +460,10 @@ Une mutation du lot 1 n'a pas été détectée : ne plus forcer le statut `pendi
 ## Limites
 
 - **Couverture des lignes seulement.** PCOV mesure les lignes exécutées, pas chaque branche d'une condition. Les cas limites listés plus haut compensent en partie, mais ne garantissent pas que toutes les combinaisons sont testées.
-- **Contrôle par mutation manuel.** 64 mutations ont été essayées à la main : 4 pour la première campagne, 19 pour le lot 1 du volet social (dont une non détectée, expliquée plus haut), 21 pour le lot 2 (dont une détectée seulement après renforcement du test), 20 pour l'internationalisation. Un outil comme Infection en essaierait des centaines.
+- **Contrôle par mutation manuel.** 105 mutations ont été essayées à la main : 4 pour la première campagne, 19 pour le lot 1 du volet social (dont une non détectée, expliquée plus haut), 21 pour le lot 2 (dont une détectée seulement après renforcement du test), 20 pour l'internationalisation et 41 pour le back office et « Mon espace » (trois détectées seulement après renforcement des tests). Un outil comme Infection en essaierait des centaines.
 - **Base de test partagée entre PHPUnit et Cypress.** Cypress recharge les fixtures avant chaque test, mais le dernier test d'une spec laisse ses changements (ex. `post-look.cy.js` supprime le brouillon de Camille). Lancé juste après, `make test` peut alors échouer sur des tests qui attendent les fixtures. Lancer `make fixtures-test` avant `make test` dans ce cas.
 - **Traductions vérifiées par clés, pas par sens.** `TranslationFilesTest` et `make i18n-check` garantissent qu'aucune clé ne manque ; la justesse des traductions anglaises et allemandes est relue à la main.
+- **Back office testé côté serveur.** Les pages EasyAdmin sont testées par des requêtes PHPUnit (`WebTestCase`), pas dans un navigateur : le JavaScript d'EasyAdmin (fenêtres de confirmation, recherche) n'est vérifié qu'à la main.
 - **Règle « partageable » hors du périmètre mesuré.** Elle vit dans `Item::isShareable()` (`src/Entity`, exclu). Le 100 % ne la mesure pas : elle est couverte par `ItemExposureTest`, `OotdApiTest` et deux mutations.
 - **Règles de visibilité de la hiérarchie pas encore testables.** Les scénarios de [docs/campagne-test.md](docs/campagne-test.md) sur le contenu des logements (Théo voit la Penderie mais pas le carnet perso, Sophie voit le garage, liens de partage…) dépendent de Voters qui ne sont pas écrits. Pour l'instant, `CurrentOwnerExtension` limite chacun à son propre contenu, et c'est ce comportement provisoire qui est testé. Les **looks du jour**, eux, ont leur règle complète depuis le lot 2 (`OotdVoter`, `OotdVisibilityExtension`), testée sur toute la matrice.
 - **Front du volet social.** Les écrans Amis, profil public, comptes bloqués, fil, « Poster un look » et profil sont couverts par les specs Cypress uniquement, sans tests unitaires des composants.

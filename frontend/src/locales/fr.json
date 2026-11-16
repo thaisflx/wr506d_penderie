@@ -417,5 +417,23 @@
     "restart": "Reprendre",
     "adding": "Ajout…",
     "analysed_by": "Analysé par {model}"
+  },
+  "space": {
+    "title": "Mon espace",
+    "intro": "Ce que contient ton dressing, ce que tu portes, et tes données.",
+    "stat_looks": "look publié | looks publiés",
+    "stat_following": "abonnement | abonnements",
+    "by_place": "par logement",
+    "by_category": "par catégorie",
+    "most_worn": "les plus portés",
+    "no_worn": "Aucun objet porté dans un look publié pour l'instant.",
+    "worn_count": "{n} look | {n} looks",
+    "never_worn": "jamais portés · {n}",
+    "never_worn_help": "Objets qui n'apparaissent dans aucun look publié.",
+    "language": "langue",
+    "data": "mes données",
+    "data_help": "Un fichier avec tout ce que Lendly garde sur toi : profil, logements, objets, looks et relations.",
+    "export": "Télécharger mes données",
+    "exporting": "Préparation…"
   }
 }

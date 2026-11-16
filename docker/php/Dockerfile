@@ -3,7 +3,9 @@ FROM php:8.3-fpm-alpine
 # Correctifs de sécurité des paquets Alpine de l'image de base (ex. zlib, signalé par Snyk Container)
 RUN apk upgrade --no-cache
 
-RUN apk add --no-cache git unzip icu-dev libpq-dev libzip-dev \
+# icu-data-full : sans lui, Alpine n'a que les données ICU anglaises, et intl formate les dates en anglais
+# quelle que soit la langue (docs/decisions.md, « Internationalisation »)
+RUN apk add --no-cache git unzip icu-dev icu-data-full libpq-dev libzip-dev \
     && docker-php-ext-install intl pdo pdo_pgsql zip
 
 # PCOV : couverture de code pour PHPUnit (dépendances de build supprimées ensuite)

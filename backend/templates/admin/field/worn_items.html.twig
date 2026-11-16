@@ -1,0 +1,3 @@
+{# Objets portés dans un look, comme les voient les autres personnes : seulement les partageables
+   (un objet devenu privé ou perso après la publication est masqué, docs/decisions.md, lot 2) #}
+{{ entity.instance.items|filter(item => item.shareable)|map(item => item.name)|join(', ') }}

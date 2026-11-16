@@ -1,0 +1,76 @@
+login:
+    email: Email
+    password: Password
+    sign_in: Sign in
+menu:
+    dashboard: Dashboard
+    community: Community
+    users: Accounts
+    looks: Published looks
+    content: Content
+    items: Items shown
+    categories: Categories
+dashboard:
+    title: Dashboard
+    intro: Lendly's key figures, without the details of the wardrobes, which stay private.
+user:
+    singular: Account
+    plural: Accounts
+    username: Username
+    email: Email
+    admin: Administrator
+    suspended: Suspended
+    minor: Minor
+    item_count: Items stored
+    created_at: Signed up
+    last_login_at: Last login
+    cannot_lock_yourself: You can't suspend yourself or remove your own administrator role.
+look:
+    singular: Look
+    plural: Published looks
+    photo: Photo
+    owner: Posted by
+    caption: Caption
+    items: What is worn
+    worn_on: Worn on
+    published_at: Published on
+item:
+    singular: Item
+    plural: Items shown in a published look
+    photo: Photo
+    name: Name
+    type: Type
+    brand: Brand
+    owner: Owner
+    published_looks: Published looks
+category:
+    singular: Category
+    plural: Categories
+    name: Name
+    type: Type
+    item_count: Items
+    not_empty: "This category contains items: it can't be deleted."
+kpi:
+    signups:
+        title: New accounts in the last 7 days
+        sub: '%last30% over the last 30 days. Per week:'
+    active:
+        title: People who came in the last 30 days
+        sub: '%last7% in the last 7 days, out of %total% accounts.'
+    looks:
+        title: Published looks
+        sub: 'In total. Per week:'
+    items_per_user:
+        title: Items stored per person
+        sub: 'Middle value; the average is %average%.'
+    shareable:
+        title: Items their owners agree to show
+        sub: '%shareable% items out of %total%. The rest is private or personal.'
+    relationships:
+        title: Friend requests accepted
+        sub: '%percent% % of requests are accepted. Waiting: %pending%.'
+    items_by_type:
+        title: Items by type
+    suspended:
+        title: Suspended accounts
+        sub: By moderation.

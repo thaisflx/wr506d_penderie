@@ -1,0 +1,82 @@
+{% extends '@EasyAdmin/page/content.html.twig' %}
+{% trans_default_domain 'admin' %}
+
+{% block content_title %}{{ 'dashboard.title'|trans }}{% endblock %}
+
+{% block head_stylesheets %}
+    {{ parent() }}
+    <style>
+        .kpi-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 16px; margin-top: 16px; }
+        .kpi { background: var(--form-bg, #fff); border: 1px solid var(--border-color, #e3e3e3); border-radius: 12px; padding: 16px; }
+        .kpi h2 { font-size: 15px; font-weight: 600; margin: 0 0 8px; }
+        .kpi-number { font-size: 34px; font-weight: 700; line-height: 1.1; }
+        .kpi-sub { color: var(--text-muted, #6c757d); font-size: 13px; margin: 4px 0 0; }
+        .kpi-bars { list-style: none; padding: 0; margin: 12px 0 0; }
+        .kpi-bars li { display: grid; grid-template-columns: 90px 1fr 32px; align-items: center; gap: 8px; font-size: 12px; margin: 3px 0; }
+        .kpi-bar { height: 10px; border-radius: 5px; background: #6b1d3a; min-width: 2px; }
+    </style>
+{% endblock %}
+
+{% macro bars(rows) %}
+    {% set max = max(rows|map(row => row.count)|merge([1])) %}
+    <ul class="kpi-bars">
+        {% for row in rows %}
+            <li><span>{{ row.label }}</span><span class="kpi-bar" style="width: {{ (100 * row.count / max)|round }}%"></span><span>{{ row.count }}</span></li>
+        {% endfor %}
+    </ul>
+{% endmacro %}
+
+{% block main %}
+    <p>{{ 'dashboard.intro'|trans }}</p>
+
+    <div class="kpi-grid">
+        <section class="kpi" data-kpi="signups">
+            <h2>{{ 'kpi.signups.title'|trans }}</h2>
+            <p class="kpi-number">{{ stats.signups.last7 }}</p>
+            <p class="kpi-sub">{{ 'kpi.signups.sub'|trans({'%last30%': stats.signups.last30}) }}</p>
+            {{ _self.bars(signupWeeks) }}
+        </section>
+
+        <section class="kpi" data-kpi="active">
+            <h2>{{ 'kpi.active.title'|trans }}</h2>
+            <p class="kpi-number">{{ stats.active.last30 }}</p>
+            <p class="kpi-sub">{{ 'kpi.active.sub'|trans({'%last7%': stats.active.last7, '%total%': stats.active.total}) }}</p>
+        </section>
+
+        <section class="kpi" data-kpi="looks">
+            <h2>{{ 'kpi.looks.title'|trans }}</h2>
+            <p class="kpi-number">{{ stats.looks.total }}</p>
+            <p class="kpi-sub">{{ 'kpi.looks.sub'|trans }}</p>
+            {{ _self.bars(lookWeeks) }}
+        </section>
+
+        <section class="kpi" data-kpi="items-per-user">
+            <h2>{{ 'kpi.items_per_user.title'|trans }}</h2>
+            <p class="kpi-number">{{ median }}</p>
+            <p class="kpi-sub">{{ 'kpi.items_per_user.sub'|trans({'%average%': average}) }}</p>
+        </section>
+
+        <section class="kpi" data-kpi="shareable">
+            <h2>{{ 'kpi.shareable.title'|trans }}</h2>
+            <p class="kpi-number">{{ stats.shareable.percent }} %</p>
+            <p class="kpi-sub">{{ 'kpi.shareable.sub'|trans({'%shareable%': stats.shareable.shareable, '%total%': stats.shareable.total}) }}</p>
+        </section>
+
+        <section class="kpi" data-kpi="relationships">
+            <h2>{{ 'kpi.relationships.title'|trans }}</h2>
+            <p class="kpi-number">{{ stats.relationships.accepted }}</p>
+            <p class="kpi-sub">{{ 'kpi.relationships.sub'|trans({'%percent%': stats.relationships.percent, '%pending%': stats.relationships.pending}) }}</p>
+        </section>
+
+        <section class="kpi" data-kpi="items-by-type">
+            <h2>{{ 'kpi.items_by_type.title'|trans }}</h2>
+            {{ _self.bars(itemsByType) }}
+        </section>
+
+        <section class="kpi" data-kpi="suspended">
+            <h2>{{ 'kpi.suspended.title'|trans }}</h2>
+            <p class="kpi-number">{{ stats.suspended }}</p>
+            <p class="kpi-sub">{{ 'kpi.suspended.sub'|trans }}</p>
+        </section>
+    </div>
+{% endblock %}

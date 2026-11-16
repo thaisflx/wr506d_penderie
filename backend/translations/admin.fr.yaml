@@ -1,0 +1,78 @@
+# Back office (domaine admin) : libellés simples, sans jargon (docs/decisions.md, « Back office »).
+# Mêmes clés en en et de : TranslationFilesTest.
+login:
+    email: Email
+    password: Mot de passe
+    sign_in: Se connecter
+menu:
+    dashboard: Tableau de bord
+    community: Communauté
+    users: Comptes
+    looks: Looks publiés
+    content: Contenu
+    items: Objets montrés
+    categories: Catégories
+dashboard:
+    title: Tableau de bord
+    intro: Les chiffres clés de Lendly, sans le détail des dressings, qui restent privés.
+user:
+    singular: Compte
+    plural: Comptes
+    username: Pseudo
+    email: Email
+    admin: Administrateur
+    suspended: Suspendu
+    minor: Mineur
+    item_count: Objets rangés
+    created_at: Inscription
+    last_login_at: Dernière connexion
+    cannot_lock_yourself: Tu ne peux ni te suspendre ni te retirer le rôle administrateur.
+look:
+    singular: Look
+    plural: Looks publiés
+    photo: Photo
+    owner: Posté par
+    caption: Légende
+    items: Ce qui est porté
+    worn_on: Porté le
+    published_at: Publié le
+item:
+    singular: Objet
+    plural: Objets montrés dans un look publié
+    photo: Photo
+    name: Nom
+    type: Type
+    brand: Marque
+    owner: Propriétaire
+    published_looks: Looks publiés
+category:
+    singular: Catégorie
+    plural: Catégories
+    name: Nom
+    type: Type
+    item_count: Objets
+    not_empty: 'Cette catégorie contient des objets : elle ne peut pas être supprimée.'
+kpi:
+    signups:
+        title: Nouveaux comptes ces 7 derniers jours
+        sub: '%last30% sur les 30 derniers jours. Par semaine :'
+    active:
+        title: Personnes venues ces 30 derniers jours
+        sub: '%last7% ces 7 derniers jours, sur %total% comptes.'
+    looks:
+        title: Looks publiés
+        sub: 'Au total. Par semaine :'
+    items_per_user:
+        title: Objets rangés par personne
+        sub: 'Valeur du milieu ; la moyenne est de %average%.'
+    shareable:
+        title: Objets que leurs propriétaires acceptent de montrer
+        sub: '%shareable% objets sur %total%. Le reste est privé ou perso.'
+    relationships:
+        title: Demandes d'amis acceptées
+        sub: '%percent% % des demandes sont acceptées. En attente : %pending%.'
+    items_by_type:
+        title: Objets par type
+    suspended:
+        title: Comptes suspendus
+        sub: Par la modération.
