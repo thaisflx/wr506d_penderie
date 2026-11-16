@@ -182,3 +182,19 @@ L'IA m'a fait gagner du temps sur l'analyse du code et la structuration des règ
   10. Export RGPD : JSON avec les URL des photos, sans ZIP.
 - **Pourquoi l'allemand :** pas d'écriture de droite à gauche comme l'arabe, et je parle allemand (B1), donc je peux relire les traductions.
 - **Inscription :** le brief la demande (« créer un compte »). Elle fera l'objet d'une branche à part, après l'i18n et avant le back office.
+
+---
+
+## 16/11/2026 : back office et « Mon espace »
+
+**Outil :** Claude Code, en autonomie la nuit, avec une autorisation écrite : commiter seulement si `make test` et `make e2e` passent et si toutes les mutations du commit sont détectées ; ne jamais pousser, fusionner, supprimer de branche, ni toucher à `.env` ou à la clé OpenRouter ; s'en tenir au brief, à la consigne, à `decisions.md` et au plan validé.
+
+### 1. Ce que l'admin peut voir (RGPD)
+- **Proposition de Claude Code :** des agrégats pour tout ce qui est privé ; en clair, seulement ce qui est déjà montré à d'autres (looks publiés, objets visibles dans ces looks, sans emplacement) et ce qui sert à gérer les comptes (email, rôles, suspension, dernière connexion, « mineur » au lieu de la date de naissance).
+- **Mon choix :** validé, avec suspension seulement (pas de suppression de compte) et pas de notification à l'auteur d'un look supprimé.
+- **Pourquoi :** brief, « le dressing doit être privé » ; minimisation des données (RGPD, art. 5.1.c).
+
+### 2. KPI
+- **Proposition de Claude Code :** 8 KPI tirés des données existantes, avec `lastLoginAt` à ajouter pour les personnes actives. Pas d'« objets ajoutés par période » faute de date de création sur `Item`, rien sur les prêts.
+- **Mon choix :** validé tel quel, avec `lastLoginAt` mis à jour à chaque connexion.
+- **Pourquoi :** le client « ne connaît rien en informatique » : peu de chiffres, chacun avec un libellé simple.

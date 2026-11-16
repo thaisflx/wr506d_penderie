@@ -147,3 +147,62 @@ Consigne des chapitres 22-23 : site entièrement multilingue, tout adapté à la
 | Dates, nombres et dates relatives (« hier », « yesterday », « gestern ») formatés par **`Intl`** dans la langue choisie ; « à l'instant » reste une traduction (`Intl` dirait « maintenant »). L'attribut `lang` de la page, son titre et sa description suivent la langue. | Pas de format écrit à la main par langue ; `lang` sert aux lecteurs d'écran et à la césure. |
 | Contrôle des traductions : un test PHPUnit (back) et un script Node sans dépendance (front, `make i18n-check`) échouent s'il manque une clé en `en` ou `de` par rapport à `fr`. Pas d'ESLint. | Une clé oubliée afficherait la clé brute à l'écran : on veut le savoir avant. |
 | Limite acceptée : le calendrier natif de `<input type="date">` suit la langue du **navigateur**, pas celle de l'application. | Comportement du navigateur, non modifiable sans recoder un calendrier. |
+
+## 2026-11-16 · Back office et « Mon espace »
+
+Consigne des chapitres 22-23 : un back office pour le commanditaire (administrer toute l'application, avec des KPI pertinents) et un espace pour l'utilisateur. Brief : « Faire un admin pour gestion de l'application ».
+
+### Back office (`/admin`)
+
+| Décision | Justification |
+|---|---|
+| **EasyAdmin 4** sous **`/admin`**, servi par Symfony (port 8000 en local), réservé à **`ROLE_ADMIN`**. | Le client « ne connaît rien en informatique » et veut quelque chose de « très très simple » : EasyAdmin donne des listes, des fiches et des boutons standard, sans écran à concevoir. |
+| **Firewall `admin` séparé, avec session** et formulaire de connexion (`form_login`, jeton CSRF), à côté du firewall `api` (JWT, sans état), inchangé. Un jeton JWT n'ouvre pas `/admin`, une session admin n'ouvre pas l'API. Les comptes suspendus sont refusés (`UserChecker`). | Le back office est un site classique (pages, formulaires) : la session et le CSRF sont la protection adaptée. Séparer les firewalls évite qu'une faille de l'un ouvre l'autre. |
+| **Suspension seulement, pas de suppression de compte.** Un admin ne peut ni se suspendre ni retirer son propre `ROLE_ADMIN`. Pas de modification du mot de passe, de l'email ni du profil. | Une suspension se défait, une suppression non. Se retirer ses propres droits bloquerait l'administration. |
+| **Pas de notification** quand un look est supprimé par la modération. | Réponse au plan : l'application n'a pas de notifications aujourd'hui. |
+| Le back office est **traduit** (fr, en, de) : textes propres dans le domaine `admin`, ceux d'EasyAdmin fournis par le bundle. Langue : celle du compte de l'admin, comme dans l'API. | Consigne i18n : tout est adapté à la locale. |
+| Libellés **simples, sans jargon** (« Personnes venues ces 30 derniers jours » plutôt que « MAU »). | Brief : le client ne connaît rien en informatique, « pas de jargon ». |
+
+### Ce que l'admin voit (RGPD)
+
+Brief : « **Le dressing doit être privé** », certaines personnes seulement y ont accès. L'admin n'en fait pas partie : il gère l'application, il n'a pas besoin du contenu des dressings.
+
+| L'admin voit | Pourquoi |
+|---|---|
+| **Des chiffres globaux** (KPI) pour tout ce qui est privé : nombres, moyennes, répartitions, jamais le détail. | Minimisation des données (RGPD, art. 5.1.c) : des agrégats suffisent pour piloter l'application. |
+| Les **looks publiés** (photo, légende, objets portés, sans leur emplacement), pour les modérer (supprimer). | Ce contenu est déjà montré à d'autres personnes : c'est lui qui peut poser problème. |
+| Les **objets visibles dans un look publié** seulement (nom, photo, type, marque, propriétaire, nombre de looks), en lecture seule. | Même règle que pour les autres utilisateurs (decisions.md, lot 2) : un objet n'est exposé qu'à travers un look, jamais son emplacement. |
+| Pour gérer les comptes : pseudo, email, rôles, suspension, date d'inscription, dernière connexion, mineur ou non, nombre d'objets. | Nécessaire pour suspendre un compte ou donner le rôle admin. La case « mineur » remplace la date de naissance. |
+| Les **catégories** : nom, type et nombre d'objets, modifiables ; suppression seulement si la catégorie est vide. Pas de création. | Une catégorie appartient à un rangement d'un utilisateur : la supprimer pleine supprimerait ses objets, en créer une chez lui n'a pas de sens. |
+
+| L'admin ne voit jamais | Pourquoi |
+|---|---|
+| Les adresses des logements, les noms des pièces et des rangements. | Le dressing doit être privé. |
+| Les brouillons, les objets perso ou privés, les objets jamais montrés dans un look. | Visibles par leur propriétaire seul (decisions.md, lot 2). |
+| Les relations et les blocages détaillés (qui suit qui, qui bloque qui). | Seuls les totaux servent les KPI. Un blocage ne doit jamais être révélé. |
+| La date de naissance, le mot de passe. | Inutiles pour administrer. |
+
+### KPI du tableau de bord
+
+| KPI (libellé à l'écran) | Source | Pourquoi |
+|---|---|---|
+| Nouveaux comptes (7 et 30 derniers jours, et par semaine) | `User.createdAt` | Croissance |
+| Personnes venues (7 et 30 derniers jours) | **`User.lastLoginAt`**, mis à jour à chaque connexion (API et back office) | Distingue les comptes vivants des comptes inscrits. Le jeton dure 1 h : une visite régulière se reconnecte souvent |
+| Looks publiés par semaine | `Ootd.publishedAt` | Usage de la fonction sociale principale |
+| Objets rangés par personne (médiane et moyenne) | `Item` | Adoption de l'inventaire ; la médiane n'est pas faussée par quelques gros comptes |
+| Part des objets montrables | Règle d'`Item::isShareable`, reprise en requête (testée contre la méthode, objet par objet) | Montre à quel point les utilisateurs gardent leurs objets privés |
+| Demandes d'amis acceptées (nombre et taux) | `Relationship` (acceptées / acceptées + en attente) | Santé du réseau |
+| Objets par type de catégorie | `Category.type` (libellé traduit) | Les noms de catégories sont libres, donc non agrégeables ; le type est fiable |
+| Comptes suspendus | `User.isSuspended` | Suivi de la modération |
+
+Rien sur les prêts (lot 3). Pas d'« objets ajoutés par période » : `Item` n'a pas de date de création.
+
+### « Mon espace » (utilisateur)
+
+| Décision | Justification |
+|---|---|
+| Écran **`/espace`**, ouvert depuis le Profil. | Consigne : un espace avec des informations sur son espace. |
+| `GET /api/me/stats` calcule côté back : objets par catégorie et par logement, objets jamais portés (looks **publiés** seulement), 5 objets les plus portés, looks publiés, abonnés et abonnements. | Réponses au plan. Un seul appel, des nombres déjà prêts : l'écran reste simple. |
+| Choix de la langue dans « Mon espace » (`PATCH /api/me`). | Plan validé. |
+| `GET /api/me/export` : fichier **JSON** à télécharger avec toutes **mes** données (profil, logements et objets, looks avec brouillons, relations avec le seul pseudo de l'autre personne, comptes que j'ai bloqués, mes commentaires). Les photos y sont des **URL**, sans ZIP. | Droit d'accès et à la portabilité (RGPD, art. 15 et 20). Rien sur les autres personnes au-delà de leur pseudo. |
+| Suppression du compte : **seulement proposée** (plan d'action d'audit.md). | Réponse au plan. |
