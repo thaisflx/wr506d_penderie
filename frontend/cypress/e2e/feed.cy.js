@@ -9,7 +9,8 @@ describe('Fil des looks du jour', () => {
 
     captions().should('deep.equal', ['Prête pour le marché', 'Tenue de bricolage du samedi', 'Jean brut et rien d\'autre'])
     cy.getCy('ootd-author').first().should('have.text', 'sophie')
-    cy.getCy('ootd-when').first().should('have.text', 'il y a 2 h')
+    // Intl met une espace insécable fine avant « h » (typographie française) : espaces ramenées à des espaces simples
+    cy.getCy('ootd-when').first().invoke('text').should((text) => expect(text.replace(/\s/g, ' ')).to.eq('il y a 2 h'))
     // Camille est amie proche de Sophie ; pas de puce sur ses propres looks
     cy.getCy('ootd-card').first().find('[data-cy="ootd-relation"]').should('have.text', 'Ami proche')
     cy.getCy('ootd-card').eq(1).find('[data-cy="ootd-relation"]').should('not.exist')

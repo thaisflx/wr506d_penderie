@@ -1,5 +1,6 @@
 <script setup>
 import BottomSheet from './BottomSheet.vue'
+import { itemCategoryLabel } from '../hierarchy'
 import ItemVisual from './ItemVisual.vue'
 
 // Objet porté dans le look d'une autre personne : lecture seule, jamais l'emplacement (docs/decisions.md, lot 2).
@@ -18,11 +19,11 @@ const emit = defineEmits(['close'])
       </span>
       <dl class="card item-infos">
         <div v-if="item.categoryName" class="item-info">
-          <dt>Catégorie</dt>
-          <dd data-cy="item-preview-category">{{ item.categoryName }}</dd>
+          <dt>{{ $t('item.category') }}</dt>
+          <dd data-cy="item-preview-category">{{ itemCategoryLabel(item) }}</dd>
         </div>
         <div v-if="item.brand" class="item-info">
-          <dt>Marque</dt>
+          <dt>{{ $t('item.brand') }}</dt>
           <dd data-cy="item-preview-brand">{{ item.brand }}</dd>
         </div>
       </dl>

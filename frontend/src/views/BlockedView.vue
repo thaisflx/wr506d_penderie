@@ -41,17 +41,17 @@ async function unblock() {
 <template>
   <main class="screen">
     <div class="page-head">
-      <button type="button" class="icon-btn" aria-label="Retour" @click="router.back()">
+      <button type="button" class="icon-btn" :aria-label="$t('common.back')" @click="router.back()">
         <AppIcon name="back" :stroke="2.4" />
       </button>
     </div>
     <div class="page-intro">
-      <h1 class="display page-title">Comptes bloqués</h1>
-      <p class="page-intro-text">Ils ne te voient plus et ne peuvent plus te trouver.</p>
+      <h1 class="display page-title">{{ $t('blocked.title') }}</h1>
+      <p class="page-intro-text">{{ $t('blocked.intro') }}</p>
     </div>
 
     <p v-if="error" class="error" role="alert">{{ error }}</p>
-    <p v-if="loading" class="loading">Chargement…</p>
+    <p v-if="loading" class="loading">{{ $t('common.loading') }}</p>
     <ul v-else-if="blocks.length" class="person-list">
       <li v-for="block in blocks" :key="block.id" class="person-row" data-cy="blocked-row">
         <UserAvatar :name="block.blocked.username" :src="block.blocked.avatar" :size="44" />
@@ -59,19 +59,19 @@ async function unblock() {
           <span class="person-row-name" data-cy="blocked-name">{{ block.blocked.username }}</span>
         </span>
         <span class="person-row-actions">
-          <button type="button" class="btn btn--soft btn--small" data-cy="unblock" @click="confirm = block">Débloquer</button>
+          <button type="button" class="btn btn--soft btn--small" data-cy="unblock" @click="confirm = block">{{ $t('blocked.unblock') }}</button>
         </span>
       </li>
     </ul>
     <div v-else class="empty-state" data-cy="blocked-empty">
-      <p>Tu n'as bloqué personne.</p>
+      <p>{{ $t('blocked.none') }}</p>
     </div>
 
-    <BottomSheet v-if="confirm" :title="`Débloquer ${confirm.blocked.username}`" @close="confirm = null">
+    <BottomSheet v-if="confirm" :title="$t('blocked.unblock_title', { name: confirm.blocked.username })" @close="confirm = null">
       <div class="confirm-box" role="alert">
-        <p>Vous pourrez de nouveau vous voir et vous trouver. Vos anciennes relations ne seront pas rétablies.</p>
-        <button type="button" class="btn btn--primary btn--block" data-cy="unblock-confirm" @click="unblock">Débloquer</button>
-        <button type="button" class="btn btn--soft btn--block" @click="confirm = null">Annuler</button>
+        <p>{{ $t('blocked.unblock_warning') }}</p>
+        <button type="button" class="btn btn--primary btn--block" data-cy="unblock-confirm" @click="unblock">{{ $t('blocked.unblock') }}</button>
+        <button type="button" class="btn btn--soft btn--block" @click="confirm = null">{{ $t('common.cancel') }}</button>
       </div>
     </BottomSheet>
   </main>

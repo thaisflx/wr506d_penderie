@@ -12,7 +12,7 @@ import UserAvatar from './UserAvatar.vue'
 // Carte d'un look du jour (maquette v2 : Fil.png, sans ligne violette)
 const props = defineProps({
   ootd: { type: Object, required: true },
-  // « Ami proche », « Abonné » ou null : mon lien avec l'auteur
+  // close_friend, follower ou null : mon lien avec l'auteur (libellé traduit à l'affichage)
   relation: { type: String, default: null },
   // Mon look : mes objets ouvrent leur fiche (ceux des autres, un panneau en lecture seule) et je peux le supprimer
   mine: { type: Boolean, default: false },
@@ -47,34 +47,34 @@ async function remove() {
 <template>
   <article class="ootd-card" data-cy="ootd-card">
     <header v-if="!hideAuthor" class="ootd-card-author">
-      <RouterLink :to="mine ? '/profile' : `/users/${ootd.owner.id}`" class="ootd-card-avatar" :aria-label="`Profil de ${ootd.owner.username}`">
+      <RouterLink :to="mine ? '/profile' : `/users/${ootd.owner.id}`" class="ootd-card-avatar" :aria-label="$t('look.profile_of', { name: ootd.owner.username })">
         <UserAvatar :name="ootd.owner.username" :src="ootd.owner.avatar" :size="40" />
       </RouterLink>
       <span class="ootd-card-who">
         <RouterLink :to="mine ? '/profile' : `/users/${ootd.owner.id}`" class="ootd-card-name" data-cy="ootd-author">{{ ootd.owner.username }}</RouterLink>
         <time class="ootd-card-when" :datetime="ootd.publishedAt" data-cy="ootd-when">{{ when }}</time>
       </span>
-      <span v-if="relation" class="chip chip--peach" data-cy="ootd-relation">{{ relation }}</span>
-      <button v-if="mine" type="button" class="icon-btn ootd-card-delete" aria-label="Supprimer ce look" data-cy="ootd-delete" @click="confirming = true">
+      <span v-if="relation" class="chip chip--peach" data-cy="ootd-relation">{{ $t(`relation.${relation}`) }}</span>
+      <button v-if="mine" type="button" class="icon-btn ootd-card-delete" :aria-label="$t('look.delete')" data-cy="ootd-delete" @click="confirming = true">
         <AppIcon name="trash" :size="18" />
       </button>
     </header>
     <div v-else class="ootd-card-meta">
       <time class="ootd-card-when" :datetime="ootd.publishedAt" data-cy="ootd-when">{{ when }}</time>
-      <button v-if="mine" type="button" class="icon-btn ootd-card-delete" aria-label="Supprimer ce look" data-cy="ootd-delete" @click="confirming = true">
+      <button v-if="mine" type="button" class="icon-btn ootd-card-delete" :aria-label="$t('look.delete')" data-cy="ootd-delete" @click="confirming = true">
         <AppIcon name="trash" :size="18" />
       </button>
     </div>
 
     <div class="ootd-card-photo scallop" :class="ootd.photo ? '' : 'tone-glaucous'">
-      <img v-if="ootd.photo" :src="ootd.photo" :alt="`Tenue de ${ootd.owner.username}`" loading="lazy" />
+      <img v-if="ootd.photo" :src="ootd.photo" :alt="$t('look.outfit_of', { name: ootd.owner.username })" loading="lazy" />
       <DecoStar class="ootd-card-star" :size="26" color="var(--white)" />
     </div>
 
     <p v-if="ootd.caption" class="ootd-card-caption" data-cy="ootd-caption">{{ ootd.caption }}</p>
 
-    <section v-if="ootd.wornItems.length" class="ootd-card-items" :aria-label="`Ce que porte ${ootd.owner.username}`">
-      <h2 class="section-title ootd-card-items-title">ce que je porte</h2>
+    <section v-if="ootd.wornItems.length" class="ootd-card-items" :aria-label="$t('look.worn_by', { name: ootd.owner.username })">
+      <h2 class="section-title ootd-card-items-title">{{ $t('look.what_i_wear') }}</h2>
       <div class="pills">
         <template v-for="(item, index) in ootd.wornItems" :key="item.id">
           <RouterLink v-if="mine" :to="`/items/${item.id}`" class="worn-pill" data-cy="worn-item">
@@ -89,12 +89,12 @@ async function remove() {
       </div>
     </section>
 
-    <BottomSheet v-if="confirming" title="Supprimer ce look ?" @close="confirming = false">
+    <BottomSheet v-if="confirming" :title="$t('look.delete_title')" @close="confirming = false">
       <div class="confirm-box" role="alert">
-        <p>Sa photo sera effacée.</p>
+        <p>{{ $t('look.delete_photo_erased') }}</p>
         <p v-if="deleteError" class="error">{{ deleteError }}</p>
-        <button type="button" class="btn btn--danger btn--block" data-cy="ootd-delete-confirm" :disabled="deleting" @click="remove">Supprimer</button>
-        <button type="button" class="btn btn--soft btn--block" @click="confirming = false">Garder</button>
+        <button type="button" class="btn btn--danger btn--block" data-cy="ootd-delete-confirm" :disabled="deleting" @click="remove">{{ $t('common.delete') }}</button>
+        <button type="button" class="btn btn--soft btn--block" @click="confirming = false">{{ $t('look.keep') }}</button>
       </div>
     </BottomSheet>
   </article>

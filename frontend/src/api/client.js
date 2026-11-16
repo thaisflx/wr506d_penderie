@@ -1,3 +1,5 @@
+import { currentLocale, t } from '../i18n'
+
 // Client HTTP minimal pour l'API Platform (JSON-LD) avec le jeton JWT
 
 const TOKEN_KEY = 'penderie_token'
@@ -39,7 +41,8 @@ function toUrl(path) {
 }
 
 export async function request(path, { method = 'GET', body, auth = true } = {}) {
-  const headers = { Accept: 'application/ld+json' }
+  // Langue de l'interface : l'API répond dans cette langue aux visiteurs ; une personne connectée a celle de son compte
+  const headers = { Accept: 'application/ld+json', 'Accept-Language': currentLocale() }
   if (body !== undefined) {
     headers['Content-Type'] = method === 'PATCH' ? 'application/merge-patch+json' : 'application/ld+json'
   }
@@ -59,7 +62,7 @@ export async function request(path, { method = 'GET', body, auth = true } = {}) 
   if (!response.ok) {
     if (response.status === 401 && auth) onUnauthorized()
     const violations = data?.violations ?? []
-    const message = data?.detail || data?.description || data?.message || `Erreur ${response.status}`
+    const message = data?.detail || data?.description || data?.message || t('error.http', { status: response.status })
     throw new ApiError(message, response.status, violations)
   }
 

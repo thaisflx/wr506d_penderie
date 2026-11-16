@@ -24,21 +24,21 @@ const removeLook = (id) => (ootds.value = ootds.value.filter((ootd) => ootd.id !
     <AppHeader bell />
 
     <div class="feed-head">
-      <h1 class="display page-title" data-cy="feed-title">Looks du jour</h1>
+      <h1 class="display page-title" data-cy="feed-title">{{ $t('feed.title') }}</h1>
       <RouterLink to="/looks/nouveau" class="btn btn--primary" data-cy="feed-post">
-        <AppIcon name="plus" :size="18" :stroke="2.4" /> Poster
+        <AppIcon name="plus" :size="18" :stroke="2.4" /> {{ $t('feed.post') }}
       </RouterLink>
     </div>
 
     <p v-if="error" class="error" role="alert">{{ error }}</p>
-    <p v-if="loading" class="loading">Chargement…</p>
+    <p v-if="loading" class="loading">{{ $t('common.loading') }}</p>
 
     <section v-else-if="!ootds.length" class="empty-state" data-cy="feed-empty">
-      <p><strong>Aucun look du jour pour l'instant.</strong></p>
-      <p>Suis tes amis pour voir leurs tenues, ou poste la tienne.</p>
+      <p><strong>{{ $t('feed.empty_title') }}</strong></p>
+      <p>{{ $t('feed.empty_text') }}</p>
       <div class="feed-empty-actions">
-        <RouterLink :to="{ path: '/friends', query: { tab: 'search' } }" class="btn" data-cy="feed-find-friends">Trouver des amis</RouterLink>
-        <RouterLink to="/looks/nouveau" class="btn btn--primary">Poster mon look</RouterLink>
+        <RouterLink :to="{ path: '/friends', query: { tab: 'search' } }" class="btn" data-cy="feed-find-friends">{{ $t('feed.find_friends') }}</RouterLink>
+        <RouterLink to="/looks/nouveau" class="btn btn--primary">{{ $t('look.post_mine') }}</RouterLink>
       </div>
     </section>
 
@@ -55,7 +55,7 @@ const removeLook = (id) => (ootds.value = ootds.value.filter((ootd) => ootd.id !
         />
       </div>
       <button v-if="hasMore" type="button" class="btn btn--block" data-cy="feed-more" :disabled="loadingMore" @click="loadMore">
-        {{ loadingMore ? 'Chargement…' : 'Voir plus' }}
+        {{ loadingMore ? $t('common.loading') : $t('common.see_more') }}
       </button>
     </template>
 
