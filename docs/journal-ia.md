@@ -198,3 +198,12 @@ L'IA m'a fait gagner du temps sur l'analyse du code et la structuration des règ
 - **Proposition de Claude Code :** 8 KPI tirés des données existantes, avec `lastLoginAt` à ajouter pour les personnes actives. Pas d'« objets ajoutés par période » faute de date de création sur `Item`, rien sur les prêts.
 - **Mon choix :** validé tel quel, avec `lastLoginAt` mis à jour à chaque connexion.
 - **Pourquoi :** le client « ne connaît rien en informatique » : peu de chiffres, chacun avec un libellé simple.
+
+### 3. Choix faits seul pendant la nuit (règle : le plus simple, dans le périmètre)
+- **EasyAdmin 5 au lieu de 4.** Composer a installé la version stable actuelle (5.10) ; le plan parlait de la 4. Gardée : compatible avec Symfony 7.4, rien à adapter.
+- **Jetons CSRF classiques, en session.** La recette proposait des jetons « sans état » (vérification de l'en-tête Origin ou d'un cookie posé en JavaScript). Le back office a de toute façon une session : les jetons classiques sont plus simples et testables.
+- **Date de dernière connexion seulement à la saisie des identifiants.** L'authentificateur JWT déclenche le même événement à chaque requête : sans filtre, chaque appel à l'API aurait écrit en base.
+- **Données ICU complètes dans l'image PHP.** Les dates du back office sortaient en anglais en français et en allemand : Alpine n'installe que les données ICU anglaises. Ajout de `icu-data-full` au Dockerfile, image reconstruite.
+- **Bug trouvé en testant la connexion admin :** après le formulaire, EasyAdmin renvoyait vers « / » (page hors du back office). Corrigé en donnant l'adresse du tableau de bord au formulaire.
+- **Fixtures de démo :** dates d'inscription et de connexion étalées sur 8 semaines et 8 comptes sans contenu (dont un suspendu), pour que les graphiques du tableau de bord aient des chiffres parlants.
+- **Mutations non détectées au premier essai (3)**, toutes dues à des données de test qui ne faisaient pas la différence : tests complétés, mutations détectées ensuite.

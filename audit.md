@@ -13,7 +13,7 @@
 | Code source | Snyk Code | ⚠️ 1 H · 1 L | ✅ 2 faux positifs, justifiés |
 | Accessibilité | Lighthouse, axe-core, clavier | 🟢 100 / 1 erreur | ✅ |
 | Performance (prod) | Lighthouse | 🟢 96 | |
-| Tests automatisés | PHPUnit, Cypress | ❌ aucun | ✅ 373 PHPUnit + 58 Cypress, 100 % sur le métier, 30 classes (voir [coverage.md](coverage.md)) |
+| Tests automatisés | PHPUnit, Cypress | ❌ aucun | ✅ 509 PHPUnit + 61 Cypress, 100 % sur le métier, 42 classes (voir [coverage.md](coverage.md)) |
 | Contrastes (refonte Lendly) | Calcul WCAG 2.1 | | ✅ tous les textes ≥ 4,5:1, logo exempté |
 
 ---
@@ -237,6 +237,19 @@ Référence : [`docs/maquette-v2/`](docs/maquette-v2/README.md) ; décisions dan
 - **Anomalies trouvées** : un `catch` « erreur réseau » jamais exécuté dans `ClothingScanner`, le message « Ce compte est suspendu. » masqué dans `LoginView`, et (lot 2) des brouillons créés en double dans « Poster un look » quand une publication échouait puis était retentée. Les trois sont corrigées.
 - **Données** : les fixtures de test (groupe `test` : camille, sophie, theo…) sont séparées des fixtures de démo (groupe `dev` : alice, leo, bob…), dans une base dédiée `penderie_db_test`.
 
+### Back office et « Mon espace »
+
+- **Accès** : `/admin` (port 8000), `ROLE_ADMIN`, firewall de session séparé de l'API JWT, formulaire protégé par CSRF, comptes suspendus refusés. Testé dans les deux sens : un jeton JWT n'ouvre pas `/admin`, une session admin n'ouvre pas l'API.
+- **RGPD** : l'admin voit des chiffres globaux, les looks publiés et les objets montrés dans ces looks, jamais l'emplacement d'un objet, un brouillon ni la date de naissance (justification dans [decisions.md](docs/decisions.md)). « Mon espace » donne à chaque personne l'export de ses données (art. 15 et 20).
+- **i18n** : le back office suit la langue du compte de l'admin. L'image PHP n'avait que les données ICU anglaises (`icu-data-en` d'Alpine) : toutes les dates formatées par PHP sortaient en anglais. Corrigé avec `icu-data-full`.
+
+| Limite | Effet | Piste |
+|---|---|---|
+| Heures du back office en **UTC** (même cause que le bug du fuseau horaire ci-dessous) | « Publié le 16 nov. 2026, 04:07 » pour 05:07 à Paris | Branche `fix/fuseau-horaire` |
+| KPI calculés à chaque affichage, une partie en PHP | Rapide avec des centaines de comptes, à revoir avec des dizaines de milliers | Cache court ou requêtes agrégées |
+| Règle « partageable » écrite deux fois (méthode et requête) | Une modification oubliée d'un côté | Le test d'intégration compare les deux objet par objet |
+| Textes de « Mon espace » en français | En attente de vue-i18n (commit front de l'i18n) | Commit 4 de `feature/i18n` |
+
 ### Limites connues (lot 2 : looks du jour)
 
 | Limite | Effet | Piste |
@@ -267,7 +280,10 @@ Référence : [`docs/maquette-v2/`](docs/maquette-v2/README.md) ; décisions dan
 | ✅ | Volet social, lot 2 : looks du jour (fil en accueil, poster, brouillons, suppression, looks d'un profil), premier Voter (`OotdVoter`) et matrice des droits des looks testée | Fait |
 | 🔴 | `setAddress(?string)`, `setBirthDate(?…)` | À faire |
 | 🟠 | Voters pour la hiérarchie (logement → objet), sur le modèle d'`OotdVoter`, puis tests des droits de la campagne (Penderie, Garage, liens de partage) | Prochaine étape |
+| ✅ | Back office (EasyAdmin) : comptes, modération des looks, objets montrés, catégories, tableau de bord de 8 KPI | Fait |
+| ✅ | « Mon espace » : chiffres de mon dressing, langue, export de mes données (RGPD) | Fait |
 | 🟠 | Commentaires sur un look (règles déjà décidées dans [decisions.md](docs/decisions.md)) | Lot 3 |
+| 🟢 | Suppression de son compte par l'utilisateur (cascade avec les photos, sort des comptes enfants, délai pour changer d'avis) | Proposition, à décider |
 | 🟢 | Notification de succès | À faire |
 | 🟢 | Puce « Famille » pour les comptes enfants | Plus tard |
 | 🟢 | Invitation d'amis par lien (« comme Duolingo », brief) : carte « Invite tes proches » de la maquette, non affichée faute d'API | Piste |
