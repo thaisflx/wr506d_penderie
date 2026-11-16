@@ -1,0 +1,51 @@
+# Erreurs de l'API et libellés des enums (domaine messages). Mêmes clés en en et de : TranslationFilesTest.
+error:
+    account_not_found: Ce compte est introuvable.
+    item_not_found: Cet objet est introuvable.
+    ootd_not_found: Ce look est introuvable.
+    ootd_photo_owner_only: Seule la personne qui a posté ce look peut changer sa photo.
+    ootd_published_keeps_photo: 'Un look publié garde sa photo : remplace-la ou supprime le look.'
+    relationship_addressee_missing: Indique le compte à qui envoyer la demande (addressee).
+    relationship_only_pending: Seule une demande en attente peut être acceptée.
+    block_target_missing: Indique le compte à bloquer (blocked).
+    block_family: Tu ne peux pas bloquer ton compte parent ou ton compte enfant.
+    filter_direction: 'direction : received ou sent.'
+    filter_status: 'status : pending ou accepted.'
+    filter_type: 'type : follower ou close_friend.'
+    search_too_short: Indique au moins %min% caractères du pseudo.
+    me_locale_only: Seule la langue (locale) peut être modifiée ici.
+photo:
+    invalid: Envoie une image JPEG encodée en base64 (data:image/jpeg;base64,...).
+    too_heavy: 'Image trop lourde : redimensionne-la à 1024 px avant l''envoi.'
+    too_large: 'Image trop grande : redimensionne-la à 1024 px avant l''envoi.'
+scan:
+    not_configured: 'Le scan n''est pas configuré : ajoute OPENROUTER_API_KEY dans backend/.env.local.'
+    saturated: 'Les modèles d''IA gratuits sont saturés en ce moment : réessaie dans une minute.'
+    failed: Aucun modèle n'a pu analyser la photo. Réessaie dans un instant.
+enum:
+    visibility:
+        private: Privé
+        close_friends: Amis proches
+        followers: Abonnés
+    item_status:
+        available: Disponible
+        in_laundry: Au sale
+        reserved: Réservé
+        lent: Prêté
+        for_sale: À la vente
+    category_type:
+        top: Haut
+        bottom: Bas
+        shoes: Chaussures
+        media: Média
+        other: Autre
+    relationship_type:
+        follower: Abonné
+        close_friend: Ami proche
+    relationship_status:
+        pending: En attente
+        accepted: Acceptée
+    reservation_status:
+        ongoing: En cours
+        completed: Terminé
+        late: En retard

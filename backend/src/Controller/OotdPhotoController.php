@@ -11,6 +11,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Photo d'un look du jour : prise avec la caméra ou choisie dans la galerie, envoyée en JPEG base64.
@@ -24,6 +25,7 @@ final class OotdPhotoController extends AbstractController
     public function __construct(
         private readonly OotdPhotoStorage $storage,
         private readonly EntityManagerInterface $entityManager,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -59,7 +61,7 @@ final class OotdPhotoController extends AbstractController
         }
         // Un look publié a forcément une photo : on la remplace, ou on supprime le look
         if ($ootd->isPublished()) {
-            return $this->photoError('Un look publié garde sa photo : remplace-la ou supprime le look.', Response::HTTP_UNPROCESSABLE_ENTITY);
+            return $this->photoError('error.ootd_published_keeps_photo', Response::HTTP_UNPROCESSABLE_ENTITY);
         }
 
         $this->storage->remove($ootd);
@@ -72,10 +74,10 @@ final class OotdPhotoController extends AbstractController
     {
         $ootd = $this->entityManager->getRepository(Ootd::class)->find($id);
         if (null === $ootd || !$this->isGranted(OotdVoter::VIEW, $ootd)) {
-            return $this->photoError('Ce look est introuvable.', Response::HTTP_NOT_FOUND);
+            return $this->photoError('error.ootd_not_found', Response::HTTP_NOT_FOUND);
         }
         if (!$this->isGranted(OotdVoter::EDIT, $ootd)) {
-            return $this->photoError('Seule la personne qui a posté ce look peut changer sa photo.', Response::HTTP_FORBIDDEN);
+            return $this->photoError('error.ootd_photo_owner_only', Response::HTTP_FORBIDDEN);
         }
 
         return $ootd;

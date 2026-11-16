@@ -1,6 +1,7 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { api, getToken, request, setToken } from '../api/client'
+import { setLocale } from '../i18n'
 
 export const useAuthStore = defineStore('auth', () => {
   const token = ref(getToken())
@@ -23,6 +24,8 @@ export const useAuthStore = defineStore('auth', () => {
   async function fetchMe() {
     if (!token.value) return null
     user.value = await api.get('/me')
+    // La langue choisie sur le compte suit la personne sur tous ses appareils
+    if (user.value?.locale) setLocale(user.value.locale)
     return user.value
   }
 

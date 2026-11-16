@@ -42,6 +42,7 @@
             <directory>src/State</directory>
             <directory>src/Doctrine</directory>
             <directory>src/EventListener</directory>
+            <directory>src/EventSubscriber</directory>
             <directory>src/Controller</directory>
             <directory>src/Validator</directory>
             <directory>src/Serializer</directory>

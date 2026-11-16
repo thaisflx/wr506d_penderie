@@ -86,6 +86,29 @@ final class ClothingScannerTest extends TestCase
         self::assertStringContainsString('étiquette', $this->prompt($response));
     }
 
+    /**
+     * @return iterable<string, array{?string, string}>
+     */
+    public static function languageProvider(): iterable
+    {
+        yield 'sans langue : français' => [null, 'en français ;'];
+        yield 'français' => ['fr', 'en français ;'];
+        yield 'anglais' => ['en', 'en anglais (English) ;'];
+        yield 'allemand' => ['de', 'en allemand (Deutsch) ;'];
+        yield 'langue non gérée : français' => ['es', 'en français ;'];
+    }
+
+    // L'IA rédige ses valeurs dans la langue de l'utilisateur (docs/decisions.md, « Internationalisation »)
+    #[DataProvider('languageProvider')]
+    public function testValuesAreWrittenInTheLanguageOfTheUser(?string $locale, string $expected): void
+    {
+        $response = $this->ok('{"name": "Pull"}');
+        $scanner = $this->scanner([$response]);
+        null === $locale ? $scanner->analyze(self::IMAGE) : $scanner->analyze(self::IMAGE, 'photo', $locale);
+
+        self::assertStringContainsString('Rédige les valeurs texte (name, type, color, description, composition) '.$expected, $this->prompt($response));
+    }
+
     public function testUnknownModeFallsBackToPhotoPrompt(): void
     {
         $response = $this->ok('{"name": "Pull"}');
@@ -265,7 +288,7 @@ final class ClothingScannerTest extends TestCase
         ]), logger: $logger);
 
         $exception = $this->expectScanFailure($scanner);
-        self::assertSame('Les modèles d\'IA gratuits sont saturés en ce moment : réessaie dans une minute.', $exception->getMessage());
+        self::assertSame('scan.saturated', $exception->getMessage());
         self::assertCount(4, $exception->errors);
     }
 
@@ -277,7 +300,7 @@ final class ClothingScannerTest extends TestCase
         ]));
 
         $exception = $this->expectScanFailure($scanner);
-        self::assertSame('Aucun modèle n\'a pu analyser la photo. Réessaie dans un instant.', $exception->getMessage());
+        self::assertSame('scan.failed', $exception->getMessage());
         self::assertContains('model-b : réponse illisible', $exception->errors);
     }
 
@@ -289,7 +312,7 @@ final class ClothingScannerTest extends TestCase
         ]));
 
         $exception = $this->expectScanFailure($scanner);
-        self::assertSame('Aucun modèle n\'a pu analyser la photo. Réessaie dans un instant.', $exception->getMessage());
+        self::assertSame('scan.failed', $exception->getMessage());
         self::assertSame(['model-a : Timeout', 'model-b : Timeout'], $exception->errors);
     }
 

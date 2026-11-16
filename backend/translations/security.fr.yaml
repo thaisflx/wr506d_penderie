@@ -1,0 +1,5 @@
+# Connexion (domaine security, traduit par le gestionnaire d'échec de lexik/jwt).
+# Remplace « Identifiants invalides. » de Symfony par le message déjà affiché par l'application.
+Invalid credentials.: Email ou mot de passe incorrect.
+account:
+    suspended: Ce compte est suspendu.

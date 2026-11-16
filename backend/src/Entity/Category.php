@@ -21,7 +21,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 // Catégorie rangée dans un storage : place > room > storage > category > item
 #[ORM\Entity(repositoryClass: CategoryRepository::class)]
 #[ORM\UniqueConstraint(name: 'uniq_category_storage_name', fields: ['storage', 'name'])]
-#[UniqueEntity(fields: ['storage', 'name'], message: 'Cette catégorie existe déjà dans ce rangement.')]
+#[UniqueEntity(fields: ['storage', 'name'], message: 'category.duplicate')]
 #[ApiResource(
     operations: [
         // Toutes mes catégories (choix de l'emplacement au scan)
@@ -52,6 +52,13 @@ class Category
     #[Assert\NotBlank]
     #[Groups(['category:read', 'category:write'])]
     private ?string $name = null;
+
+    // Clé de traduction d'une catégorie proposée par l'application (fixtures), ex. category.tshirts : le front affiche
+    // sa traduction, sinon le nom saisi. Jamais écrite par un client ; effacée si la catégorie est renommée
+    // (docs/decisions.md, « Internationalisation »)
+    #[ORM\Column(length: 64, nullable: true)]
+    #[Groups(['category:read'])]
+    private ?string $labelKey = null;
 
     #[ORM\Column(length: 50, enumType: CategoryType::class)]
     #[Groups(['category:read', 'category:write'])]
@@ -86,7 +93,23 @@ class Category
 
     public function setName(string $name): static
     {
+        // Renommée par l'utilisateur : c'est maintenant son nom, plus celui proposé par l'application
+        if (null !== $this->name && $name !== $this->name) {
+            $this->labelKey = null;
+        }
         $this->name = $name;
+
+        return $this;
+    }
+
+    public function getLabelKey(): ?string
+    {
+        return $this->labelKey;
+    }
+
+    public function setLabelKey(?string $labelKey): static
+    {
+        $this->labelKey = $labelKey;
 
         return $this;
     }

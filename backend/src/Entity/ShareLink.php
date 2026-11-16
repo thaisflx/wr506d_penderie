@@ -60,7 +60,7 @@ class ShareLink
     public function validateTarget(ExecutionContextInterface $context): void
     {
         if ((null === $this->look) === $this->items->isEmpty()) {
-            $context->buildViolation('Un lien de partage doit pointer soit vers un look, soit vers une sélection d\'objets.')
+            $context->buildViolation('share_link.target')
                 ->atPath('look')
                 ->addViolation();
         }

@@ -1,4 +1,5 @@
 import { ref } from 'vue'
+import { t } from '../i18n'
 import { toJpegDataUrl } from '../utils/image'
 
 // Caméra arrière du téléphone dans un <video> : partagée par le Scanner et l'écran « Poster un look ».
@@ -14,7 +15,7 @@ export function useCamera() {
   async function start() {
     error.value = ''
     if (!navigator.mediaDevices?.getUserMedia) {
-      error.value = "La caméra n'est pas disponible ici : importe une photo."
+      error.value = t('camera.unavailable')
       return
     }
     try {
@@ -28,7 +29,7 @@ export function useCamera() {
       const track = stream.getVideoTracks()[0]
       torchAvailable.value = !!track.getCapabilities?.().torch
     } catch {
-      error.value = 'Accès à la caméra refusé ou impossible : importe une photo.'
+      error.value = t('camera.denied')
     }
   }
 

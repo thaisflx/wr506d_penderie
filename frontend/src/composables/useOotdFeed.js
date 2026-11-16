@@ -3,7 +3,7 @@ import { api, request } from '../api/client'
 import { useAuthStore } from '../stores/auth'
 
 // Liste paginée de looks du jour (fil ou profil public) : 10 par page, « Voir plus » charge la suivante.
-// Calcule aussi mon lien avec chaque auteur (« Ami proche » l'emporte sur « Abonné ») à partir de mes relations.
+// Calcule aussi mon lien avec chaque auteur (ami proche l'emporte sur abonné ; type traduit par OotdCard) à partir de mes relations.
 export function useOotdFeed(firstPage) {
   const auth = useAuthStore()
 
@@ -30,7 +30,7 @@ export function useOotdFeed(firstPage) {
       const byUser = {}
       for (const r of mine) {
         if (r.type === 'close_friend' || !byUser[r.addressee.id]) {
-          byUser[r.addressee.id] = r.type === 'close_friend' ? 'Ami proche' : 'Abonné'
+          byUser[r.addressee.id] = r.type
         }
       }
       links.value = byUser

@@ -21,6 +21,9 @@ abstract class ApiTestCase extends WebTestCase
     protected function setUp(): void
     {
         $this->client = static::createClient();
+        // Navigateur en français, comme l'application par défaut. Sans cela, Symfony envoie « en-us » dans les
+        // requêtes de test, et l'API répondrait en anglais aux visiteurs anonymes (docs/decisions.md, i18n)
+        $this->client->setServerParameter('HTTP_ACCEPT_LANGUAGE', 'fr');
     }
 
     /**

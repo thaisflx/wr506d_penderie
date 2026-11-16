@@ -47,7 +47,7 @@ class Comment
     public function validateTarget(ExecutionContextInterface $context): void
     {
         if ((null === $this->item) === (null === $this->look)) {
-            $context->buildViolation('Un commentaire doit porter soit sur un objet, soit sur un look, mais pas les deux.')
+            $context->buildViolation('comment.target')
                 ->atPath('item')
                 ->addViolation();
         }

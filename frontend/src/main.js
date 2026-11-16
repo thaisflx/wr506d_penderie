@@ -2,6 +2,7 @@ import { createPinia } from 'pinia'
 import { createApp } from 'vue'
 import { setUnauthorizedHandler } from './api/client'
 import App from './App.vue'
+import { i18n } from './i18n'
 import router from './router'
 import { useAuthStore } from './stores/auth'
 import { usePlacesStore } from './stores/places'
@@ -10,6 +11,7 @@ import './style.css'
 const app = createApp(App)
 app.use(createPinia())
 app.use(router)
+app.use(i18n)
 
 // Jeton expiré ou invalide : retour à la connexion
 setUnauthorizedHandler(() => {

@@ -14,7 +14,7 @@ final class UserChecker implements UserCheckerInterface
     public function checkPreAuth(UserInterface $user, ?TokenInterface $token = null): void
     {
         if ($user instanceof User && $user->isSuspended()) {
-            throw new CustomUserMessageAccountStatusException('Ce compte est suspendu.');
+            throw new CustomUserMessageAccountStatusException('account.suspended');
         }
     }
 

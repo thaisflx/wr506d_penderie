@@ -2,18 +2,18 @@
 
 namespace App\Enum;
 
-enum ReservationStatus: string
+use Symfony\Contracts\Translation\TranslatableInterface;
+use Symfony\Contracts\Translation\TranslatorInterface;
+
+enum ReservationStatus: string implements TranslatableInterface
 {
     case Ongoing = 'ongoing';
     case Completed = 'completed';
     case Late = 'late';
 
-    public function label(): string
+    // Libellé dans la langue demandée (clé enum.reservation_status.<valeur> du domaine messages), pour Twig et le back office
+    public function trans(TranslatorInterface $translator, ?string $locale = null): string
     {
-        return match ($this) {
-            self::Ongoing => 'En cours',
-            self::Completed => 'Terminé',
-            self::Late => 'En retard',
-        };
+        return $translator->trans('enum.reservation_status.'.$this->value, [], 'messages', $locale);
     }
 }

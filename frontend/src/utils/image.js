@@ -1,3 +1,5 @@
+import { t } from '../i18n'
+
 // Préparation d'une photo pour le scan IA :
 // redimensionnement (1024 px max sur le plus grand côté) -> conversion JPEG -> base64 (data URL).
 
@@ -20,7 +22,7 @@ function loadImage(file) {
     }
     img.onerror = () => {
       URL.revokeObjectURL(url)
-      reject(new Error("Impossible de lire cette image."))
+      reject(new Error(t('error.image_unreadable')))
     }
     img.src = url
   })
@@ -59,7 +61,7 @@ export async function fileToJpegDataUrl(file, maxSize = MAX_SIZE) {
       const { heicTo } = await import('heic-to')
       return toJpegDataUrl(await heicTo({ blob: file, type: 'bitmap' }), maxSize)
     } catch {
-      throw new Error('Impossible de lire cette photo HEIC : exporte-la en JPEG puis réessaie.')
+      throw new Error(t('error.heic_unreadable'))
     }
   }
 }

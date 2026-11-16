@@ -68,7 +68,7 @@ final class ItemPhotoStorageTest extends TestCase
         $item = $this->item();
 
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Envoie une image JPEG encodée en base64');
+        $this->expectExceptionMessage('photo.invalid');
         try {
             $this->storage->store($item, $dataUrl);
         } finally {
@@ -90,7 +90,7 @@ final class ItemPhotoStorageTest extends TestCase
     public function testRejectsTooLargeImage(int $width, int $height): void
     {
         $this->expectException(\InvalidArgumentException::class);
-        $this->expectExceptionMessage('Image trop grande');
+        $this->expectExceptionMessage('photo.too_large');
 
         try {
             $this->storage->store($this->item(), Images::dataUrl(Images::jpeg($width, $height)));

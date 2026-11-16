@@ -22,12 +22,12 @@ const auth = useAuthStore()
         to="/friends"
         class="icon-btn icon-btn--badge"
         data-cy="home-bell"
-        :aria-label="auth.user?.pendingRequestCount ? `Demandes en attente : ${auth.user.pendingRequestCount}` : 'Notifications'"
+        :aria-label="auth.user?.pendingRequestCount ? $t('header.pending_requests', { count: auth.user.pendingRequestCount }) : $t('header.notifications')"
       >
         <AppIcon name="bell" :size="22" />
         <span v-if="auth.user?.pendingRequestCount" class="badge-count" data-cy="home-bell-count">{{ auth.user.pendingRequestCount }}</span>
       </RouterLink>
-      <RouterLink to="/profile" aria-label="Mon profil" class="home-avatar">
+      <RouterLink to="/profile" :aria-label="$t('header.my_profile')" class="home-avatar">
         <UserAvatar :name="auth.user?.username ?? ''" :src="auth.user?.avatar" :size="44" />
       </RouterLink>
     </div>

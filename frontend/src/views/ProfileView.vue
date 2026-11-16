@@ -7,7 +7,9 @@ import BottomSheet from '../components/BottomSheet.vue'
 import DecoStar from '../components/DecoStar.vue'
 import OotdCard from '../components/OotdCard.vue'
 import UserAvatar from '../components/UserAvatar.vue'
+import { LOCALES, currentLocale } from '../i18n'
 import { useAuthStore } from '../stores/auth'
+import { formatDate } from '../utils/relativeTime'
 import { usePlacesStore } from '../stores/places'
 
 const auth = useAuthStore()
@@ -38,7 +40,23 @@ const drafts = computed(() => looks.value.filter((ootd) => !ootd.published))
 const removeLook = (id) => (looks.value = looks.value.filter((ootd) => ootd.id !== id))
 
 const TONES = ['tone-glaucous', 'tone-sky', 'tone-peach']
-const draftDate = (ootd) => new Date(`${ootd.wornOn}T12:00:00`).toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
+const draftDate = (ootd) => formatDate(`${ootd.wornOn}T12:00:00`, { day: 'numeric', month: 'short' })
+
+// Langue du compte : enregistrée par l'API (PATCH /api/me), puis appliquée à l'interface par fetchMe()
+const locale = ref(currentLocale())
+const localeSaved = ref(false)
+const localeError = ref('')
+async function changeLocale() {
+  localeSaved.value = false
+  localeError.value = ''
+  try {
+    await api.patch('/me', { locale: locale.value })
+    await auth.fetchMe()
+    localeSaved.value = true
+  } catch (e) {
+    localeError.value = e.message
+  }
+}
 
 function logout() {
   auth.logout()
@@ -53,7 +71,7 @@ function logout() {
     <div class="profile-band scallop">
       <DecoStar class="profile-star profile-star--white" :size="18" color="var(--white)" />
       <DecoStar class="profile-star profile-star--wine" :size="22" color="var(--wine)" />
-      <button type="button" class="icon-btn profile-band-btn" aria-label="Paramètres" data-cy="profile-settings" @click="settingsOpen = true">
+      <button type="button" class="icon-btn profile-band-btn" :aria-label="$t('profile.settings')" data-cy="profile-settings" @click="settingsOpen = true">
         <AppIcon name="settings" />
       </button>
     </div>
@@ -73,28 +91,28 @@ function logout() {
         <div class="stat-grid">
           <div class="card stat">
             <span class="display stat-number">{{ user.itemCount ?? 0 }}</span>
-            <span class="stat-label">{{ (user.itemCount ?? 0) > 1 ? 'objets' : 'objet' }}</span>
+            <span class="stat-label">{{ $t('profile.stat_items', user.itemCount ?? 0) }}</span>
           </div>
           <div class="card stat">
             <span class="display stat-number">{{ user.followerCount ?? 0 }}</span>
-            <span class="stat-label">{{ (user.followerCount ?? 0) > 1 ? 'abonnés' : 'abonné' }}</span>
+            <span class="stat-label">{{ $t('profile.stat_followers', user.followerCount ?? 0) }}</span>
           </div>
           <div class="card stat">
             <span class="display stat-number">{{ user.closeFriendCount ?? 0 }}</span>
-            <span class="stat-label">{{ (user.closeFriendCount ?? 0) > 1 ? 'amis proches' : 'ami proche' }}</span>
+            <span class="stat-label">{{ $t('profile.stat_close_friends', user.closeFriendCount ?? 0) }}</span>
           </div>
         </div>
 
         <!-- Bandeau des demandes reçues : ouvre la page Amis -->
         <RouterLink v-if="user.pendingRequestCount" to="/friends" class="notice notice--link notice--request" data-cy="profile-requests-notice">
           <span class="notice-text">
-            <span class="notice-count">{{ user.pendingRequestCount }}</span> demande{{ user.pendingRequestCount > 1 ? 's' : '' }} en attente
+            <span class="notice-count">{{ user.pendingRequestCount }}</span> {{ $t('profile.pending_requests', user.pendingRequestCount) }}
           </span>
           <AppIcon name="next" :size="18" :stroke="2.2" />
         </RouterLink>
 
         <section v-if="user.children?.length" class="stack stack--tight">
-          <h2 class="section-title">comptes rattachés</h2>
+          <h2 class="section-title">{{ $t('profile.children') }}</h2>
           <ul class="children-list">
             <li v-for="child in user.children" :key="child.id" class="child">
               <UserAvatar :name="child.username" :src="child.avatar" :size="56" />
@@ -106,7 +124,7 @@ function logout() {
       </aside>
 
       <section class="profile-main">
-        <div class="pills profile-tabs" role="tablist" aria-label="Mes looks du jour">
+        <div class="pills profile-tabs" role="tablist" :aria-label="$t('profile.tabs')">
           <button
             id="profile-tab-looks"
             type="button"
@@ -117,7 +135,7 @@ function logout() {
             :aria-pressed="tab === 'looks'"
             data-cy="profile-tab-looks"
             @click="tab = 'looks'"
-          >Mes looks</button>
+          >{{ $t('profile.tab_looks') }}</button>
           <button
             id="profile-tab-drafts"
             type="button"
@@ -128,11 +146,11 @@ function logout() {
             :aria-pressed="tab === 'drafts'"
             data-cy="profile-tab-drafts"
             @click="tab = 'drafts'"
-          >Brouillons<template v-if="!loading"> · {{ drafts.length }}</template></button>
+          >{{ $t('profile.tab_drafts') }}<template v-if="!loading"> · {{ drafts.length }}</template></button>
         </div>
 
         <div id="profile-panel" role="tabpanel" :aria-labelledby="`profile-tab-${tab}`" class="stack">
-          <p v-if="loading" class="loading">Chargement…</p>
+          <p v-if="loading" class="loading">{{ $t('common.loading') }}</p>
           <p v-else-if="error" class="error" role="alert">{{ error }}</p>
 
           <!-- Mes looks publiés : mes objets ouvrent leur fiche -->
@@ -141,9 +159,9 @@ function logout() {
               <OotdCard v-for="ootd in published" :key="ootd.id" :ootd="ootd" mine hide-author @deleted="removeLook" />
             </div>
             <div v-else class="empty-state" data-cy="profile-looks-empty">
-              <p>Aucun look publié pour l'instant.</p>
+              <p>{{ $t('profile.no_published') }}</p>
               <RouterLink to="/looks/nouveau" class="btn btn--primary btn--small">
-                <AppIcon name="plus" :size="16" :stroke="2.4" /> Poster mon look
+                <AppIcon name="plus" :size="16" :stroke="2.4" /> {{ $t('look.post_mine') }}
               </RouterLink>
             </div>
           </template>
@@ -161,28 +179,37 @@ function logout() {
                 <span class="draft-card-media scallop" :class="ootd.photo ? '' : TONES[index % TONES.length]">
                   <img v-if="ootd.photo" :src="ootd.photo" alt="" loading="lazy" />
                   <AppIcon v-else name="camera" :size="30" :stroke="1.8" />
-                  <span class="chip chip--white draft-card-chip">Brouillon</span>
+                  <span class="chip chip--white draft-card-chip">{{ $t('profile.draft') }}</span>
                 </span>
                 <span class="draft-card-text">
-                  <span class="draft-card-caption">{{ ootd.caption || 'Sans légende' }}</span>
-                  <span class="small muted">{{ draftDate(ootd) }} · {{ ootd.wornItems.length }} objet{{ ootd.wornItems.length > 1 ? 's' : '' }}</span>
+                  <span class="draft-card-caption">{{ ootd.caption || $t('profile.no_caption') }}</span>
+                  <span class="small muted">{{ draftDate(ootd) }} · {{ $t('count.items', ootd.wornItems.length) }}</span>
                 </span>
               </RouterLink>
             </div>
             <div v-else class="empty-state" data-cy="profile-drafts-empty">
-              <p>Aucun brouillon.</p>
+              <p>{{ $t('profile.no_drafts') }}</p>
             </div>
           </template>
         </div>
       </section>
     </div>
 
-    <BottomSheet v-if="settingsOpen" title="Paramètres" @close="settingsOpen = false">
+    <BottomSheet v-if="settingsOpen" :title="$t('profile.settings')" @close="settingsOpen = false">
+      <!-- Langue enregistrée sur le compte : elle suit la personne sur tous ses appareils -->
+      <label class="field">
+        <span class="field-label">{{ $t('profile.language') }}</span>
+        <select v-model="locale" class="input" data-cy="settings-locale" @change="changeLocale">
+          <option v-for="code in LOCALES" :key="code" :value="code" :lang="code">{{ $t(`language.${code}`) }}</option>
+        </select>
+      </label>
+      <p v-if="localeSaved" class="small muted" role="status" data-cy="settings-locale-saved">{{ $t('profile.language_saved') }}</p>
+      <p v-if="localeError" class="error" role="alert">{{ localeError }}</p>
       <RouterLink to="/blocked" class="btn btn--soft btn--large btn--block" data-cy="settings-blocked">
-        <AppIcon name="lock" /> Comptes bloqués
+        <AppIcon name="lock" /> {{ $t('profile.blocked_accounts') }}
       </RouterLink>
       <button type="button" class="btn btn--primary btn--large btn--block" data-cy="logout" @click="logout">
-        <AppIcon name="logout" /> Se déconnecter
+        <AppIcon name="logout" /> {{ $t('profile.logout') }}
       </button>
     </BottomSheet>
   </div>

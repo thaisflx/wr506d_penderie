@@ -4,7 +4,8 @@ import { RouterLink, useRoute, useRouter } from 'vue-router'
 import { api } from '../api/client'
 import AppIcon from '../components/AppIcon.vue'
 import ItemTile from '../components/ItemTile.vue'
-import { plural, toneFor } from '../hierarchy'
+import { itemCategoryLabel, toneFor } from '../hierarchy'
+import { t } from '../i18n'
 
 // Tous mes objets, avec recherche (aussi utilisée depuis l'accueil) et filtres par statut
 const route = useRoute()
@@ -17,9 +18,9 @@ const search = ref(route.query.q ?? '')
 const filter = ref('all')
 
 const FILTERS = [
-  { value: 'all', label: 'Tout' },
-  { value: 'for_sale', label: 'En vente' },
-  { value: 'lent', label: 'Prêtés' },
+  { value: 'all', get label() { return t('items.filter_all') } },
+  { value: 'for_sale', get label() { return t('items.filter_for_sale') } },
+  { value: 'lent', get label() { return t('items.filter_lent') } },
 ]
 
 api
@@ -40,7 +41,7 @@ const visibleItems = computed(() => {
   return items.value.filter(
     (item) =>
       (filter.value === 'all' || item.status === filter.value) &&
-      (!query || normalize(`${item.name} ${item.categoryName}`).includes(query)),
+      (!query || normalize(`${item.name} ${item.categoryName} ${itemCategoryLabel(item)}`).includes(query)),
   )
 })
 </script>
@@ -48,14 +49,14 @@ const visibleItems = computed(() => {
 <template>
   <main class="screen">
     <div class="page-head">
-      <RouterLink to="/dressing" class="icon-btn" aria-label="Retour à Mon dressing" data-cy="items-back">
+      <RouterLink to="/dressing" class="icon-btn" :aria-label="$t('items.back')" data-cy="items-back">
         <AppIcon name="back" :stroke="2.4" />
       </RouterLink>
     </div>
-    <h1 class="display page-title">Tous mes objets</h1>
+    <h1 class="display page-title">{{ $t('items.title') }}</h1>
 
     <div role="search">
-      <label for="dressing-search" class="visually-hidden">Rechercher un objet</label>
+      <label for="dressing-search" class="visually-hidden">{{ $t('dressing.search_label') }}</label>
       <span class="input-wrap">
         <span class="input-icon input-icon--search"><AppIcon name="search" :stroke="2.2" /></span>
         <input
@@ -63,12 +64,12 @@ const visibleItems = computed(() => {
           v-model.trim="search"
           class="input input--search"
           type="search"
-          placeholder="Où est mon pull bleu ?"
+          :placeholder="$t('items.search_placeholder')"
         />
       </span>
     </div>
 
-    <div class="pills" role="group" aria-label="Filtrer les objets">
+    <div class="pills" role="group" :aria-label="$t('items.filters')">
       <button
         v-for="option in FILTERS"
         :key="option.value"
@@ -81,16 +82,16 @@ const visibleItems = computed(() => {
       </button>
     </div>
 
-    <p v-if="loading" class="loading">Chargement…</p>
+    <p v-if="loading" class="loading">{{ $t('common.loading') }}</p>
     <p v-else-if="error" class="error" role="alert">{{ error }}</p>
     <template v-else>
-      <p class="small muted" aria-live="polite">{{ plural(visibleItems.length, 'objet') }}</p>
+      <p class="small muted" aria-live="polite">{{ $t('count.items', visibleItems.length) }}</p>
       <div v-if="visibleItems.length" class="item-cards item-grid">
         <ItemTile v-for="(item, index) in visibleItems" :key="item.id" :item="item" :tone="toneFor(index)" />
       </div>
       <div v-else class="empty-state">
         <p v-if="search">Aucun objet ne correspond à « {{ search }} ».</p>
-        <p v-else>Aucun objet ici pour l'instant.</p>
+        <p v-else>{{ $t('items.none_here') }}</p>
       </div>
     </template>
   </main>

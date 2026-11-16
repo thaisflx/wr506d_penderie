@@ -1,0 +1,23 @@
+# Messages de validation de l'API (domaine validators). Mêmes clés en en et de : TranslationFilesTest.
+block:
+    already: Cette personne est déjà bloquée.
+    self: Tu ne peux pas te bloquer toi-même.
+category:
+    duplicate: Cette catégorie existe déjà dans ce rangement.
+comment:
+    target: Un commentaire doit porter soit sur un objet, soit sur un look, mais pas les deux.
+ootd:
+    caption_too_long: La légende ne peut pas dépasser {{ limit }} caractères.
+    future_date: La date du look ne peut pas être dans le futur.
+    photo_required: Ajoute une photo de ta tenue avant de publier.
+    no_back_to_draft: 'Un look publié ne peut pas redevenir un brouillon : supprime-le.'
+    item_not_mine: Tu ne peux ajouter que tes propres objets.
+    item_hidden: '« {{ name }} » est privé ou perso : il ne peut pas apparaître dans un look.'
+relationship:
+    duplicate: Tu as déjà envoyé cette demande.
+    type_required: 'Indique le type de demande : follower ou close_friend.'
+    self: Tu ne peux pas t'envoyer une demande à toi-même.
+share_link:
+    target: Un lien de partage doit pointer soit vers un look, soit vers une sélection d'objets.
+user:
+    locale: 'Choisis une langue proposée : fr, en ou de.'

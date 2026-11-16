@@ -31,6 +31,8 @@ describe('Poster un look du jour', () => {
   })
 
   it('ne propose que les objets partageables', () => {
+    // Pluriel français : 0 au singulier
+    cy.getCy('post-look-count').should('have.text', '0 choisi')
     pickNames().should('include', 'Ponceuse').and('include', 'T-shirt blanc')
       .and('not.include', 'Carnet intime')
       .and('not.include', 'Contrat de location')

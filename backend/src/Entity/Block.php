@@ -21,7 +21,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  */
 #[ORM\Entity(repositoryClass: BlockRepository::class)]
 #[ORM\UniqueConstraint(name: 'uniq_block_blocker_blocked', fields: ['blocker', 'blocked'])]
-#[UniqueEntity(fields: ['blocker', 'blocked'], message: 'Cette personne est déjà bloquée.', errorPath: 'blocked')]
+#[UniqueEntity(fields: ['blocker', 'blocked'], message: 'block.already', errorPath: 'blocked')]
 // Je ne vois que mes propres blocages : la personne bloquée ne sait pas qu'elle l'est (App\Doctrine\BlockExtension)
 #[ApiResource(
     operations: [
@@ -68,7 +68,7 @@ class Block
     public function validateNotSelf(ExecutionContextInterface $context): void
     {
         if (null !== $this->blocker && $this->blocker === $this->blocked) {
-            $context->buildViolation('Tu ne peux pas te bloquer toi-même.')
+            $context->buildViolation('block.self')
                 ->atPath('blocked')
                 ->addViolation();
         }

@@ -13,6 +13,7 @@ use App\Enum\RelationshipType;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Une relation n'existe que pour son demandeur et son destinataire : pour les autres, 404.
@@ -20,8 +21,10 @@ use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
  */
 final class RelationshipExtension implements QueryCollectionExtensionInterface, QueryItemExtensionInterface
 {
-    public function __construct(private readonly Security $security)
-    {
+    public function __construct(
+        private readonly Security $security,
+        private readonly TranslatorInterface $translator,
+    ) {
     }
 
     public function applyToCollection(QueryBuilder $queryBuilder, QueryNameGeneratorInterface $queryNameGenerator, string $resourceClass, ?Operation $operation = null, array $context = []): void
@@ -39,20 +42,20 @@ final class RelationshipExtension implements QueryCollectionExtensionInterface, 
             $side = match ($direction) {
                 'received' => 'addressee',
                 'sent' => 'requester',
-                default => throw new BadRequestHttpException('direction : received ou sent.'),
+                default => throw new BadRequestHttpException($this->translator->trans('error.filter_direction')),
             };
             $param = $queryNameGenerator->generateParameterName('me');
             $queryBuilder->andWhere(\sprintf('%s.%s = :%s', $alias, $side, $param))->setParameter($param, $viewer);
         }
 
         if (isset($filters['status'])) {
-            $status = RelationshipStatus::tryFrom((string) $filters['status']) ?? throw new BadRequestHttpException('status : pending ou accepted.');
+            $status = RelationshipStatus::tryFrom((string) $filters['status']) ?? throw new BadRequestHttpException($this->translator->trans('error.filter_status'));
             $param = $queryNameGenerator->generateParameterName('status');
             $queryBuilder->andWhere(\sprintf('%s.status = :%s', $alias, $param))->setParameter($param, $status);
         }
 
         if (isset($filters['type'])) {
-            $type = RelationshipType::tryFrom((string) $filters['type']) ?? throw new BadRequestHttpException('type : follower ou close_friend.');
+            $type = RelationshipType::tryFrom((string) $filters['type']) ?? throw new BadRequestHttpException($this->translator->trans('error.filter_type'));
             $param = $queryNameGenerator->generateParameterName('type');
             $queryBuilder->andWhere(\sprintf('%s.type = :%s', $alias, $param))->setParameter($param, $type);
         }

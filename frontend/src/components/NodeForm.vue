@@ -6,11 +6,11 @@ import { computed, reactive, ref } from 'vue'
 const props = defineProps({
   fields: { type: Array, required: true },
   initial: { type: Object, default: null },
-  submitLabel: { type: String, default: 'Enregistrer' },
+  submitLabel: { type: String, default: null },
   saving: { type: Boolean, default: false },
   error: { type: Object, default: null },
   deletable: { type: Boolean, default: false },
-  deleteLabel: { type: String, default: 'Supprimer' },
+  deleteLabel: { type: String, default: null },
   deleteWarning: { type: String, default: '' },
 })
 const emit = defineEmits(['submit', 'delete'])
@@ -79,16 +79,16 @@ function submit() {
 
     <div class="form-actions">
       <button type="submit" class="btn btn--primary btn--large btn--block" data-cy="form-submit" :disabled="saving">
-        {{ saving ? 'Enregistrement…' : submitLabel }}
+        {{ saving ? $t('common.saving') : (submitLabel ?? $t('common.save')) }}
       </button>
       <template v-if="deletable">
         <button v-if="!confirmingDelete" type="button" class="btn btn--danger btn--block" @click="confirmingDelete = true">
-          {{ deleteLabel }}
+          {{ deleteLabel ?? $t('common.delete') }}
         </button>
         <div v-else class="confirm-box" role="alert">
-          <p>{{ deleteWarning || 'Cette suppression est définitive.' }}</p>
-          <button type="button" class="btn btn--primary btn--block" @click="emit('delete')">Oui, supprimer</button>
-          <button type="button" class="btn btn--soft btn--block" @click="confirmingDelete = false">Annuler</button>
+          <p>{{ deleteWarning || $t('common.delete_warning') }}</p>
+          <button type="button" class="btn btn--primary btn--block" @click="emit('delete')">{{ $t('common.yes_delete') }}</button>
+          <button type="button" class="btn btn--soft btn--block" @click="confirmingDelete = false">{{ $t('common.cancel') }}</button>
         </div>
       </template>
     </div>

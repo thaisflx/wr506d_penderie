@@ -11,6 +11,7 @@ use App\Entity\User;
 use Doctrine\ORM\QueryBuilder;
 use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Comptes qu'un utilisateur peut trouver (recherche) ou consulter (profil public), voir docs/decisions.md :
@@ -22,8 +23,10 @@ final class PublicUserExtension implements QueryCollectionExtensionInterface, Qu
 {
     private const MIN_SEARCH_LENGTH = 2;
 
-    public function __construct(private readonly Security $security)
-    {
+    public function __construct(
+        private readonly Security $security,
+        private readonly TranslatorInterface $translator,
+    ) {
     }
 
     public function applyToCollection(QueryBuilder $queryBuilder, QueryNameGeneratorInterface $queryNameGenerator, string $resourceClass, ?Operation $operation = null, array $context = []): void
@@ -34,7 +37,7 @@ final class PublicUserExtension implements QueryCollectionExtensionInterface, Qu
 
         $search = trim((string) ($context['filters']['username'] ?? ''));
         if (mb_strlen($search) < self::MIN_SEARCH_LENGTH) {
-            throw new BadRequestHttpException(\sprintf('Indique au moins %d caractères du pseudo.', self::MIN_SEARCH_LENGTH));
+            throw new BadRequestHttpException($this->translator->trans('error.search_too_short', ['%min%' => self::MIN_SEARCH_LENGTH]));
         }
 
         $alias = $this->restrict($queryBuilder, $queryNameGenerator);

@@ -1,0 +1,22 @@
+block:
+    already: Diese Person ist bereits blockiert.
+    self: Du kannst dich nicht selbst blockieren.
+category:
+    duplicate: Diese Kategorie gibt es in diesem Stauraum schon.
+comment:
+    target: Ein Kommentar bezieht sich entweder auf einen Gegenstand oder auf einen Look, nicht auf beides.
+ootd:
+    caption_too_long: Die Bildunterschrift darf höchstens {{ limit }} Zeichen lang sein.
+    future_date: Das Datum des Looks darf nicht in der Zukunft liegen.
+    photo_required: Füge ein Foto deines Outfits hinzu, bevor du es veröffentlichst.
+    no_back_to_draft: 'Ein veröffentlichter Look kann kein Entwurf mehr werden: Lösche ihn stattdessen.'
+    item_not_mine: Du kannst nur deine eigenen Gegenstände hinzufügen.
+    item_hidden: '„{{ name }}“ ist privat oder persönlich: Er kann nicht in einem Look erscheinen.'
+relationship:
+    duplicate: Du hast diese Anfrage bereits gesendet.
+    type_required: 'Gib die Art der Anfrage an: follower oder close_friend.'
+    self: Du kannst dir nicht selbst eine Anfrage senden.
+share_link:
+    target: Ein Freigabelink verweist entweder auf einen Look oder auf eine Auswahl von Gegenständen.
+user:
+    locale: 'Wähle eine verfügbare Sprache: fr, en oder de.'

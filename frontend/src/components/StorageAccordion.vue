@@ -2,7 +2,8 @@
 import { computed, ref, watch } from 'vue'
 import { RouterLink } from 'vue-router'
 import { api } from '../api/client'
-import { ITEM_STATUS_OPTIONS, LEVELS, VISIBILITY_OPTIONS, iri, optionLabel, plural, statusChip } from '../hierarchy'
+import { t } from '../i18n'
+import { ITEM_STATUS_OPTIONS, LEVELS, VISIBILITY_OPTIONS, categoryLabel, iri, optionLabel, statusChip } from '../hierarchy'
 import AppIcon from './AppIcon.vue'
 import BottomSheet from './BottomSheet.vue'
 import ItemVisual from './ItemVisual.vue'
@@ -38,7 +39,7 @@ const toneOf = (item) => TONES[flatItems.value.indexOf(item) % TONES.length]
 const featuredId = computed(() => flatItems.value[0]?.id)
 
 const subtitle = computed(() =>
-  [plural(props.storage.itemCount ?? 0, 'objet'), plural(props.storage.categoryCount ?? 0, 'catégorie')].join(' · '),
+  [t('count.items', props.storage.itemCount ?? 0), t('count.categories', props.storage.categoryCount ?? 0)].join(' · '),
 )
 
 async function load() {
@@ -133,28 +134,28 @@ const deleteCategory = () =>
         <span class="storage-name" data-cy="storage-name">{{ storage.name }}</span>
         <span class="small muted">{{ subtitle }}</span>
       </span>
-      <span v-if="storage.isPersonal" class="chip chip--wine"><AppIcon name="lock" :size="12" :stroke="2.2" /> Perso</span>
+      <span v-if="storage.isPersonal" class="chip chip--wine"><AppIcon name="lock" :size="12" :stroke="2.2" /> {{ $t('common.personal') }}</span>
       <span v-else class="chip"><AppIcon :name="storage.visibility === 'private' ? 'lock' : 'eye'" :size="12" :stroke="2.2" /> {{ optionLabel(VISIBILITY_OPTIONS, storage.visibility) }}</span>
       <span class="chevron" :class="{ 'chevron--open': expanded }"><AppIcon name="down" :size="18" :stroke="2.4" /></span>
     </button>
 
     <div v-if="expanded" class="storage-body">
-      <p v-if="loading && !loaded" class="empty-note">Chargement…</p>
+      <p v-if="loading && !loaded" class="empty-note">{{ $t('common.loading') }}</p>
       <p v-else-if="error" class="error" role="alert">{{ error }}</p>
       <template v-else>
-        <p v-if="!categories.length" class="empty-note">Aucune catégorie : ajoute-en une pour y ranger des objets.</p>
+        <p v-if="!categories.length" class="empty-note">{{ $t('storage.no_category') }}</p>
 
         <section v-for="category in categories" :key="category.id" class="category" data-cy="category">
           <div class="category-head">
-            <span data-cy="category-name">{{ category.name }}</span>
+            <span data-cy="category-name">{{ categoryLabel(category) }}</span>
             <span class="category-actions">
-              <button type="button" class="link-btn" @click="emit('add-item', category)">+ Objet</button>
-              <button type="button" class="link-btn" :aria-label="`Modifier la catégorie ${category.name}`" @click="openSheet({ edit: category })">
-                Modifier
+              <button type="button" class="link-btn" @click="emit('add-item', category)">{{ $t('storage.add_item') }}</button>
+              <button type="button" class="link-btn" :aria-label="$t('storage.edit_category_of', { name: categoryLabel(category) })" @click="openSheet({ edit: category })">
+                {{ $t('storage.edit') }}
               </button>
             </span>
           </div>
-          <p v-if="!itemsByCategory[category.id]?.length" class="empty-note">Aucun objet.</p>
+          <p v-if="!itemsByCategory[category.id]?.length" class="empty-note">{{ $t('storage.no_item') }}</p>
           <div v-else class="item-cards">
             <RouterLink
               v-for="item in itemsByCategory[category.id]"
@@ -173,9 +174,9 @@ const deleteCategory = () =>
               <span class="item-card-text">
                 <span>
                   <span class="item-card-name" data-cy="item-name">{{ item.name }}</span>
-                  <span class="item-card-meta">{{ storage.name }} · {{ category.name }}<template v-if="item.isPersonal"> · Perso</template></span>
+                  <span class="item-card-meta">{{ storage.name }} · {{ categoryLabel(category) }}<template v-if="item.isPersonal"> · {{ $t('common.personal') }}</template></span>
                 </span>
-                <span v-if="item.id === featuredId" class="item-card-see" aria-hidden="true">Voir</span>
+                <span v-if="item.id === featuredId" class="item-card-see" aria-hidden="true">{{ $t('storage.see') }}</span>
               </span>
             </RouterLink>
           </div>
@@ -183,42 +184,42 @@ const deleteCategory = () =>
 
         <div class="storage-actions">
           <button type="button" class="btn btn--soft btn--small" @click="openSheet('category-create')">
-            <AppIcon name="plus" :size="14" :stroke="2.4" /> Catégorie
+            <AppIcon name="plus" :size="14" :stroke="2.4" /> {{ $t('storage.category_button') }}
           </button>
           <button type="button" class="btn btn--soft btn--small" @click="openSheet('storage-edit')">
-            <AppIcon name="edit" :size="14" /> Rangement
+            <AppIcon name="edit" :size="14" /> {{ $t('storage.storage_button') }}
           </button>
         </div>
       </template>
     </div>
 
-    <BottomSheet v-if="sheet === 'storage-edit'" title="Modifier le rangement" @close="sheet = null">
+    <BottomSheet v-if="sheet === 'storage-edit'" :title="$t('storage.edit_storage')" @close="sheet = null">
       <NodeForm
         :fields="LEVELS.storage.fields"
         :initial="storage"
         :saving="saving"
         :error="formError"
         deletable
-        delete-label="Supprimer ce rangement"
-        delete-warning="Ses catégories et tous les objets qu'il contient seront supprimés."
+        :delete-label="$t('storage.delete_storage')"
+        :delete-warning="$t('storage.delete_storage_warning')"
         @submit="updateStorage"
         @delete="deleteStorage"
       />
     </BottomSheet>
 
-    <BottomSheet v-if="sheet === 'category-create'" :title="`Nouvelle catégorie`" @close="sheet = null">
-      <NodeForm :fields="LEVELS.category.fields" :saving="saving" :error="formError" submit-label="Créer" @submit="createCategory" />
+    <BottomSheet v-if="sheet === 'category-create'" :title="$t('storage.new_category')" @close="sheet = null">
+      <NodeForm :fields="LEVELS.category.fields" :saving="saving" :error="formError" :submit-label="$t('common.create')" @submit="createCategory" />
     </BottomSheet>
 
-    <BottomSheet v-if="sheet?.edit" title="Modifier la catégorie" @close="sheet = null">
+    <BottomSheet v-if="sheet?.edit" :title="$t('storage.edit_category')" @close="sheet = null">
       <NodeForm
         :fields="LEVELS.category.fields"
         :initial="sheet.edit"
         :saving="saving"
         :error="formError"
         deletable
-        delete-label="Supprimer cette catégorie"
-        delete-warning="Tous les objets de cette catégorie seront supprimés."
+        :delete-label="$t('storage.delete_category')"
+        :delete-warning="$t('storage.delete_category_warning')"
         @submit="updateCategory"
         @delete="deleteCategory"
       />

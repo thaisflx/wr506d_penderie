@@ -13,7 +13,8 @@
 | Code source | Snyk Code | ⚠️ 1 H · 1 L | ✅ 2 faux positifs, justifiés |
 | Accessibilité | Lighthouse, axe-core, clavier | 🟢 100 / 1 erreur | ✅ |
 | Performance (prod) | Lighthouse | 🟢 96 | |
-| Tests automatisés | PHPUnit, Cypress | ❌ aucun | ✅ 373 PHPUnit + 58 Cypress, 100 % sur le métier, 30 classes (voir [coverage.md](coverage.md)) |
+| Tests automatisés | PHPUnit, Cypress | ❌ aucun | ✅ 430 PHPUnit + 62 Cypress, 100 % sur le métier, 31 classes (voir [coverage.md](coverage.md)) |
+| Internationalisation | `TranslationFilesTest`, `make i18n-check`, `i18n.cy.js` | ❌ français seulement | ✅ fr, en, de ; aucune clé manquante (341 côté front) |
 | Contrastes (refonte Lendly) | Calcul WCAG 2.1 | | ✅ tous les textes ≥ 4,5:1, logo exempté |
 
 ---
@@ -237,6 +238,18 @@ Référence : [`docs/maquette-v2/`](docs/maquette-v2/README.md) ; décisions dan
 - **Anomalies trouvées** : un `catch` « erreur réseau » jamais exécuté dans `ClothingScanner`, le message « Ce compte est suspendu. » masqué dans `LoginView`, et (lot 2) des brouillons créés en double dans « Poster un look » quand une publication échouait puis était retentée. Les trois sont corrigées.
 - **Données** : les fixtures de test (groupe `test` : camille, sophie, theo…) sont séparées des fixtures de démo (groupe `dev` : alice, leo, bob…), dans une base dédiée `penderie_db_test`.
 
+### Internationalisation (fr, en, de)
+
+- **Ce qui suit la langue** : tous les textes du front, les messages de l'API (validations, erreurs, connexion), les libellés des enums, les réponses du scanner IA, les dates et dates relatives (`Intl`), les pluriels, et les catégories proposées par l'application (`labelKey`). Les contenus saisis par les utilisateurs ne sont pas traduits.
+- **Accessibilité** : l'attribut `lang` de la page suit la langue choisie (prononciation des lecteurs d'écran, césure) ; chaque option du choix de la langue porte son propre `lang` (« Deutsch » lu en allemand).
+- **Langue des visiteurs** : sans compte, celle choisie sur l'écran de connexion ou, à la première visite, celle du navigateur si elle est proposée (brief : « pas obligé de créer un compte pour regarder »).
+
+| Limite | Effet | Piste |
+|---|---|---|
+| Calendrier de `<input type="date">` | Suit la langue du navigateur, pas celle de l'application | Accepté (comportement du navigateur) |
+| Traductions relues à la main | Les tests vérifient les clés, pas le sens | Relecture de l'allemand (niveau B1) et de l'anglais |
+| Base de test partagée par PHPUnit et Cypress | `make test` lancé juste après Cypress peut échouer (brouillon des fixtures supprimé) | `make fixtures-test` avant ; à automatiser dans `make test` |
+
 ### Limites connues (lot 2 : looks du jour)
 
 | Limite | Effet | Piste |
@@ -245,6 +258,7 @@ Référence : [`docs/maquette-v2/`](docs/maquette-v2/README.md) ; décisions dan
 | **Règle « partageable » hors du périmètre de couverture.** Elle vit dans `Item::isShareable()` (`src/Entity`, exclu) pour être exposée au front. | Le 100 % ne la mesure pas. | Couverte par `ItemExposureTest`, `OotdApiTest` et deux mutations ; la contrainte `ShareableItems` revérifie toujours côté back |
 | **Profil non paginé.** `GET /api/me/ootds` renvoie tous mes looks (vérifié avec 15). | Choix assumé : le compteur « Brouillons · n » est exact. Une liste très longue serait lourde à charger. | Paginer si le volume le justifie, avec le compteur tiré de `totalItems` |
 | **Caméra et IA simulées dans les tests.** Cypress utilise la caméra simulée d'Electron, et la réponse du scanner est simulée. | Le comportement sur un vrai téléphone (caméra arrière, flash) n'est vérifié qu'à la main. | Vérification manuelle sur téléphone avant une mise en ligne |
+| **Bug : look du jour refusé juste après minuit (fuseau horaire).** Le conteneur PHP est en UTC, le front envoie la date locale (Paris). Trouvé le 16/11/2026 à 00 h 08 : `post-look.cy.js` échouait, la date du 16 était jugée « future » par un serveur encore au 15 (23 h 08 UTC). | En France, poster le look du jour répond 422 « La date du look ne peut pas être dans le futur. » entre minuit et 1 h (2 h en été). | **À corriger** dans la branche `fix/fuseau-horaire` : `date.timezone = Europe/Paris` dans l'image PHP et `TZ` dans `docker-compose.yml`, test PHPUnit avec `MockClock` juste après minuit. Limite qui restera : un utilisateur dans un autre fuseau |
 
 ---
 

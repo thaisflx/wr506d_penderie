@@ -12,6 +12,7 @@ use Doctrine\Common\Collections\Collection;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Serializer\Attribute\Groups;
+use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
@@ -34,6 +35,10 @@ use Symfony\Component\Security\Core\User\UserInterface;
 )]
 class User implements UserInterface, PasswordAuthenticatedUserInterface
 {
+    // Langues de l'application ; le français est la langue par défaut et la langue de secours
+    public const LOCALES = ['fr', 'en', 'de'];
+    public const DEFAULT_LOCALE = 'fr';
+
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
@@ -81,6 +86,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     // Modération par un admin
     #[ORM\Column(options: ['default' => false])]
     private bool $isSuspended = false;
+
+    // Langue de l'interface et des messages de l'API (docs/decisions.md, « Internationalisation »), lue par LocaleSubscriber
+    #[ORM\Column(length: 2, options: ['default' => self::DEFAULT_LOCALE])]
+    #[Assert\Choice(choices: self::LOCALES, message: 'user.locale')]
+    private string $locale = self::DEFAULT_LOCALE;
 
     #[ORM\Column]
     private \DateTimeImmutable $createdAt;
@@ -305,6 +315,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function setIsSuspended(bool $isSuspended): static
     {
         $this->isSuspended = $isSuspended;
+
+        return $this;
+    }
+
+    public function getLocale(): string
+    {
+        return $this->locale;
+    }
+
+    public function setLocale(string $locale): static
+    {
+        $this->locale = $locale;
 
         return $this;
     }

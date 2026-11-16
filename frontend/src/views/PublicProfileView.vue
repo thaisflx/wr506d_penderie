@@ -9,6 +9,7 @@ import ItemPreviewSheet from '../components/ItemPreviewSheet.vue'
 import OotdCard from '../components/OotdCard.vue'
 import UserAvatar from '../components/UserAvatar.vue'
 import { useOotdFeed } from '../composables/useOotdFeed'
+import { t } from '../i18n'
 
 // Profil public d'un autre compte : pseudo, avatar, bio, et mon lien avec lui (suivre, ami proche, bloquer)
 const props = defineProps({
@@ -80,11 +81,11 @@ function askRemove(type) {
   const state = link.value[type]
   const name = profile.value.username
   if (state.status === 'pending') {
-    sheet.value = { kind: 'remove', type, title: 'Annuler la demande', text: `Annuler ta demande à ${name} ?`, action: 'Annuler la demande' }
+    sheet.value = { kind: 'remove', type, title: t('friends.confirm.cancel_title'), text: t('friends.confirm.cancel_text', { name }), action: t('friends.confirm.cancel_title') }
   } else if (type === 'follower') {
-    sheet.value = { kind: 'remove', type, title: 'Ne plus suivre', text: `Tu ne verras plus ce que ${name} réserve à ses abonnés.`, action: 'Ne plus suivre' }
+    sheet.value = { kind: 'remove', type, title: t('friends.unfollow'), text: t('public.unfollow_text', { name }), action: t('friends.unfollow') }
   } else {
-    sheet.value = { kind: 'remove', type, title: 'Quitter les amis proches', text: `Tu ne verras plus ce que ${name} réserve à ses amis proches.`, action: 'Quitter' }
+    sheet.value = { kind: 'remove', type, title: t('friends.confirm.leave_title'), text: t('friends.confirm.leave_text', { name }), action: t('friends.confirm.leave_action') }
   }
 }
 
@@ -115,17 +116,17 @@ function openBlock() {
     <div class="profile-band scallop">
       <DecoStar class="profile-star profile-star--white" :size="18" color="var(--white)" />
       <DecoStar class="profile-star profile-star--wine" :size="22" color="var(--wine)" />
-      <button type="button" class="icon-btn profile-band-btn profile-band-btn--start" aria-label="Retour" @click="router.back()">
+      <button type="button" class="icon-btn profile-band-btn profile-band-btn--start" :aria-label="$t('common.back')" @click="router.back()">
         <AppIcon name="back" :stroke="2.4" />
       </button>
     </div>
 
     <main class="profile-content profile-public">
-      <p v-if="loading" class="loading">Chargement…</p>
+      <p v-if="loading" class="loading">{{ $t('common.loading') }}</p>
 
       <div v-else-if="notFound" class="empty-state" data-cy="profile-not-found">
-        <p>Ce profil n'est pas disponible.</p>
-        <RouterLink to="/friends" class="btn btn--soft">Retour aux amis</RouterLink>
+        <p>{{ $t('public.not_available') }}</p>
+        <RouterLink to="/friends" class="btn btn--soft">{{ $t('public.back_to_friends') }}</RouterLink>
       </div>
 
       <template v-else-if="profile">
@@ -149,10 +150,10 @@ function openBlock() {
             :disabled="busy"
             @click="send('follower')"
           >
-            Suivre
+            {{ $t('public.follow') }}
           </button>
           <button v-else type="button" class="btn btn--soft" data-cy="follow" :disabled="busy" @click="askRemove('follower')">
-            {{ link.follower.status === 'pending' ? 'Demande envoyée' : 'Abonné·e' }}
+            {{ link.follower.status === 'pending' ? $t('public.request_sent') : $t('public.following') }}
           </button>
 
           <!-- Ami proche -->
@@ -164,21 +165,21 @@ function openBlock() {
             :disabled="busy"
             @click="send('close_friend')"
           >
-            Demander en ami proche
+            {{ $t('public.ask_close_friend') }}
           </button>
           <button v-else type="button" class="btn btn--soft" data-cy="close-friend" :disabled="busy" @click="askRemove('closeFriend')">
-            {{ link.closeFriend.status === 'pending' ? 'Ami proche : en attente' : 'Ami·e proche' }}
+            {{ link.closeFriend.status === 'pending' ? $t('public.close_friend_pending') : $t('public.close_friend') }}
           </button>
         </div>
 
         <button type="button" class="link-btn link-btn--danger profile-block" data-cy="block-open" @click="openBlock">
-          Bloquer {{ profile.username }}
+          {{ $t('public.block_name', { name: profile.username }) }}
         </button>
 
         <section class="stack profile-looks" aria-labelledby="public-looks-title" data-cy="public-looks">
-          <h2 id="public-looks-title" class="section-title">ses looks du jour</h2>
-          <p v-if="looksLoading" class="loading">Chargement…</p>
-          <p v-else-if="!ootds.length" class="small muted" data-cy="public-looks-empty">Aucun look du jour à afficher.</p>
+          <h2 id="public-looks-title" class="section-title">{{ $t('public.looks') }}</h2>
+          <p v-if="looksLoading" class="loading">{{ $t('common.loading') }}</p>
+          <p v-else-if="!ootds.length" class="small muted" data-cy="public-looks-empty">{{ $t('public.no_looks') }}</p>
           <template v-else>
             <div class="ootd-list">
               <OotdCard
@@ -191,7 +192,7 @@ function openBlock() {
               />
             </div>
             <button v-if="hasMore" type="button" class="btn btn--block" :disabled="loadingMore" @click="loadMore">
-              {{ loadingMore ? 'Chargement…' : 'Voir plus' }}
+              {{ loadingMore ? $t('common.loading') : $t('common.see_more') }}
             </button>
           </template>
         </section>
@@ -205,16 +206,16 @@ function openBlock() {
         <p>{{ sheet.text }}</p>
         <p v-if="error" class="error">{{ error }}</p>
         <button type="button" class="btn btn--primary btn--block" data-cy="confirm-remove" :disabled="busy" @click="confirmRemove">{{ sheet.action }}</button>
-        <button type="button" class="btn btn--soft btn--block" @click="sheet = null">Garder</button>
+        <button type="button" class="btn btn--soft btn--block" @click="sheet = null">{{ $t('look.keep') }}</button>
       </div>
     </BottomSheet>
 
-    <BottomSheet v-if="sheet?.kind === 'block'" :title="`Bloquer ${profile.username}`" @close="sheet = null">
+    <BottomSheet v-if="sheet?.kind === 'block'" :title="$t('public.block_name', { name: profile.username })" @close="sheet = null">
       <div class="confirm-box" role="alert">
-        <p>Vos relations seront supprimées et vous ne pourrez plus vous voir, ni vous trouver. {{ profile.username }} ne sera pas prévenu·e.</p>
+        <p>{{ $t('public.block_warning', { name: profile.username }) }}</p>
         <p v-if="error" class="error" data-cy="block-error">{{ error }}</p>
-        <button type="button" class="btn btn--danger btn--block" data-cy="block-confirm" :disabled="busy" @click="block">Bloquer</button>
-        <button type="button" class="btn btn--soft btn--block" @click="sheet = null">Annuler</button>
+        <button type="button" class="btn btn--danger btn--block" data-cy="block-confirm" :disabled="busy" @click="block">{{ $t('public.block') }}</button>
+        <button type="button" class="btn btn--soft btn--block" @click="sheet = null">{{ $t('common.cancel') }}</button>
       </div>
     </BottomSheet>
   </div>

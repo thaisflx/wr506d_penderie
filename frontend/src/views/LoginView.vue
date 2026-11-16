@@ -3,6 +3,7 @@ import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import AppIcon from '../components/AppIcon.vue'
 import AppLogo from '../components/AppLogo.vue'
+import { LOCALES, currentLocale, setLocale, t } from '../i18n'
 import { useAuthStore } from '../stores/auth'
 
 const auth = useAuthStore()
@@ -14,6 +15,8 @@ const email = ref('')
 const password = ref('')
 const error = ref('')
 const loading = ref(false)
+// Langue avant la connexion : gardée dans le navigateur et envoyée à l'API ; une fois connecté, celle du compte
+const locale = ref(currentLocale())
 
 async function submit() {
   error.value = ''
@@ -22,8 +25,9 @@ async function submit() {
     await auth.login(email.value, password.value)
     router.push(route.query.redirect || '/')
   } catch (e) {
-    // 401 : identifiants refusés, ou compte suspendu (l'API renvoie alors son propre message)
-    error.value = e.status === 401 && e.message === 'Invalid credentials.' ? 'Email ou mot de passe incorrect.' : e.message
+    // Reconnu par le code HTTP, jamais par le texte (traduit) : 401 = identifiants refusés ou compte suspendu, et
+    // l'API renvoie alors son message dans la langue choisie ; sinon, un message générique
+    error.value = e.status === 401 ? e.message : t('login.error_generic')
   } finally {
     loading.value = false
   }
@@ -37,15 +41,22 @@ async function submit() {
     </section>
 
     <section class="auth-panel">
-      <div class="segmented segmented--large" role="tablist">
-        <button type="button" role="tab" :aria-selected="tab === 'login'" @click="tab = 'login'">Connexion</button>
-        <button type="button" role="tab" :aria-selected="tab === 'signup'" @click="tab = 'signup'">Inscription</button>
+      <label class="field auth-language">
+        <span class="field-label">{{ $t('language.label') }}</span>
+        <select v-model="locale" class="input" data-cy="login-locale" @change="setLocale(locale)">
+          <option v-for="code in LOCALES" :key="code" :value="code" :lang="code">{{ $t(`language.${code}`) }}</option>
+        </select>
+      </label>
+
+      <div class="segmented segmented--large" role="tablist" :aria-label="$t('login.tabs')">
+        <button type="button" role="tab" :aria-selected="tab === 'login'" @click="tab = 'login'">{{ $t('login.tab_login') }}</button>
+        <button type="button" role="tab" :aria-selected="tab === 'signup'" @click="tab = 'signup'">{{ $t('login.tab_signup') }}</button>
       </div>
 
       <form v-if="tab === 'login'" class="form form--loose" data-cy="login-form" @submit.prevent="submit">
         <div class="form">
           <label class="field">
-            <span class="field-label">Email</span>
+            <span class="field-label">{{ $t('login.email') }}</span>
             <span class="input-wrap">
               <span class="input-icon"><AppIcon name="mail" /></span>
               <input
@@ -54,13 +65,13 @@ async function submit() {
                 class="input input--with-icon"
                 type="email"
                 autocomplete="username"
-                placeholder="toi@exemple.fr"
+                :placeholder="$t('login.email_placeholder')"
                 required
               />
             </span>
           </label>
           <label class="field">
-            <span class="field-label">Mot de passe</span>
+            <span class="field-label">{{ $t('login.password') }}</span>
             <span class="input-wrap">
               <span class="input-icon"><AppIcon name="lock" /></span>
               <input
@@ -77,16 +88,16 @@ async function submit() {
         </div>
         <p v-if="error" class="error" role="alert" data-cy="login-error">{{ error }}</p>
         <button type="submit" class="btn btn--primary btn--large btn--block" data-cy="login-submit" :disabled="loading">
-          {{ loading ? 'Connexion…' : 'Me connecter' }}
+          {{ loading ? $t('login.signing_in') : $t('login.submit') }}
           <AppIcon v-if="!loading" name="arrow" :stroke="2.4" />
         </button>
       </form>
 
       <!-- L'inscription n'a pas encore d'endpoint côté API -->
       <div v-else class="empty-state" role="tabpanel">
-        <p><strong>L'inscription arrive bientôt.</strong></p>
-        <p>En attendant, connecte-toi avec un compte de test.</p>
-        <button type="button" class="btn btn--soft" @click="tab = 'login'">Aller à la connexion</button>
+        <p><strong>{{ $t('login.signup_soon') }}</strong></p>
+        <p>{{ $t('login.signup_meanwhile') }}</p>
+        <button type="button" class="btn btn--soft" @click="tab = 'login'">{{ $t('login.go_to_login') }}</button>
       </div>
     </section>
   </main>

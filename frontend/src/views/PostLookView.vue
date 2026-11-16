@@ -7,7 +7,10 @@ import CameraOverlay from '../components/CameraOverlay.vue'
 import DecoStar from '../components/DecoStar.vue'
 import FlowerShape from '../components/FlowerShape.vue'
 import ItemVisual from '../components/ItemVisual.vue'
+import { itemCategoryLabel } from '../hierarchy'
+import { t } from '../i18n'
 import { fileToJpegDataUrl } from '../utils/image'
+import { formatDate } from '../utils/relativeTime'
 
 // Poster un look du jour (/looks/nouveau) ou reprendre un brouillon (/looks/:id/modifier), d'après Poster.png.
 // Photo (caméra ou galerie), légende, date, objets portés parmi mes objets partageables ; Brouillon ou Publier.
@@ -53,7 +56,7 @@ async function load() {
       selected.value = ootd.wornItems.map((item) => item.id)
     }
   } catch (e) {
-    loadError.value = e.status === 404 ? 'Ce brouillon est introuvable.' : e.message
+    loadError.value = e.status === 404 ? t('post.not_found') : e.message
   } finally {
     loading.value = false
   }
@@ -67,7 +70,7 @@ function normalize(text) {
 // Objets choisis en tête, puis les autres ; la recherche porte sur le nom et la catégorie
 const shownItems = computed(() => {
   const query = normalize(search.value)
-  const matches = items.value.filter((item) => !query || normalize(`${item.name} ${item.categoryName}`).includes(query))
+  const matches = items.value.filter((item) => !query || normalize(`${item.name} ${item.categoryName} ${itemCategoryLabel(item)}`).includes(query))
   return [...matches.filter((i) => selected.value.includes(i.id)), ...matches.filter((i) => !selected.value.includes(i.id))]
 })
 
@@ -77,8 +80,8 @@ function toggle(item) {
 
 const dateLabel = computed(() => {
   const date = new Date(`${wornOn.value}T12:00:00`)
-  const label = date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'short' })
-  return wornOn.value === today() ? `Aujourd'hui · ${label}` : label
+  const label = formatDate(date, { day: 'numeric', month: 'short' })
+  return wornOn.value === today() ? t('post.today', { date: label }) : label
 })
 
 function onPhoto(dataUrl) {
@@ -103,7 +106,7 @@ async function onFileChosen(event) {
 // Enregistre (création ou mise à jour), envoie la nouvelle photo, puis publie si demandé
 async function save(publish) {
   if (publish && !photo.value) {
-    saveError.value = 'Ajoute une photo de ta tenue avant de publier.'
+    saveError.value = t('post.photo_required')
     return
   }
   saving.value = true
@@ -150,63 +153,63 @@ function close() {
 <template>
   <main class="screen post-look" data-cy="post-look">
     <div class="post-look-bar">
-      <button type="button" class="icon-btn" aria-label="Fermer" data-cy="post-look-close" @click="close">
+      <button type="button" class="icon-btn" :aria-label="$t('common.close')" data-cy="post-look-close" @click="close">
         <AppIcon name="close" :stroke="2.4" />
       </button>
       <label class="chip chip--sky post-look-date">
         <span>{{ dateLabel }}</span>
-        <input v-model="wornOn" type="date" :max="today()" class="post-look-date-input" aria-label="Jour où la tenue a été portée" data-cy="post-look-date" />
+        <input v-model="wornOn" type="date" :max="today()" class="post-look-date-input" :aria-label="$t('post.date_label')" data-cy="post-look-date" />
       </label>
     </div>
 
-    <h1 class="display page-title">{{ id ? 'Mon brouillon' : 'Mon look du jour' }}</h1>
+    <h1 class="display page-title">{{ id ? $t('post.title_draft') : $t('post.title_new') }}</h1>
 
-    <p v-if="loading" class="loading">Chargement…</p>
+    <p v-if="loading" class="loading">{{ $t('common.loading') }}</p>
     <p v-else-if="loadError" class="error" role="alert">{{ loadError }}</p>
     <template v-else>
       <!-- Photo dans la forme fleur -->
       <div class="post-look-photo">
-        <img v-if="photo" :src="photo" alt="Ma tenue" class="flower-mask post-look-photo-img" data-cy="post-look-photo" />
+        <img v-if="photo" :src="photo" :alt="$t('post.photo_alt')" class="flower-mask post-look-photo-img" data-cy="post-look-photo" />
         <button v-else type="button" class="post-look-photo-empty" data-cy="post-look-camera" @click="cameraOpen = true">
           <FlowerShape fill="var(--rose-soft)" />
           <span class="post-look-photo-label">
             <AppIcon name="camera" :size="34" :stroke="2" />
-            Prendre une photo
+            {{ $t('post.take_photo') }}
           </span>
         </button>
         <DecoStar class="post-look-star" :size="22" color="var(--violet)" />
       </div>
       <div class="post-look-photo-actions">
         <button v-if="photo" type="button" class="btn btn--soft btn--small" @click="cameraOpen = true">
-          <AppIcon name="camera" :size="14" /> Reprendre
+          <AppIcon name="camera" :size="14" /> {{ $t('post.retake') }}
         </button>
         <button type="button" class="btn btn--soft btn--small" data-cy="post-look-gallery" @click="galleryInput.click()">
-          <AppIcon name="image" :size="14" /> Galerie
+          <AppIcon name="image" :size="14" /> {{ $t('post.gallery') }}
         </button>
         <input ref="galleryInput" type="file" accept="image/*,.heic,.heif" class="visually-hidden" tabindex="-1" data-cy="post-look-file" @change="onFileChosen" />
       </div>
       <p v-if="photoError" class="error" role="alert">{{ photoError }}</p>
 
       <label class="field">
-        <span class="section-title post-look-label">légende</span>
-        <textarea v-model="caption" class="input input--area" rows="2" maxlength="500" placeholder="Un mot sur ta tenue…" data-cy="post-look-caption"></textarea>
+        <span class="section-title post-look-label">{{ $t('post.caption') }}</span>
+        <textarea v-model="caption" class="input input--area" rows="2" maxlength="500" :placeholder="$t('post.caption_placeholder')" data-cy="post-look-caption"></textarea>
       </label>
 
       <section class="stack" aria-labelledby="worn-title">
         <div class="section-head">
-          <h2 id="worn-title" class="section-title">ce que je porte</h2>
-          <span class="text-link post-look-count" data-cy="post-look-count">{{ selected.length }} choisi{{ selected.length > 1 ? 's' : '' }}</span>
+          <h2 id="worn-title" class="section-title">{{ $t('look.what_i_wear') }}</h2>
+          <span class="text-link post-look-count" data-cy="post-look-count">{{ $t('post.chosen', selected.length) }}</span>
         </div>
-        <p class="small muted">Seuls les objets que tes amis peuvent voir sont proposés : rien de privé ni de perso.</p>
+        <p class="small muted">{{ $t('post.shareable_only') }}</p>
         <div role="search">
-          <label for="post-look-search" class="visually-hidden">Chercher un objet</label>
+          <label for="post-look-search" class="visually-hidden">{{ $t('post.search_label') }}</label>
           <span class="input-wrap">
             <span class="input-icon"><AppIcon name="search" :size="18" :stroke="2.2" /></span>
-            <input id="post-look-search" v-model="search" class="input input--search" type="search" placeholder="Chercher dans mes objets" data-cy="post-look-search" />
+            <input id="post-look-search" v-model="search" class="input input--search" type="search" :placeholder="$t('post.search_placeholder')" data-cy="post-look-search" />
           </span>
         </div>
-        <p v-if="!items.length" class="small muted">Aucun objet partageable pour l'instant.</p>
-        <p v-else-if="!shownItems.length" class="small muted">Aucun objet ne correspond.</p>
+        <p v-if="!items.length" class="small muted">{{ $t('post.no_shareable') }}</p>
+        <p v-else-if="!shownItems.length" class="small muted">{{ $t('post.no_match') }}</p>
         <div v-else class="pick-grid">
           <button
             v-for="(item, index) in shownItems"
@@ -226,14 +229,14 @@ function close() {
         </div>
       </section>
 
-      <button v-if="id" type="button" class="link-btn link-btn--danger" :disabled="saving" data-cy="post-look-delete" @click="removeDraft">Supprimer ce brouillon</button>
+      <button v-if="id" type="button" class="link-btn link-btn--danger" :disabled="saving" data-cy="post-look-delete" @click="removeDraft">{{ $t('post.delete_draft') }}</button>
       <p v-if="saveError" class="error" role="alert" data-cy="post-look-error">{{ saveError }}</p>
     </template>
 
     <div v-if="!loading && !loadError" class="item-actions post-look-actions">
-      <button type="button" class="btn btn--large" :disabled="saving" data-cy="post-look-draft" @click="save(false)">Brouillon</button>
+      <button type="button" class="btn btn--large" :disabled="saving" data-cy="post-look-draft" @click="save(false)">{{ $t('post.draft') }}</button>
       <button type="button" class="btn btn--primary btn--large" :disabled="saving" data-cy="post-look-publish" @click="save(true)">
-        {{ saving ? 'Envoi…' : 'Publier mon look' }}
+        {{ saving ? $t('post.sending') : $t('post.publish') }}
       </button>
     </div>
 

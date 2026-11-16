@@ -35,7 +35,7 @@ onBeforeUnmount(() => {
         <span class="sheet-grip" aria-hidden="true"></span>
         <header class="sheet-head">
           <h2 class="display sheet-title">{{ title }}</h2>
-          <button type="button" class="icon-btn" aria-label="Fermer" @click="emit('close')">
+          <button type="button" class="icon-btn" :aria-label="$t('common.close')" @click="emit('close')">
             <AppIcon name="close" />
           </button>
         </header>
