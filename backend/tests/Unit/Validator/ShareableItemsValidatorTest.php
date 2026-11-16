@@ -52,7 +52,7 @@ final class ShareableItemsValidatorTest extends ConstraintValidatorTestCase
 
         $this->validator->validate([$this->item(new User())], new ShareableItems());
 
-        $this->buildViolation('Tu ne peux ajouter que tes propres objets.')->assertRaised();
+        $this->buildViolation('ootd.item_not_mine')->assertRaised();
     }
 
     public function testANewOotdBelongsToTheConnectedUser(): void
@@ -72,7 +72,7 @@ final class ShareableItemsValidatorTest extends ConstraintValidatorTestCase
 
         $this->validator->validate([$this->item(new User())], new ShareableItems());
 
-        $this->buildViolation('Tu ne peux ajouter que tes propres objets.')->assertRaised();
+        $this->buildViolation('ootd.item_not_mine')->assertRaised();
     }
 
     public function testValuesThatAreNotItemsAreIgnored(): void

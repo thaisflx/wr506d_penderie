@@ -1,0 +1,12 @@
+# Langues de l'application (docs/decisions.md, « Internationalisation ») : français par défaut et langue
+# de secours partout ; une traduction manquante en anglais ou en allemand s'affiche en français.
+framework:
+    default_locale: fr
+    enabled_locales: ['fr', 'en', 'de']
+    # Visiteur anonyme (lien public, écran de connexion) : langue tirée de l'en-tête Accept-Language, parmi
+    # enabled_locales (de-CH -> de, langue non gérée ou en-tête absent -> fr). Une personne connectée : voir UserLocaleSubscriber.
+    set_locale_from_accept_language: true
+    translator:
+        default_path: '%kernel.project_dir%/translations'
+        fallbacks: ['fr']
+        providers:

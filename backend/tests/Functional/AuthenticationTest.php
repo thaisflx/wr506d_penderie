@@ -39,8 +39,8 @@ final class AuthenticationTest extends ApiTestCase
 
         $this->assertStatus(401);
         self::assertArrayNotHasKey('token', $response);
-        // Même message dans les deux cas : on ne révèle pas si le compte existe
-        self::assertSame('Invalid credentials.', $response['message']);
+        // Même message dans les deux cas : on ne révèle pas si le compte existe (traduit, domaine security)
+        self::assertSame('Email ou mot de passe incorrect.', $response['message']);
     }
 
     public function testSuspendedAccountCannotLogIn(): void

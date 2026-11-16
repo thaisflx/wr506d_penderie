@@ -90,14 +90,14 @@ class Ootd
 
     #[ORM\Column(type: Types::TEXT, nullable: true)]
     #[Groups(['ootd:read', 'ootd:write'])]
-    #[Assert\Length(max: 500, maxMessage: 'La légende ne peut pas dépasser {{ limit }} caractères.')]
+    #[Assert\Length(max: 500, maxMessage: 'ootd.caption_too_long')]
     private ?string $caption = null;
 
     // Jour où la tenue a été portée : aujourd'hui par défaut, jamais dans le futur
     #[ORM\Column(type: Types::DATE_IMMUTABLE)]
     #[Groups(['ootd:read', 'ootd:write'])]
     #[Context(normalizationContext: [DateTimeNormalizer::FORMAT_KEY => 'Y-m-d'])]
-    #[Assert\LessThanOrEqual('today', message: 'La date du look ne peut pas être dans le futur.')]
+    #[Assert\LessThanOrEqual('today', message: 'ootd.future_date')]
     private \DateTimeImmutable $wornOn;
 
     #[ORM\Column(nullable: true)]
@@ -138,12 +138,12 @@ class Ootd
     public function validatePhotoBeforePublishing(ExecutionContextInterface $context): void
     {
         if (null !== $this->publishedAt && null === $this->photo) {
-            $context->buildViolation('Ajoute une photo de ta tenue avant de publier.')
+            $context->buildViolation('ootd.photo_required')
                 ->atPath('photo')
                 ->addViolation();
         }
         if ($this->unpublishRequested) {
-            $context->buildViolation('Un look publié ne peut pas redevenir un brouillon : supprime-le.')
+            $context->buildViolation('ootd.no_back_to_draft')
                 ->atPath('published')
                 ->addViolation();
         }

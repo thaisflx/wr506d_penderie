@@ -25,7 +25,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
  */
 #[ORM\Entity(repositoryClass: RelationshipRepository::class)]
 #[ORM\UniqueConstraint(name: 'uniq_relationship_requester_addressee_type', fields: ['requester', 'addressee', 'type'])]
-#[UniqueEntity(fields: ['requester', 'addressee', 'type'], message: 'Tu as déjà envoyé cette demande.', errorPath: 'addressee')]
+#[UniqueEntity(fields: ['requester', 'addressee', 'type'], message: 'relationship.duplicate', errorPath: 'addressee')]
 // Seules les relations où je suis demandeur ou destinataire existent pour moi : App\Doctrine\RelationshipExtension
 #[ApiResource(
     operations: [
@@ -68,7 +68,7 @@ class Relationship
     private ?User $addressee = null;
 
     #[ORM\Column(length: 50, enumType: RelationshipType::class)]
-    #[Assert\NotNull(message: 'Indique le type de demande : follower ou close_friend.')]
+    #[Assert\NotNull(message: 'relationship.type_required')]
     #[Groups(['relationship:read', 'relationship:create'])]
     private ?RelationshipType $type = null;
 
@@ -92,7 +92,7 @@ class Relationship
     public function validateNotSelf(ExecutionContextInterface $context): void
     {
         if (null !== $this->requester && $this->requester === $this->addressee) {
-            $context->buildViolation('Tu ne peux pas t\'envoyer une demande à toi-même.')
+            $context->buildViolation('relationship.self')
                 ->atPath('addressee')
                 ->addViolation();
         }

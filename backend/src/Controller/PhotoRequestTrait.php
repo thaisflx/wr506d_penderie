@@ -23,17 +23,18 @@ trait PhotoRequestTrait
         $payload = json_decode($request->getContent(), true);
         $image = \is_array($payload) ? ($payload['image'] ?? null) : null;
         if (!\is_string($image)) {
-            return $this->photoError('Envoie une image JPEG encodée en base64 (data:image/jpeg;base64,...).', Response::HTTP_BAD_REQUEST);
+            return $this->photoError('photo.invalid', Response::HTTP_BAD_REQUEST);
         }
         if (\strlen($image) > $maxLength) {
-            return $this->photoError('Image trop lourde : redimensionne-la à 1024 px avant l\'envoi.', Response::HTTP_REQUEST_ENTITY_TOO_LARGE);
+            return $this->photoError('photo.too_heavy', Response::HTTP_REQUEST_ENTITY_TOO_LARGE);
         }
 
         return $image;
     }
 
-    private function photoError(string $message, int $status): JsonResponse
+    // Message traduit dans la langue de la requête (clé du domaine messages) ; le contrôleur fournit $translator
+    private function photoError(string $key, int $status): JsonResponse
     {
-        return new JsonResponse(['message' => $message], $status);
+        return new JsonResponse(['message' => $this->translator->trans($key)], $status);
     }
 }

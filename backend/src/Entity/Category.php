@@ -21,7 +21,7 @@ use Symfony\Component\Validator\Constraints as Assert;
 // Catégorie rangée dans un storage : place > room > storage > category > item
 #[ORM\Entity(repositoryClass: CategoryRepository::class)]
 #[ORM\UniqueConstraint(name: 'uniq_category_storage_name', fields: ['storage', 'name'])]
-#[UniqueEntity(fields: ['storage', 'name'], message: 'Cette catégorie existe déjà dans ce rangement.')]
+#[UniqueEntity(fields: ['storage', 'name'], message: 'category.duplicate')]
 #[ApiResource(
     operations: [
         // Toutes mes catégories (choix de l'emplacement au scan)

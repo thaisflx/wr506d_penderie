@@ -26,7 +26,8 @@ final class UserCheckerTest extends TestCase
             self::fail('Un compte suspendu doit être refusé');
         } catch (CustomUserMessageAccountStatusException $e) {
             // Ce message est renvoyé tel quel au front
-            self::assertSame('Ce compte est suspendu.', $e->getMessageKey());
+            // Clé traduite par le gestionnaire d'échec de connexion (domaine security, voir AuthenticationTest)
+            self::assertSame('account.suspended', $e->getMessageKey());
         }
     }
 

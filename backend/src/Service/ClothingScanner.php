@@ -25,7 +25,7 @@ final class ClothingScanner
     // Pause (en secondes) avant la seconde tentative sur un modèle saturé (429) ou en erreur côté fournisseur (5xx)
     private const RETRY_DELAY = 1.5;
 
-    // Consignes communes : réponse JSON stricte, en français
+    // Consignes communes : réponse JSON stricte ; la langue des valeurs est ajoutée selon la langue de l'utilisateur
     private const PROMPTS = [
         'photo' => <<<'TXT'
             Tu aides à ranger une garde-robe. Regarde la photo et identifie l'objet principal (en général un vêtement).
@@ -45,6 +45,13 @@ final class ClothingScanner
              "description": "description légère en une phrase à partir des informations lues"}
             Si aucune étiquette n'est lisible, mets "name" à null.
             TXT,
+    ];
+
+    // Langue dans laquelle l'IA rédige les valeurs texte (docs/decisions.md, « Internationalisation ») ; français par défaut
+    private const LANGUAGES = [
+        'fr' => 'français',
+        'en' => 'anglais (English)',
+        'de' => 'allemand (Deutsch)',
     ];
 
     /** @var list<string> */
@@ -71,14 +78,18 @@ final class ClothingScanner
     /**
      * @param string $imageDataUrl image JPEG encodée en base64 (data:image/jpeg;base64,...)
      * @param string $mode         'photo' (identifier l'objet) ou 'label' (lire l'étiquette)
+     * @param string $locale       langue de l'utilisateur (fr, en, de) : celle des valeurs texte renvoyées
      *
      * @return array{name: ?string, type: ?string, categoryType: string, color: ?string, description: ?string, brand: ?string, size: ?string, composition: ?string, model: string}
      *
-     * @throws ScanFailedException si aucun modèle n'a pu répondre
+     * @throws ScanFailedException si aucun modèle n'a pu répondre (message : clé de traduction scan.*)
      */
-    public function analyze(string $imageDataUrl, string $mode = 'photo'): array
+    public function analyze(string $imageDataUrl, string $mode = 'photo', string $locale = 'fr'): array
     {
-        $prompt = self::PROMPTS[$mode] ?? self::PROMPTS['photo'];
+        $prompt = (self::PROMPTS[$mode] ?? self::PROMPTS['photo'])."\n".\sprintf(
+            'Rédige les valeurs texte (name, type, color, description, composition) en %s ; garde "category" tel quel.',
+            self::LANGUAGES[$locale] ?? self::LANGUAGES['fr'],
+        );
         $deadline = $this->now() + self::TIME_BUDGET;
         $errors = [];
         // Reste vrai tant que tous les échecs viennent d'une saturation des modèles gratuits
@@ -124,9 +135,7 @@ final class ClothingScanner
 
         $this->logger->warning('Scan OpenRouter : aucun modèle n\'a répondu. '.implode(' | ', $errors));
 
-        throw new ScanFailedException($onlyBusy
-            ? 'Les modèles d\'IA gratuits sont saturés en ce moment : réessaie dans une minute.'
-            : 'Aucun modèle n\'a pu analyser la photo. Réessaie dans un instant.', $errors);
+        throw new ScanFailedException($onlyBusy ? 'scan.saturated' : 'scan.failed', $errors);
     }
 
     // Instant présent en secondes (avec les microsecondes), comme microtime(true)

@@ -10,6 +10,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Photo d'un objet : prise au scan ou choisie dans la galerie, envoyée en JPEG base64.
@@ -22,6 +23,7 @@ final class ItemPhotoController extends AbstractController
     public function __construct(
         private readonly ItemPhotoStorage $storage,
         private readonly EntityManagerInterface $entityManager,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -30,7 +32,7 @@ final class ItemPhotoController extends AbstractController
     {
         $item = $this->findOwnItem($id);
         if (null === $item) {
-            return $this->photoError('Cet objet est introuvable.', Response::HTTP_NOT_FOUND);
+            return $this->photoError('error.item_not_found', Response::HTTP_NOT_FOUND);
         }
 
         $image = $this->photoFromRequest($request);
@@ -53,7 +55,7 @@ final class ItemPhotoController extends AbstractController
     {
         $item = $this->findOwnItem($id);
         if (null === $item) {
-            return $this->photoError('Cet objet est introuvable.', Response::HTTP_NOT_FOUND);
+            return $this->photoError('error.item_not_found', Response::HTTP_NOT_FOUND);
         }
 
         $this->storage->remove($item);

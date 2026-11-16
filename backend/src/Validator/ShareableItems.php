@@ -10,6 +10,6 @@ use Symfony\Component\Validator\Constraint;
 #[\Attribute(\Attribute::TARGET_PROPERTY)]
 final class ShareableItems extends Constraint
 {
-    public string $notMineMessage = 'Tu ne peux ajouter que tes propres objets.';
-    public string $hiddenMessage = '« {{ name }} » est privé ou perso : il ne peut pas apparaître dans un look.';
+    public string $notMineMessage = 'ootd.item_not_mine';
+    public string $hiddenMessage = 'ootd.item_hidden';
 }

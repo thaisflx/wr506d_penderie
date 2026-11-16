@@ -1,0 +1,50 @@
+error:
+    account_not_found: Dieses Konto wurde nicht gefunden.
+    item_not_found: Dieser Gegenstand wurde nicht gefunden.
+    ootd_not_found: Dieser Look wurde nicht gefunden.
+    ootd_photo_owner_only: Nur die Person, die diesen Look gepostet hat, kann sein Foto ändern.
+    ootd_published_keeps_photo: 'Ein veröffentlichter Look behält sein Foto: Ersetze es oder lösche den Look.'
+    relationship_addressee_missing: Gib das Konto an, an das die Anfrage gehen soll (addressee).
+    relationship_only_pending: Nur eine offene Anfrage kann angenommen werden.
+    block_target_missing: Gib das Konto an, das blockiert werden soll (blocked).
+    block_family: Du kannst dein Elternkonto oder dein Kinderkonto nicht blockieren.
+    filter_direction: 'direction: received oder sent.'
+    filter_status: 'status: pending oder accepted.'
+    filter_type: 'type: follower oder close_friend.'
+    search_too_short: Gib mindestens %min% Zeichen des Benutzernamens ein.
+    me_locale_only: Hier kann nur die Sprache (locale) geändert werden.
+photo:
+    invalid: Sende ein Base64-kodiertes JPEG-Bild (data:image/jpeg;base64,...).
+    too_heavy: 'Bild zu schwer: Verkleinere es vor dem Senden auf 1024 px.'
+    too_large: 'Bild zu groß: Verkleinere es vor dem Senden auf 1024 px.'
+scan:
+    not_configured: 'Der Scan ist nicht eingerichtet: Füge OPENROUTER_API_KEY in backend/.env.local hinzu.'
+    saturated: 'Die kostenlosen KI-Modelle sind gerade ausgelastet: Versuche es in einer Minute erneut.'
+    failed: Kein Modell konnte das Foto analysieren. Versuche es gleich noch einmal.
+enum:
+    visibility:
+        private: Privat
+        close_friends: Enge Freunde
+        followers: Follower
+    item_status:
+        available: Verfügbar
+        in_laundry: In der Wäsche
+        reserved: Reserviert
+        lent: Verliehen
+        for_sale: Zu verkaufen
+    category_type:
+        top: Oberteil
+        bottom: Unterteil
+        shoes: Schuhe
+        media: Medien
+        other: Sonstiges
+    relationship_type:
+        follower: Follower
+        close_friend: Enger Freund
+    relationship_status:
+        pending: Ausstehend
+        accepted: Angenommen
+    reservation_status:
+        ongoing: Laufend
+        completed: Abgeschlossen
+        late: Überfällig

@@ -17,6 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Bloquer quelqu'un (docs/decisions.md) :
@@ -40,6 +41,7 @@ final class BlockProcessor implements ProcessorInterface
         private readonly RelationshipChecker $checker,
         private readonly RelationshipRepository $relationships,
         private readonly EntityManagerInterface $entityManager,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -50,15 +52,15 @@ final class BlockProcessor implements ProcessorInterface
             // Compte non trouvé par PublicUserExtension (inexistant, suspendu, déjà bloqué dans un sens ou dans l'autre)
             $request = $context['request'] ?? null;
             if ($request instanceof Request && !\array_key_exists('blocked', $request->toArray())) {
-                throw new BadRequestHttpException('Indique le compte à bloquer (blocked).');
+                throw new BadRequestHttpException($this->translator->trans('error.block_target_missing'));
             }
-            throw new NotFoundHttpException('Ce compte est introuvable.');
+            throw new NotFoundHttpException($this->translator->trans('error.account_not_found'));
         }
 
         $blocker = $this->security->getUser();
         \assert($blocker instanceof User);
         if ($this->checker->isChildOf($blocked, $blocker) || $this->checker->isChildOf($blocker, $blocked)) {
-            throw new UnprocessableEntityHttpException('Tu ne peux pas bloquer ton compte parent ou ton compte enfant.');
+            throw new UnprocessableEntityHttpException($this->translator->trans('error.block_family'));
         }
 
         $data->setBlocker($blocker);

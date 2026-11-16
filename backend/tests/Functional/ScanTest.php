@@ -69,6 +69,32 @@ final class ScanTest extends ApiTestCase
         self::assertStringContainsString($expectedPrompt, $prompt);
     }
 
+    // La langue du compte va jusqu'à l'IA, et les erreurs du scan sont traduites (docs/decisions.md, i18n)
+    public function testScanUsesTheLanguageOfTheAccount(): void
+    {
+        $answer = $this->openRouterAnswer('{"name": "Grauer Pullover"}');
+        $this->fakeScanner([$answer]);
+        $this->logIn('camille')->setLocale('de');
+        $this->em()->flush();
+
+        $this->request('POST', '/api/scan', ['image' => Images::dataUrl(Images::jpeg())]);
+
+        $this->assertStatus(200);
+        $prompt = json_decode($answer->getRequestOptions()['body'], true)['messages'][0]['content'][0]['text'];
+        self::assertStringContainsString('en allemand (Deutsch)', $prompt);
+    }
+
+    public function testScanErrorsAreTranslated(): void
+    {
+        $this->logIn('camille')->setLocale('en');
+        $this->em()->flush();
+
+        $response = $this->request('POST', '/api/scan', ['image' => Images::dataUrl(Images::jpeg())]);
+
+        $this->assertStatus(503);
+        self::assertSame('Scanning is not set up: add OPENROUTER_API_KEY to backend/.env.local.', $response['message']);
+    }
+
     public function testAllModelsFailingReturns502(): void
     {
         $busy = fn () => new MockResponse('{"error": {"message": "Rate limit"}}', ['http_code' => 429]);

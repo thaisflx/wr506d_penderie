@@ -1,0 +1,22 @@
+block:
+    already: This person is already blocked.
+    self: You can't block yourself.
+category:
+    duplicate: This category already exists in this storage.
+comment:
+    target: A comment must be about either an item or a look, not both.
+ootd:
+    caption_too_long: The caption can't be longer than {{ limit }} characters.
+    future_date: The date of the look can't be in the future.
+    photo_required: Add a photo of your outfit before publishing.
+    no_back_to_draft: "A published look can't go back to draft: delete it instead."
+    item_not_mine: You can only add your own items.
+    item_hidden: "“{{ name }}” is private or personal: it can't appear in a look."
+relationship:
+    duplicate: You have already sent this request.
+    type_required: 'Give the type of request: follower or close_friend.'
+    self: You can't send a request to yourself.
+share_link:
+    target: A share link must point to either a look or a selection of items.
+user:
+    locale: 'Choose one of the available languages: fr, en or de.'

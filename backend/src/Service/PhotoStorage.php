@@ -25,7 +25,7 @@ final class PhotoStorage
      * @param string $publicPath dossier public, ex. /uploads/items/
      * @param string $prefix     début du nom de fichier (identifiant de l'objet ou du look)
      *
-     * @throws \InvalidArgumentException si le contenu n'est pas une image JPEG valide
+     * @throws \InvalidArgumentException si le contenu n'est pas une image JPEG valide (message : clé de traduction photo.*)
      */
     public function save(string $publicPath, string $prefix, string $dataUrl): string
     {
@@ -34,10 +34,10 @@ final class PhotoStorage
         // On vérifie le contenu réel du fichier, pas seulement l'en-tête annoncé
         $info = false !== $binary ? @getimagesizefromstring($binary) : false;
         if (false === $info || \IMAGETYPE_JPEG !== $info[2]) {
-            throw new \InvalidArgumentException('Envoie une image JPEG encodée en base64 (data:image/jpeg;base64,...).');
+            throw new \InvalidArgumentException('photo.invalid');
         }
         if (max($info[0], $info[1]) > self::MAX_DIMENSION) {
-            throw new \InvalidArgumentException('Image trop grande : redimensionne-la à 1024 px avant l\'envoi.');
+            throw new \InvalidArgumentException('photo.too_large');
         }
 
         // Nom aléatoire : une nouvelle photo a une nouvelle URL, le cache du navigateur ne gêne pas

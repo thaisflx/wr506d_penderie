@@ -1,0 +1,50 @@
+error:
+    account_not_found: This account can't be found.
+    item_not_found: This item can't be found.
+    ootd_not_found: This look can't be found.
+    ootd_photo_owner_only: Only the person who posted this look can change its photo.
+    ootd_published_keeps_photo: 'A published look keeps its photo: replace it or delete the look.'
+    relationship_addressee_missing: Give the account to send the request to (addressee).
+    relationship_only_pending: Only a pending request can be accepted.
+    block_target_missing: Give the account to block (blocked).
+    block_family: You can't block your parent account or your child account.
+    filter_direction: 'direction: received or sent.'
+    filter_status: 'status: pending or accepted.'
+    filter_type: 'type: follower or close_friend.'
+    search_too_short: Type at least %min% characters of the username.
+    me_locale_only: Only the language (locale) can be changed here.
+photo:
+    invalid: Send a base64-encoded JPEG image (data:image/jpeg;base64,...).
+    too_heavy: 'Image too heavy: resize it to 1024 px before sending.'
+    too_large: 'Image too large: resize it to 1024 px before sending.'
+scan:
+    not_configured: 'Scanning is not set up: add OPENROUTER_API_KEY to backend/.env.local.'
+    saturated: 'The free AI models are busy right now: try again in a minute.'
+    failed: No model could analyse the photo. Try again in a moment.
+enum:
+    visibility:
+        private: Private
+        close_friends: Close friends
+        followers: Followers
+    item_status:
+        available: Available
+        in_laundry: In the wash
+        reserved: Reserved
+        lent: Lent
+        for_sale: For sale
+    category_type:
+        top: Top
+        bottom: Bottom
+        shoes: Shoes
+        media: Media
+        other: Other
+    relationship_type:
+        follower: Follower
+        close_friend: Close friend
+    relationship_status:
+        pending: Pending
+        accepted: Accepted
+    reservation_status:
+        ongoing: Ongoing
+        completed: Completed
+        late: Late

@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Symfony\Component\HttpKernel\Exception\UnprocessableEntityHttpException;
+use Symfony\Contracts\Translation\TranslatorInterface;
 
 /**
  * Demandes d'abonnement et d'ami proche (docs/decisions.md).
@@ -35,6 +36,7 @@ final class RelationshipProcessor implements ProcessorInterface
         private readonly ProcessorInterface $persistProcessor,
         private readonly Security $security,
         private readonly ValidatorInterface $validator,
+        private readonly TranslatorInterface $translator,
     ) {
     }
 
@@ -60,13 +62,13 @@ final class RelationshipProcessor implements ProcessorInterface
             // sauf si le champ manque dans la requête
             $request = $context['request'] ?? null;
             if ($request instanceof Request && !\array_key_exists('addressee', $request->toArray())) {
-                throw new BadRequestHttpException('Indique le compte à qui envoyer la demande (addressee).');
+                throw new BadRequestHttpException($this->translator->trans('error.relationship_addressee_missing'));
             }
-            throw new NotFoundHttpException('Ce compte est introuvable.');
+            throw new NotFoundHttpException($this->translator->trans('error.account_not_found'));
         }
         // Les comptes -18 ne reçoivent pas de demande, même de leur parent
         if ($addressee->isMinor()) {
-            throw new NotFoundHttpException('Ce compte est introuvable.');
+            throw new NotFoundHttpException($this->translator->trans('error.account_not_found'));
         }
 
         $requester = $this->security->getUser();
@@ -86,7 +88,7 @@ final class RelationshipProcessor implements ProcessorInterface
         $previous = $context['previous_data'] ?? null;
         $wasPending = $previous instanceof Relationship && RelationshipStatus::Pending === $previous->getStatus();
         if (!$wasPending || !$relationship->isAccepted()) {
-            throw new UnprocessableEntityHttpException('Seule une demande en attente peut être acceptée.');
+            throw new UnprocessableEntityHttpException($this->translator->trans('error.relationship_only_pending'));
         }
     }
 }
