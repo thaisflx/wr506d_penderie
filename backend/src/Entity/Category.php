@@ -53,6 +53,13 @@ class Category
     #[Groups(['category:read', 'category:write'])]
     private ?string $name = null;
 
+    // Clé de traduction d'une catégorie proposée par l'application (fixtures), ex. category.tshirts : le front affiche
+    // sa traduction, sinon le nom saisi. Jamais écrite par un client ; effacée si la catégorie est renommée
+    // (docs/decisions.md, « Internationalisation »)
+    #[ORM\Column(length: 64, nullable: true)]
+    #[Groups(['category:read'])]
+    private ?string $labelKey = null;
+
     #[ORM\Column(length: 50, enumType: CategoryType::class)]
     #[Groups(['category:read', 'category:write'])]
     private CategoryType $type = CategoryType::Other;
@@ -86,7 +93,23 @@ class Category
 
     public function setName(string $name): static
     {
+        // Renommée par l'utilisateur : c'est maintenant son nom, plus celui proposé par l'application
+        if (null !== $this->name && $name !== $this->name) {
+            $this->labelKey = null;
+        }
         $this->name = $name;
+
+        return $this;
+    }
+
+    public function getLabelKey(): ?string
+    {
+        return $this->labelKey;
+    }
+
+    public function setLabelKey(?string $labelKey): static
+    {
+        $this->labelKey = $labelKey;
 
         return $this;
     }
