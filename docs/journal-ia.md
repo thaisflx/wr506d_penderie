@@ -182,3 +182,10 @@ L'IA m'a fait gagner du temps sur l'analyse du code et la structuration des règ
   10. Export RGPD : JSON avec les URL des photos, sans ZIP.
 - **Pourquoi l'allemand :** pas d'écriture de droite à gauche comme l'arabe, et je parle allemand (B1), donc je peux relire les traductions.
 - **Inscription :** le brief la demande (« créer un compte »). Elle fera l'objet d'une branche à part, après l'i18n et avant le back office.
+
+### 2. Internationalisation du front (commit fait seul pendant la nuit)
+- **Choix de Claude Code, dans le plan validé :** vue-i18n en mode Composition, fichiers `fr`, `en`, `de` ; les libellés des listes (visibilité, statuts, types) deviennent des « getters » qui traduisent à chaque affichage, pour suivre un changement de langue sans recharger ; le fil garde le **type** de relation et la carte le traduit.
+- **Dates :** `Intl.RelativeTimeFormat` donne « hier », « yesterday », « gestern » sans traduction écrite ; en français, Intl met une espace insécable fine avant « h » (« il y a 2 h ») : gardée, c'est la typographie correcte, et le test compare les espaces normalisées.
+- **Pluriel français :** vue-i18n met « 0 » au pluriel par défaut (« 0 objets ») ; règle française ajoutée (0 et 1 au singulier).
+- **Tests Cypress :** le navigateur de Cypress est en anglais ; sans choix déjà fait, l'application démarrait en anglais. Le support Cypress fixe le français par défaut, sauf si un test a choisi une langue.
+- **Constat :** `make test` lancé juste après un run Cypress peut échouer, car la base de test garde les changements du dernier test (fragilité qui date du lot 2, notée dans les limites).
